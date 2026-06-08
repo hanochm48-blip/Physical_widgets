@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>אוסף היישומונים שלי</title>
+    <style>
+        /* עיצוב בסיסי ונקי */
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background-color: #f4f7f6;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        p {
+            color: #7f8c8d;
+        }
+
+        /* עיצוב רשימת היישומונים */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            width: 100%;
+            max-width: 800px;
+        }
+
+        /* עיצוב כרטיסייה לכל יישומון */
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            text-align: center;
+            text-decoration: none;
+            color: inherit;
+            transition: transform 0.2s, box-shadow 0.2s;
+            border: 1px solid #e2e8f0;
+        }
+
+        /* אפקט מעבר עכבר */
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+            border-color: #3498db;
+        }
+
+        .card h2 {
+            margin: 0 0 10px 0;
+            color: #2980b9;
+            font-size: 1.5rem;
+        }
+
+        .card p {
+            margin: 0;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>ארגז הכלים והיישומונים שלי</h1>
+        <p>ריכוז של כל הפרויקטים והיישומים שבניתי במקום אחד</p>
+    </header>
+
+    <main class="grid">
+        
+        <!-- יישומון 1 -->
+        <a href="./energy/" class="card">
+            <h2>🧮 מחשבון חכם</h2>
+            <p>יישומון לחישובים מתמטיים מהירים</p>
+        </a>
+
+        <!-- יישומון 2 -->
+        <a href="./app2-game/" class="card">
+            <h2>🎮 משחק זיכרון</h2>
+            <p>משחק אינטראקטיבי קצר שפיתחתי</p>
+        </a>
+
+        <!-- כאן אפשר להוסיף עוד כרטיסיות בעתיד לפי אותו מבנה -->
+
+    </main>
+
+</body>
+</html>
