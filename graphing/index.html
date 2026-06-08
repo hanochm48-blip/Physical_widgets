@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>סרטוט דיאגרמת פיזור — סדר פעולות</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@500;700;900&family=Assistant:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#f7f2e7;
+    --paper-deep:#efe7d4;
+    --ink:#16324a;
+    --ink-soft:#3c5468;
+    --grid-minor:#c5d3d8;
+    --grid-major:#7fa1ab;
+    --axis:#16324a;
+    --accent:#c2452d;      /* data points */
+    --accent-soft:#e07a5f;
+    --gold:#b88a2e;
+    --line:#d8cdb6;
+    --shadow:rgba(22,50,74,.14);
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{height:100%;}
+  body{
+    font-family:'Assistant',sans-serif;
+    background:
+      radial-gradient(1200px 600px at 80% -10%, #fffdf6 0%, transparent 60%),
+      var(--paper);
+    color:var(--ink);
+    min-height:100vh;
+    padding:clamp(14px,3vw,40px);
+    line-height:1.5;
+  }
+  .wrap{max-width:1180px;margin:0 auto;}
+  header.top{
+    text-align:center;
+    margin-bottom:clamp(14px,2.2vw,26px);
+    position:relative;
+  }
+  header.top .kicker{
+    font-size:.82rem;letter-spacing:.18em;font-weight:700;
+    color:var(--gold);text-transform:uppercase;
+    display:inline-block;
+    border-top:2px solid var(--gold);border-bottom:2px solid var(--gold);
+    padding:5px 14px;margin-bottom:12px;
+  }
+  header.top h1{
+    font-family:'Frank Ruhl Libre',serif;
+    font-weight:900;
+    font-size:clamp(1.7rem,4.4vw,2.9rem);
+    line-height:1.08;letter-spacing:-.01em;
+  }
+  header.top p{color:var(--ink-soft);font-size:1.02rem;margin-top:8px;}
+
+  .board{
+    display:grid;
+    grid-template-columns:1.15fr .85fr;
+    gap:clamp(16px,2.2vw,30px);
+    align-items:stretch;
+  }
+  @media(max-width:860px){.board{grid-template-columns:1fr;}}
+
+  /* ---- graph panel ---- */
+  .graph-panel{
+    background:linear-gradient(160deg,#fffdf6,#f5efe1);
+    border:1px solid var(--line);
+    border-radius:16px;
+    padding:clamp(12px,1.6vw,22px);
+    box-shadow:0 18px 40px -22px var(--shadow), 0 2px 0 #fff inset;
+    position:relative;
+    display:flex;flex-direction:column;
+  }
+  .graph-panel::before{
+    content:"דף משבצות · A4";
+    position:absolute;top:14px;left:18px;
+    font-size:.72rem;letter-spacing:.14em;color:var(--grid-major);
+    font-weight:700;
+  }
+  svg.graph{width:100%;height:auto;display:block;margin-top:10px;}
+  .reveal{opacity:0;transition:opacity .55s ease;}
+  .reveal.on{opacity:1;}
+  .pt{transition:opacity .4s ease, transform .4s cubic-bezier(.2,1.4,.4,1);
+      transform-box:fill-box;transform-origin:center;}
+  .pt.hidden{opacity:0;transform:scale(.2);}
+
+  /* ---- steps panel ---- */
+  .steps-panel{display:flex;flex-direction:column;gap:14px;}
+  .rail{
+    display:flex;gap:6px;
+  }
+  .rail .seg{
+    flex:1;height:6px;border-radius:6px;background:var(--paper-deep);
+    border:1px solid var(--line);transition:background .3s;
+  }
+  .rail .seg.done{background:var(--accent);border-color:var(--accent);}
+  .rail .seg.cur{background:var(--gold);border-color:var(--gold);}
+
+  .card{
+    background:linear-gradient(160deg,#fffdf6,#f3ecdd);
+    border:1px solid var(--line);
+    border-radius:16px;
+    padding:clamp(18px,2vw,26px);
+    box-shadow:0 14px 34px -22px var(--shadow);
+    flex:1;
+    display:flex;flex-direction:column;
+  }
+  .step-no{
+    font-family:'Frank Ruhl Libre',serif;font-weight:900;
+    font-size:.95rem;color:var(--accent);letter-spacing:.04em;
+    display:flex;align-items:center;gap:10px;margin-bottom:6px;
+  }
+  .step-no .dot{
+    width:30px;height:30px;border-radius:50%;
+    background:var(--accent);color:#fff;
+    display:grid;place-items:center;font-size:1rem;
+    box-shadow:0 4px 10px -3px var(--accent);
+  }
+  .card h2{
+    font-family:'Frank Ruhl Libre',serif;font-weight:700;
+    font-size:clamp(1.3rem,2.8vw,1.7rem);line-height:1.15;margin-bottom:12px;
+  }
+  .card .body{font-size:1.04rem;color:var(--ink-soft);}
+  .card .body strong{color:var(--ink);font-weight:700;}
+  .card .body p{margin-bottom:10px;}
+
+  .calc{
+    background:#fff;border:1px dashed var(--grid-major);
+    border-radius:12px;padding:14px 16px;margin:6px 0 12px;
+    font-size:1.02rem;color:var(--ink);
+  }
+  .calc .row{display:flex;justify-content:space-between;gap:10px;
+    padding:5px 0;border-bottom:1px dotted var(--line);}
+  .calc .row:last-child{border-bottom:none;}
+  .calc .lbl{color:var(--ink-soft);}
+  .calc .val{font-weight:700;font-variant-numeric:tabular-nums;direction:ltr;}
+  .hl{background:linear-gradient(transparent 55%, #ffe9a8 55%);padding:0 2px;font-weight:700;color:var(--ink);}
+  .friendly{display:flex;gap:8px;flex-wrap:wrap;margin:4px 0 10px;}
+  .friendly .chip{
+    border:1px solid var(--line);border-radius:999px;padding:5px 12px;
+    background:#fff;font-weight:700;font-variant-numeric:tabular-nums;direction:ltr;
+    color:var(--ink-soft);font-size:.95rem;
+  }
+  .friendly .chip.pick{background:var(--gold);color:#fff;border-color:var(--gold);
+    box-shadow:0 4px 12px -4px var(--gold);}
+
+  /* step 4 — rounding clarity */
+  .fdef{background:var(--paper-deep);border:1px solid var(--line);border-radius:11px;
+    padding:11px 13px;margin:2px 0 18px;font-size:1rem;}
+  .fdef b{color:var(--ink);}
+  .fdef .ok{color:#2f7a4d;font-weight:700;direction:ltr;display:inline-block;}
+  .round-row{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin:14px 0;direction:rtl;}
+  .round-row .axlab{font-weight:700;color:var(--ink);min-width:46px;
+    font-family:'Frank Ruhl Libre',serif;font-size:1.1rem;}
+  .raw{background:#fff;border:1px solid var(--line);border-radius:8px;padding:5px 11px;
+    color:var(--ink-soft);font-variant-numeric:tabular-nums;direction:ltr;font-weight:700;
+    text-align:center;line-height:1.1;}
+  .raw small{display:block;font-size:.66rem;font-weight:400;color:var(--grid-major);}
+  .arrow{color:var(--gold);font-weight:900;font-size:1.3rem;}
+  .cands{display:flex;gap:6px;}
+  .cand{position:relative;border:1px solid var(--line);border-radius:8px;padding:5px 11px;
+    background:#fff;color:var(--ink-soft);font-variant-numeric:tabular-nums;direction:ltr;
+    font-weight:700;}
+  .cand.small{opacity:.45;}
+  .cand.small::after{content:'קטן מדי';position:absolute;bottom:-16px;left:50%;
+    transform:translateX(-50%);font-size:.62rem;color:var(--accent);white-space:nowrap;
+    font-family:'Assistant';direction:rtl;}
+  .cand.pick{background:var(--gold);color:#fff;border-color:var(--gold);
+    box-shadow:0 5px 14px -4px var(--gold);transform:scale(1.07);}
+  .cand.pick::after{content:'✓ זה הבחירה';position:absolute;bottom:-16px;left:50%;
+    transform:translateX(-50%);font-size:.62rem;color:var(--gold);white-space:nowrap;
+    font-family:'Assistant';font-weight:700;direction:rtl;}
+
+  .note{
+    margin-top:auto;font-size:.92rem;color:var(--ink-soft);
+    background:var(--paper-deep);border-right:4px solid var(--gold);
+    padding:10px 12px;border-radius:0 10px 10px 0;
+  }
+  .note b{color:var(--ink);}
+
+  /* data table */
+  table.data{width:100%;border-collapse:collapse;margin:4px 0 12px;
+    font-variant-numeric:tabular-nums;direction:ltr;font-size:.95rem;}
+  table.data th,table.data td{border:1px solid var(--line);padding:6px 4px;text-align:center;}
+  table.data th{background:var(--paper-deep);color:var(--ink);font-weight:700;}
+  table.data caption{caption-side:top;text-align:right;color:var(--ink-soft);
+    margin-bottom:6px;direction:rtl;font-size:.95rem;}
+
+  /* nav */
+  .nav{display:flex;gap:10px;margin-top:16px;}
+  button{
+    font-family:'Assistant',sans-serif;font-weight:700;font-size:1.02rem;
+    border:none;border-radius:11px;padding:13px 18px;cursor:pointer;
+    transition:transform .15s,box-shadow .2s,opacity .2s;
+  }
+  button:active{transform:translateY(1px);}
+  .btn-next{flex:1;background:var(--ink);color:#fff;
+    box-shadow:0 10px 22px -10px var(--ink);}
+  .btn-next:hover{box-shadow:0 14px 26px -10px var(--ink);}
+  .btn-prev{background:transparent;color:var(--ink-soft);
+    border:1.5px solid var(--line);}
+  .btn-prev:hover{background:var(--paper-deep);}
+  button:disabled{opacity:.4;cursor:not-allowed;}
+  .btn-restart{background:var(--accent);color:#fff;flex:1;
+    box-shadow:0 10px 22px -10px var(--accent);}
+
+  /* ===== practice ===== */
+  .practice{
+    display:none;
+    margin-top:clamp(20px,3vw,36px);
+    background:linear-gradient(160deg,#fffdf6,#f3ecdd);
+    border:1px solid var(--line);border-radius:18px;
+    padding:clamp(20px,2.6vw,34px);
+    box-shadow:0 18px 40px -24px var(--shadow);
+    position:relative;overflow:hidden;
+  }
+  .practice::before{
+    content:"";position:absolute;inset:0;pointer-events:none;
+    background:repeating-linear-gradient(0deg,transparent 0 14px,rgba(127,161,171,.06) 14px 15px),
+               repeating-linear-gradient(90deg,transparent 0 14px,rgba(127,161,171,.06) 14px 15px);
+  }
+  .practice>*{position:relative;}
+  .practice.on{display:block;animation:pracIn .5s ease;}
+  @keyframes pracIn{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:none;}}
+  .prac-head .kicker{
+    font-size:.78rem;letter-spacing:.18em;font-weight:700;color:var(--accent);
+    text-transform:uppercase;display:inline-block;
+    border-top:2px solid var(--accent);border-bottom:2px solid var(--accent);
+    padding:4px 12px;margin-bottom:10px;
+  }
+  .prac-head h2{font-family:'Frank Ruhl Libre',serif;font-weight:900;
+    font-size:clamp(1.4rem,3vw,2rem);line-height:1.1;}
+  .prac-sub{color:var(--ink-soft);margin:6px 0 4px;font-size:1.02rem;}
+  .prac-sub b{color:var(--ink);}
+  .prac-scenario{font-weight:700;color:var(--ink);margin:14px 0 8px;
+    font-family:'Frank Ruhl Libre',serif;font-size:1.12rem;}
+  .prac-scenario span{color:var(--ink-soft);font-weight:400;font-family:'Assistant';font-size:.95rem;}
+
+  .answers{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:18px 0 6px;}
+  @media(max-width:640px){.answers{grid-template-columns:1fr;}}
+  .ans-axis{background:#fff;border:1px solid var(--line);border-radius:13px;padding:14px;}
+  .ans-lab{display:block;font-weight:700;color:var(--ink);margin-bottom:10px;}
+  .opts{display:flex;gap:8px;flex-wrap:wrap;}
+  .opt{font-family:'Assistant';font-weight:700;font-variant-numeric:tabular-nums;direction:ltr;
+    border:1.5px solid var(--line);background:var(--paper);border-radius:10px;
+    padding:9px 14px;cursor:pointer;font-size:1rem;color:var(--ink);transition:all .15s;}
+  .opt:hover{border-color:var(--grid-major);transform:translateY(-1px);}
+  .opt.sel{background:var(--ink);color:#fff;border-color:var(--ink);box-shadow:0 6px 14px -6px var(--ink);}
+  .opt.right{background:#2f7a4d;color:#fff;border-color:#2f7a4d;}
+  .opt.wrong{background:var(--accent);color:#fff;border-color:var(--accent);}
+  .opt:disabled{cursor:default;}
+  .opt:disabled:hover{transform:none;}
+
+  .prac-nav{display:flex;gap:10px;margin-top:16px;}
+  .btn-check{flex:1;background:var(--ink);color:#fff;box-shadow:0 10px 22px -10px var(--ink);}
+  .btn-check:hover:not(:disabled){box-shadow:0 14px 26px -10px var(--ink);}
+  .btn-newq{background:transparent;color:var(--ink-soft);border:1.5px solid var(--line);}
+  .btn-newq:hover{background:var(--paper-deep);}
+
+  .feedback{margin-top:16px;display:none;}
+  .feedback.show{display:block;animation:fade .4s ease;}
+  @keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+  .fb-line{display:flex;gap:10px;align-items:flex-start;padding:11px 14px;border-radius:11px;
+    margin-bottom:8px;font-size:1rem;line-height:1.4;}
+  .fb-line .ico{font-weight:900;font-size:1.1rem;flex-shrink:0;}
+  .fb-line b{font-variant-numeric:tabular-nums;direction:ltr;display:inline-block;}
+  .fb-ok{background:#e6f3ea;color:#1f5836;border:1px solid #b5dcc3;}
+  .fb-warn{background:#fdf2dc;color:#7a5a16;border:1px solid #ecd29a;}
+  .fb-err{background:#fbe7e2;color:#8a2e1c;border:1px solid #f0bcaf;}
+  .fb-summary{margin-top:4px;font-weight:700;color:var(--ink);font-size:1.05rem;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <span class="kicker">מעבדה · עיבוד נתונים</span>
+    <h1>איך מסרטטים דיאגרמת פיזור</h1>
+    <p>סדר הפעולות לבחירת קנה מידה נוח — צעד אחר צעד</p>
+  </header>
+
+  <div class="board">
+    <!-- GRAPH -->
+    <div class="graph-panel">
+      <svg class="graph" viewBox="0 0 690 540" xmlns="http://www.w3.org/2000/svg" aria-label="דף משבצות">
+        <g id="gridMinor"></g>
+        <g id="usable" class="reveal"></g>
+        <g id="axes" class="reveal"></g>
+        <g id="ticks" class="reveal"></g>
+        <g id="trend" class="reveal"></g>
+        <g id="points"></g>
+      </svg>
+    </div>
+
+    <!-- STEPS -->
+    <div class="steps-panel">
+      <div class="rail" id="rail"></div>
+      <div class="card">
+        <div class="step-no"><span class="dot" id="stepDot">1</span><span id="stepKicker">צעד 1 מתוך 7</span></div>
+        <h2 id="stepTitle"></h2>
+        <div class="body" id="stepBody"></div>
+        <div class="note" id="stepNote"></div>
+        <div class="nav">
+          <button class="btn-prev" id="prevBtn">הקודם</button>
+          <button class="btn-next" id="nextBtn">הצעד הבא ←</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PRACTICE -->
+  <section class="practice" id="practice">
+    <div class="prac-head">
+      <span class="kicker">תרגול עצמי</span>
+      <h2 id="pracTitle">בחרו קנה מידה מתאים</h2>
+      <p class="prac-sub">לפניכם טבלת ערכים. נניח שיש בדף מקום ל‑<b>50 משבצות בכל ציר</b>. בחרו לכל ציר את הערך לכל משבצת.</p>
+    </div>
+    <div class="prac-scenario" id="pracScenario"></div>
+    <table class="data" id="pracTable"></table>
+
+    <div class="answers">
+      <div class="ans-axis">
+        <span class="ans-lab">ציר x — לכל משבצת:</span>
+        <div class="opts" id="optsX"></div>
+      </div>
+      <div class="ans-axis">
+        <span class="ans-lab">ציר y — לכל משבצת:</span>
+        <div class="opts" id="optsY"></div>
+      </div>
+    </div>
+
+    <div class="prac-nav">
+      <button class="btn-check" id="checkBtn" disabled>בדקו את התשובה</button>
+      <button class="btn-newq" id="newqBtn">תרגיל הבא ↻</button>
+    </div>
+    <div class="feedback" id="feedback"></div>
+  </section>
+</div>
+
+<script>
+/* ===== נתונים וקנה מידה ===== */
+const DATA = [
+  [0.05,0.18],[0.10,0.42],[0.15,0.61],[0.20,0.79],
+  [0.25,1.05],[0.30,1.18],[0.35,1.41],[0.38,1.52]
+];
+const SQ=15, OX=55, OY=490;          // גודל משבצת, ראשית הצירים
+const NX=40, NY=31;                    // מספר משבצות בצירים (x:0–0.40, y:0–1.55)
+const SCX=0.01, SCY=0.05;              // קנה מידה: ערך למשבצת
+const px = x => OX + (x/SCX)*SQ;
+const py = y => OY - (y/SCY)*SQ;
+
+const NS="http://www.w3.org/2000/svg";
+const mk=(t,a={})=>{const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);return e;};
+
+/* --- רשת משבצות (תמיד גלויה) --- */
+const gMinor=document.getElementById('gridMinor');
+for(let i=0;i<=NX;i++){const X=OX+i*SQ;gMinor.appendChild(mk('line',{x1:X,y1:OY-NY*SQ,x2:X,y2:OY,stroke:'var(--grid-minor)','stroke-width':i%5===0?1.1:.6}));}
+for(let j=0;j<=NY;j++){const Y=OY-j*SQ;gMinor.appendChild(mk('line',{x1:OX,y1:Y,x2:OX+NX*SQ,y2:Y,stroke:'var(--grid-minor)','stroke-width':j%5===0?1.1:.6}));}
+
+/* --- אזור שימושי (צעד 2) --- */
+const gUse=document.getElementById('usable');
+gUse.appendChild(mk('rect',{x:OX,y:OY-NY*SQ,width:NX*SQ,height:NY*SQ,fill:'#ffe9a8','fill-opacity':.35,stroke:'var(--gold)','stroke-width':2,'stroke-dasharray':'6 5',rx:3}));
+const cntX=mk('text',{x:OX+NX*SQ/2,y:OY-NY*SQ-9,'text-anchor':'middle',fill:'var(--gold)','font-weight':700,'font-size':14,'font-family':'Assistant'});cntX.textContent='≈ 52 משבצות שימושיות לרוחב';
+const cntY=mk('text',{x:OX-12,y:OY-NY*SQ/2,'text-anchor':'middle',fill:'var(--gold)','font-weight':700,'font-size':14,'font-family':'Assistant',transform:`rotate(-90 ${OX-12} ${OY-NY*SQ/2})`});cntY.textContent='≈ 38 לאורך';
+gUse.append(cntX,cntY);
+
+/* --- צירים (צעד 5) --- */
+const gAx=document.getElementById('axes');
+gAx.appendChild(mk('line',{x1:OX,y1:OY,x2:OX+NX*SQ+8,y2:OY,stroke:'var(--axis)','stroke-width':2.4}));
+gAx.appendChild(mk('line',{x1:OX,y1:OY,x2:OX,y2:OY-NY*SQ-8,stroke:'var(--axis)','stroke-width':2.4}));
+gAx.appendChild(mk('polygon',{points:`${OX+NX*SQ+8},${OY} ${OX+NX*SQ},${OY-5} ${OX+NX*SQ},${OY+5}`,fill:'var(--axis)'}));
+gAx.appendChild(mk('polygon',{points:`${OX},${OY-NY*SQ-8} ${OX-5},${OY-NY*SQ} ${OX+5},${OY-NY*SQ}`,fill:'var(--axis)'}));
+const xl=mk('text',{x:OX+NX*SQ+2,y:OY+34,'text-anchor':'end',fill:'var(--axis)','font-weight':700,'font-size':15,'font-family':'Frank Ruhl Libre'});xl.textContent='x';
+const yl=mk('text',{x:OX-2,y:OY-NY*SQ-14,'text-anchor':'middle',fill:'var(--axis)','font-weight':700,'font-size':15,'font-family':'Frank Ruhl Libre'});yl.textContent='y';
+gAx.append(xl,yl);
+
+/* --- מספור (צעד 5) --- */
+const gTk=document.getElementById('ticks');
+for(let i=0;i<=NX;i+=5){const X=OX+i*SQ, v=(i*SCX).toFixed(2);
+  gTk.appendChild(mk('line',{x1:X,y1:OY,x2:X,y2:OY+5,stroke:'var(--axis)','stroke-width':1.6}));
+  const t=mk('text',{x:X,y:OY+18,'text-anchor':'middle',fill:'var(--ink-soft)','font-size':12,'font-family':'Assistant',direction:'ltr'});t.textContent=v;gTk.appendChild(t);}
+for(let j=5;j<=NY;j+=5){const Y=OY-j*SQ, v=(j*SCY).toFixed(2);
+  gTk.appendChild(mk('line',{x1:OX,y1:Y,x2:OX-5,y2:Y,stroke:'var(--axis)','stroke-width':1.6}));
+  const t=mk('text',{x:OX-9,y:Y+4,'text-anchor':'end',fill:'var(--ink-soft)','font-size':12,'font-family':'Assistant',direction:'ltr'});t.textContent=v;gTk.appendChild(t);}
+
+/* --- נקודות (צעד 6) --- */
+const gPt=document.getElementById('points');
+const ptEls=DATA.map(([x,y])=>{
+  const c=mk('circle',{cx:px(x),cy:py(y),r:5.5,fill:'var(--accent)',stroke:'#fff','stroke-width':1.6});
+  c.classList.add('pt','hidden');gPt.appendChild(c);return c;
+});
+
+/* --- קו מגמה, משולש שיפוע, חיתוך (צעד 7) --- */
+/* נקודות שנקראות על הקו: (0.10,0.40) ו-(0.35,1.41) → שיפוע ≈ 4.0, חיתוך ≈ 0 */
+const gTr=document.getElementById('trend');
+const P1=[0.10,0.40], P2=[0.35,1.41], C=[0.35,0.40];
+// קו המגמה מהראשית עד קצה הטווח
+gTr.appendChild(mk('line',{x1:px(0),y1:py(0),x2:px(0.385),y2:py(1.547),stroke:'var(--ink)','stroke-width':2.6,'stroke-linecap':'round'}));
+// משולש שיפוע (מקווקו)
+gTr.appendChild(mk('line',{x1:px(P1[0]),y1:py(P1[1]),x2:px(C[0]),y2:py(C[1]),stroke:'var(--gold)','stroke-width':1.9,'stroke-dasharray':'5 4'}));
+gTr.appendChild(mk('line',{x1:px(C[0]),y1:py(C[1]),x2:px(P2[0]),y2:py(P2[1]),stroke:'var(--gold)','stroke-width':1.9,'stroke-dasharray':'5 4'}));
+// שתי הנקודות שנקראו על הקו (עיגול חלול)
+[P1,P2].forEach(p=>gTr.appendChild(mk('circle',{cx:px(p[0]),cy:py(p[1]),r:5,fill:'#fff',stroke:'var(--ink)','stroke-width':2.3})));
+// תוויות Δx ו-Δy
+const dx=mk('text',{x:(px(P1[0])+px(C[0]))/2,y:py(C[1])+18,'text-anchor':'middle',fill:'var(--gold)','font-weight':700,'font-size':13,'font-family':'Assistant',direction:'ltr'});dx.textContent='Δx = 0.25';
+const dy=mk('text',{x:px(P2[0])+10,y:(py(C[1])+py(P2[1]))/2,'text-anchor':'start',fill:'var(--gold)','font-weight':700,'font-size':13,'font-family':'Assistant',direction:'ltr'});dy.textContent='Δy = 1.01';
+gTr.append(dx,dy);
+// סימון החיתוך עם ציר y
+gTr.appendChild(mk('circle',{cx:px(0),cy:py(0),r:5,fill:'#fff',stroke:'var(--accent)','stroke-width':2.3}));
+const bl=mk('text',{x:px(0)+11,y:py(0)-7,'text-anchor':'start',fill:'var(--accent)','font-weight':700,'font-size':12,'font-family':'Assistant',direction:'ltr'});bl.textContent='b ≈ 0';
+gTr.appendChild(bl);
+
+/* ===== תוכן הצעדים ===== */
+const STEPS=[
+  {t:"רושמים את טווחי הנתונים",
+   body:`<p>לפני שנוגעים בעיפרון — בודקים בין אילו ערכים נעים הנתונים. כך נדע כמה "מקום" כל ציר צריך.</p>
+   <table class="data"><caption>נתוני המעבדה:</caption><tr><th>x</th>${DATA.map(d=>`<td>${d[0].toFixed(2)}</td>`).join('')}</tr><tr><th>y</th>${DATA.map(d=>`<td>${d[1].toFixed(2)}</td>`).join('')}</tr></table>
+   <p>הציר האופקי צריך להכיל <strong>x מ‑0 עד 0.38</strong>, והאנכי <strong>y מ‑0 עד 1.52</strong>.</p>`,
+   note:`<b>למה מ‑0?</b> אלו נתוני מעבדה והראשית בעלת משמעות פיזיקלית — לכן שני הצירים יוצאים מ‑0.`,
+   show:{usable:0,axes:0,ticks:0,pts:0}},
+
+  {t:"סופרים כמה משבצות יש בדף",
+   body:`<p>פורסים דף A4 ומשאירים שוליים לכותרת ולמספור (כ‑2–3 משבצות מכל צד).</p>
+   <p>כיוון שטווח ה‑x קטן ודורש דיוק, נוח יותר להניח את הדף <strong>שכוב (לרוחב)</strong>.</p>
+   <p>אחרי השוליים נשארות בערך <span class="hl">52 משבצות לרוחב</span> ו‑<span class="hl">38 משבצות לגובה</span>.</p>`,
+   note:`<b>טיפ:</b> סופרים <b>פעם אחת</b> בתחילת השיעור — המספר הזה משרת אתכם בכל הסרטוטים על אותו סוג דף.`,
+   show:{usable:1,axes:0,ticks:0,pts:0}},
+
+  {t:"מחשבים קנה מידה גולמי",
+   body:`<p>קנה המידה הגולמי = <strong>טווח הנתונים ÷ מספר המשבצות</strong>. זה אומר לנו כמה "צריך" כל משבצת לשאת.</p>
+   <div class="calc">
+     <div class="row"><span class="lbl">ציר x:</span><span class="val">0.38 ÷ 52 ≈ 0.007</span></div>
+     <div class="row"><span class="lbl">ציר y:</span><span class="val">1.52 ÷ 38 ≈ 0.040</span></div>
+   </div>
+   <p>אלו מספרים "מכוערים" — אי אפשר לקרוא איתם נקודות ביניים. בצעד הבא נעגל אותם.</p>`,
+   note:`<b>שימו לב:</b> תמיד <b>מעגלים כלפי מעלה</b> — מספר קטן מדי לא יכיל את כל הנתונים בדף.`,
+   show:{usable:1,axes:0,ticks:0,pts:0}},
+
+  {t:"מעגלים למספר ידידותי",
+   body:`<p>"מספר ידידותי" בנוי <strong>רק מהספרה 1, 2 או 5</strong> (ואחריה אפסים) — רק איתו אפשר לחלק משבצת בראש.</p>
+   <div class="fdef">מותר: <span class="ok">… 0.005 · 0.01 · 0.02 · 0.05 · 0.1 …</span><br>בוחרים את הידידותי <b>הקרוב שגדול או שווה</b> לקנה הגולמי — כלומר <b>מעגלים כלפי מעלה</b>.</div>
+   <div class="round-row"><span class="axlab">x</span><span class="raw">0.007<small>הגולמי</small></span><span class="arrow">←</span><span class="cands"><span class="cand small">0.005</span><span class="cand pick">0.01</span><span class="cand">0.02</span></span></div>
+   <div class="round-row"><span class="axlab">y</span><span class="raw">0.040<small>הגולמי</small></span><span class="arrow">←</span><span class="cands"><span class="cand small">0.02</span><span class="cand pick">0.05</span><span class="cand">0.1</span></span></div>`,
+   note:`<b>הכלל הזהב:</b> לעולם לא 3, 4, 6 או 7 למשבצת — איתם אי אפשר לחלק את המשבצת בראש.`,
+   show:{usable:1,axes:0,ticks:0,pts:0}},
+
+  {t:"משרטטים וממספרים את הצירים",
+   body:`<p>מציירים שני צירים בעזרת סרגל, עם חץ בקצה. עכשיו ממספרים — אבל <strong>רק כל 5 משבצות</strong>, כדי שלא יהיה עומס.</p>
+   <div class="calc">
+     <div class="row"><span class="lbl">x (כל 5 משבצות):</span><span class="val">0.05 · 0.10 · 0.15 …</span></div>
+     <div class="row"><span class="lbl">y (כל 5 משבצות):</span><span class="val">0.25 · 0.50 · 0.75 …</span></div>
+   </div>
+   <p>שמים לב שהמספור עולה בקפיצות שוות לכל אורך הציר.</p>`,
+   note:`<b>אל תכתבו</b> את ערכי הנתונים עצמם על הצירים — רק את הסקאלה האחידה.`,
+   show:{usable:0,axes:1,ticks:1,pts:0}},
+
+  {t:"מסמנים את נקודות הנתונים",
+   body:`<p>כל זוג ערכים (x, y) הופך לנקודה: עולים מהציר האופקי וזזים מהאנכי עד שנפגשים.</p>
+   <p>מסמנים בעדינות ב‑<strong>×</strong> או בנקודה קטנה — לא בעיגול ענק.</p>
+   <p>הביטו בדף: הנקודות מתפזרות יפה על פני כל השטח. <strong>זה בדיוק מה שקנה מידה טוב נותן.</strong></p>`,
+   note:`<b>פיזור = scatter:</b> לא מחברים את הנקודות בקו שבור! אם יש מגמה, מותחים בסוף קו ישר/חלק יחיד שעובר "בין" הנקודות.`,
+   show:{usable:0,axes:1,ticks:1,pts:1}},
+
+  {t:"מעבירים קו מגמה ומחשבים שיפוע",
+   body:`<p>הנקודות מסתדרות לאורך קו, אז מותחים בסרגל <strong>קו מגמה ישר אחד</strong> שעובר קרוב לכמה שיותר נקודות (בערך אותו מספר מעל ומתחת).</p>
+   <p>לשיפוע בוחרים <strong>שתי נקודות על הקו</strong> (לא נקודות מדידה!), רחוקות זו מזו וקלות לקריאה — כאן (0.10, 0.40) ו‑(0.35, 1.41):</p>
+   <div class="calc">
+     <div class="row"><span class="lbl">Δy (עלייה):</span><span class="val">1.41 − 0.40 = 1.01</span></div>
+     <div class="row"><span class="lbl">Δx (מהלך):</span><span class="val">0.35 − 0.10 = 0.25</span></div>
+     <div class="row"><span class="lbl">שיפוע a = Δy ÷ Δx:</span><span class="val">1.01 ÷ 0.25 ≈ 4.0</span></div>
+     <div class="row"><span class="lbl">חיתוך עם ציר y:</span><span class="val">b ≈ 0</span></div>
+   </div>
+   <p>משוואת הקו: <strong>y ≈ 4.0·x</strong></p>`,
+   note:`<b>חיתוך עם ציר y</b> נקרא היכן שהקו פוגש את ציר y (כלומר ב‑x=0). כאן b≈0 — כש‑x=0 גם y≈0, מה שהגיוני פיזיקלית.`,
+   show:{usable:0,axes:1,ticks:1,pts:1,trend:1}},
+
+  {t:"בודקים שהסרטוט מנצל את הדף",
+   body:`<p>בדיקות סיום מהירות:</p>
+   <p>✓ הנתונים פרושים על <strong>רוב</strong> שטח הדף (לא דחוסים בפינה).</p>
+   <p>✓ קנה המידה אחיד ובמספרים עגולים בשני הצירים.</p>
+   <p>✓ שני הצירים מתחילים מ‑0 וכל ציר מסומן באות שלו (x, y).</p>
+   <p>✓ אם יש מגמה — <strong>קו ישר אחד</strong> עובר בין הנקודות (לא קו שבור).</p>
+   <p>זהו — דיאגרמת פיזור מוכנה וקריאה! 🎉</p>`,
+   note:`<b>וריאציה ל"מצטיינים":</b> ב‑y אפשר גם 0.04 למשבצת — זה ימלא עוד יותר את הגובה. אין פתרון יחיד נכון, ויש כמה קני מידה תקפים.`,
+   show:{usable:0,axes:1,ticks:1,pts:1,trend:1}}
+];
+
+/* ===== מנגנון ===== */
+let cur=0;
+const rail=document.getElementById('rail');
+STEPS.forEach(()=>{const s=document.createElement('div');s.className='seg';rail.appendChild(s);});
+const segs=[...rail.children];
+
+const elDot=document.getElementById('stepDot'),
+      elKick=document.getElementById('stepKicker'),
+      elTitle=document.getElementById('stepTitle'),
+      elBody=document.getElementById('stepBody'),
+      elNote=document.getElementById('stepNote'),
+      prevBtn=document.getElementById('prevBtn'),
+      nextBtn=document.getElementById('nextBtn');
+
+function setGroup(id,on){document.getElementById(id).classList.toggle('on',!!on);}
+
+function render(){
+  const s=STEPS[cur];
+  elDot.textContent=cur+1;
+  elKick.textContent=`צעד ${cur+1} מתוך ${STEPS.length}`;
+  elTitle.textContent=s.t;
+  elBody.innerHTML=s.body;
+  elNote.innerHTML=s.note;
+
+  setGroup('usable',s.show.usable);
+  setGroup('axes',s.show.axes);
+  setGroup('ticks',s.show.ticks);
+  setGroup('trend',s.show.trend);
+
+  document.getElementById('practice').classList.toggle('on',cur===STEPS.length-1);
+
+  // נקודות — חשיפה מדורגת
+  ptEls.forEach((c,i)=>{
+    if(s.show.pts){setTimeout(()=>c.classList.remove('hidden'),120*i);}
+    else c.classList.add('hidden');
+  });
+
+  segs.forEach((seg,i)=>{seg.className='seg'+(i<cur?' done':i===cur?' cur':'');});
+
+  prevBtn.disabled=cur===0;
+  if(cur===STEPS.length-1){nextBtn.textContent='התחלה מחדש ↺';nextBtn.classList.add('btn-restart');nextBtn.classList.remove('btn-next');}
+  else{nextBtn.textContent='הצעד הבא ←';nextBtn.classList.add('btn-next');nextBtn.classList.remove('btn-restart');}
+}
+
+nextBtn.onclick=()=>{cur=(cur===STEPS.length-1)?0:cur+1;render();};
+prevBtn.onclick=()=>{if(cur>0){cur--;render();}};
+document.addEventListener('keydown',e=>{
+  if(e.target.tagName==='BUTTON')return; // לא להפריע לכפתורי התרגול
+  if(e.key==='ArrowLeft')nextBtn.click();
+  if(e.key==='ArrowRight')prevBtn.click();
+});
+render();
+
+/* ========== תרגול ========== */
+const SQUARES=50; // משבצות פנויות בכל ציר (הנחת התרגיל)
+
+// בנק תרגילים: כל אחד עם תרחיש, תוויות, וערכי x/y
+const PROBLEMS=[
+  {name:"מתיחת קפיץ", note:"כוח מול התארכות",
+   xl:"כוח (N)", yl:"התארכות (cm)",
+   x:[0.5,1.0,1.5,2.0,2.5,3.0], y:[1.2,2.5,3.6,5.1,6.3,7.4]},
+  {name:"חימום מים", note:"טמפרטורה לאורך זמן",
+   xl:"זמן (דק׳)", yl:"טמפ׳ (°C)",
+   x:[0,2,4,6,8,10,12], y:[20,35,48,61,73,84,92]},
+  {name:"נפילה חופשית", note:"מהירות מול זמן",
+   xl:"זמן (s)", yl:"מהירות (m/s)",
+   x:[0.1,0.2,0.3,0.4,0.5,0.6], y:[1.0,2.0,2.9,3.9,4.9,5.9]},
+  {name:"זרם במעגל", note:"מתח מול זרם",
+   xl:"מתח (V)", yl:"זרם (mA)",
+   x:[1,2,3,4,5,6], y:[42,85,130,172,210,255]},
+  {name:"תנועה שווה", note:"מרחק מול זמן",
+   xl:"זמן (s)", yl:"מרחק (m)",
+   x:[0,5,10,15,20,25,30], y:[0,12,26,38,51,63,77]},
+  {name:"התקררות קפה", note:"טמפרטורה מול זמן",
+   xl:"זמן (דק׳)", yl:"טמפ׳ (°C)",
+   x:[0,3,6,9,12,15,18], y:[88,72,60,50,42,36,31]},
+  {name:"צמיחת צמח", note:"גובה מול זמן",
+   xl:"זמן (ימים)", yl:"גובה (cm)",
+   x:[0,7,14,21,28,35], y:[2,5,9,14,18,23]},
+  {name:"צפיפות חומר", note:"מסה מול נפח",
+   xl:"נפח (mL)", yl:"מסה (g)",
+   x:[10,20,30,40,50,60], y:[8,17,25,34,42,51]},
+  {name:"מרחק בלימה", note:"מרחק מול מהירות",
+   xl:"מהירות (km/h)", yl:"מרחק (m)",
+   x:[20,40,60,80,100,120], y:[6,14,28,45,68,95]},
+  {name:"קצב פוטוסינתזה", note:"קצב מול עוצמת אור",
+   xl:"אור (×100 lux)", yl:"קצב (יח׳)",
+   x:[1,2,3,4,5,6], y:[0.4,0.9,1.5,2.0,2.4,2.7]}
+];
+
+// רצף מספרים ידידותיים (1·2·5 × חזקות 10)
+const FRIENDLY=(()=>{const o=[];for(let e=-3;e<=4;e++){const p=Math.pow(10,e);
+  [1,2,5].forEach(m=>o.push(+( m*p ).toPrecision(2)));}return o.sort((a,b)=>a-b);})();
+const fmt=n=>{let s=(+n.toPrecision(6)).toString();return s;};
+const smallestFriendlyGE=raw=>FRIENDLY.find(f=>f>=raw-1e-9);
+function optionsFor(correct){
+  const i=FRIENDLY.indexOf(correct);
+  return FRIENDLY.slice(Math.max(0,i-1),i+3); // קטן אחד, נכון, ושניים גדולים
+}
+
+const pTitle=document.getElementById('pracScenario'),
+      pTable=document.getElementById('pracTable'),
+      optsX=document.getElementById('optsX'),
+      optsY=document.getElementById('optsY'),
+      checkBtn=document.getElementById('checkBtn'),
+      newqBtn=document.getElementById('newqBtn'),
+      feedback=document.getElementById('feedback');
+
+let pIdx=Math.floor(Math.random()*PROBLEMS.length);
+let prob, rangeX, rangeY, correctX, correctY, selX=null, selY=null;
+
+function buildOpts(container,opts,axis){
+  container.innerHTML='';
+  opts.forEach(v=>{
+    const b=document.createElement('button');
+    b.className='opt';b.textContent=fmt(v);b.dataset.v=v;
+    b.onclick=()=>{
+      if(checkBtn.disabled && feedback.classList.contains('show'))return; // אחרי בדיקה — נעול
+      [...container.children].forEach(c=>c.classList.remove('sel'));
+      b.classList.add('sel');
+      if(axis==='x')selX=v; else selY=v;
+      checkBtn.disabled=!(selX!==null&&selY!==null);
+    };
+    container.appendChild(b);
+  });
+}
+
+function loadProblem(){
+  prob=PROBLEMS[pIdx];
+  rangeX=Math.max(...prob.x); rangeY=Math.max(...prob.y);
+  correctX=smallestFriendlyGE(rangeX/SQUARES);
+  correctY=smallestFriendlyGE(rangeY/SQUARES);
+  selX=selY=null;
+  pTitle.innerHTML=prob.name+' <span>· '+prob.note+'</span>';
+  pTable.innerHTML='<tr><th>'+prob.xl+'</th>'+prob.x.map(v=>'<td>'+v+'</td>').join('')+'</tr>'+
+                   '<tr><th>'+prob.yl+'</th>'+prob.y.map(v=>'<td>'+v+'</td>').join('')+'</tr>';
+  buildOpts(optsX,optionsFor(correctX),'x');
+  buildOpts(optsY,optionsFor(correctY),'y');
+  checkBtn.disabled=true;
+  feedback.className='feedback';feedback.innerHTML='';
+}
+
+function judge(sel,correct,range,axis){
+  const need=Math.ceil(range/sel - 1e-9);
+  if(need>SQUARES){
+    return {cls:'fb-err',ico:'✕',
+      html:`ציר ${axis}: <b>${fmt(sel)}</b> קטן מדי — צריך ${need} משבצות, יותר מ‑${SQUARES}. הנתונים לא ייכנסו בדף.`};
+  }
+  if(Math.abs(sel-correct)<1e-9){
+    return {cls:'fb-ok',ico:'✓',
+      html:`ציר ${axis}: <b>${fmt(sel)}</b> לכל משבצת — מצוין! זה הקנה החסכוני שעדיין נכנס (≈ ${need} משבצות). לכל 5 משבצות: <b>${fmt(sel*5)}</b>.`};
+  }
+  return {cls:'fb-warn',ico:'!',
+    html:`ציר ${axis}: <b>${fmt(sel)}</b> נכנס בדף, אבל מבזבז מקום (רק ${need} משבצות) והסרטוט ייצא קטן. חסכוני יותר: <b>${fmt(correct)}</b> לכל משבצת.`};
+}
+
+function check(){
+  const rx=judge(selX,correctX,rangeX,'x');
+  const ry=judge(selY,correctY,rangeY,'y');
+  const perfect = rx.cls==='fb-ok' && ry.cls==='fb-ok';
+  feedback.innerHTML=
+    `<div class="fb-line ${rx.cls}"><span class="ico">${rx.ico}</span><span>${rx.html}</span></div>`+
+    `<div class="fb-line ${ry.cls}"><span class="ico">${ry.ico}</span><span>${ry.html}</span></div>`+
+    `<div class="fb-summary">${perfect?'🎉 שני הצירים אופטימליים — כל הכבוד!':'כמעט! נסו לבחור את הערך הקטן ביותר שעדיין נכנס בדף.'}</div>`;
+  feedback.className='feedback show';
+  // נעילת כפתורים וסימון נכון/שגוי
+  [[optsX,selX,correctX],[optsY,selY,correctY]].forEach(([c,sel,cor])=>{
+    [...c.children].forEach(b=>{
+      b.disabled=true;b.classList.remove('sel');
+      const v=+b.dataset.v;
+      if(Math.abs(v-cor)<1e-9)b.classList.add('right');
+      else if(Math.abs(v-sel)<1e-9)b.classList.add('wrong');
+    });
+  });
+  checkBtn.disabled=true;
+}
+
+checkBtn.onclick=check;
+newqBtn.onclick=()=>{pIdx=(pIdx+1)%PROBLEMS.length;loadProblem();};
+loadProblem();
+</script>
+</body>
+</html>
