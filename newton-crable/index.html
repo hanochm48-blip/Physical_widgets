@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>עריסת ניוטון</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: Arial, sans-serif;
+        }
+        
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        .title {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 28px;
+        }
+        
+        canvas {
+            display: block;
+            background: #f5f5f5;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+        
+        .controls {
+            margin-top: 20px;
+            text-align: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        button:hover {
+            background: #764ba2;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .ball-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #f0f0f0;
+            padding: 8px 15px;
+            border-radius: 25px;
+        }
+        
+        .ball-controls button {
+            padding: 8px 20px;
+            font-size: 18px;
+            min-width: 40px;
+        }
+        
+        .ball-count {
+            font-size: 16px;
+            font-weight: bold;
+            color: #333;
+            min-width: 80px;
+            text-align: center;
+        }
+        
+        .instructions {
+            text-align: center;
+            margin-top: 15px;
+            color: #666;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="title">עריסת ניוטון</h1>
+        <canvas id="canvas" width="800" height="400"></canvas>
+        <div class="controls">
+            <button onclick="startSimulation()">התחל</button>
+            <button onclick="resetSimulation()">אפס</button>
+            <div class="ball-controls">
+                <button onclick="removeBall()">-</button>
+                <span class="ball-count" id="ballCount">5 כדורים</span>
+                <button onclick="addBall()">+</button>
+            </div>
+        </div>
+        <div class="instructions">
+            לחץ על כדור כדי למשוך אותו ולהתחיל את התנועה
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        let numBalls = 5;
+        const ballRadius = 30;
+        const stringLength = 200;
+        const gravity = 0.5;
+        const damping = 0.9995; // חיכוך מינימלי להתנגשות כמעט אלסטית
+        
+        let balls = [];
+        let frameHeight = 50;
+        
+        function getCenterX() {
+            return canvas.width / 2;
+        }
+        
+        function getSpacing() {
+            return ballRadius * 2; // כדורים צמודים לחלוטין
+        }
+        
+        class Ball {
+            constructor(index) {
+                this.index = index;
+                const spacing = getSpacing();
+                const centerX = getCenterX();
+                const centerY = frameHeight;
+                this.originX = centerX + (index - (numBalls - 1) / 2) * spacing;
+                this.originY = centerY;
+                this.angle = 0;
+                this.angleVelocity = 0;
+                this.angleAcceleration = 0;
+                this.x = this.originX;
+                this.y = this.originY + stringLength;
+                this.isDragging = false;
+            }
+            
+            update() {
+                if (!this.isDragging) {
+                    this.angleAcceleration = (-gravity / stringLength) * Math.sin(this.angle);
+                    this.angleVelocity += this.angleAcceleration;
+                    this.angleVelocity *= damping;
+                    this.angle += this.angleVelocity;
+                    
+                    this.x = this.originX + stringLength * Math.sin(this.angle);
+                    this.y = this.originY + stringLength * Math.cos(this.angle);
+                }
+            }
+            
+            draw() {
+                ctx.strokeStyle = '#333';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(this.originX, this.originY);
+                ctx.lineTo(this.x, this.y);
+                ctx.stroke();
+                
+                ctx.fillStyle = '#4a5568';
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, ballRadius, 0, Math.PI * 2);
+                ctx.fill();
+                
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+                ctx.beginPath();
+                ctx.arc(this.x - 10, this.y - 10, ballRadius / 3, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            
+            isPointInside(px, py) {
+                const dist = Math.sqrt((px - this.x) ** 2 + (py - this.y) ** 2);
+                return dist < ballRadius;
+            }
+        }
+        
+        function init() {
+            balls = [];
+            for (let i = 0; i < numBalls; i++) {
+                balls.push(new Ball(i));
+            }
+            updateBallCount();
+        }
+        
+        function drawFrame() {
+            const centerX = getCenterX();
+            const frameWidth = (numBalls - 1) * getSpacing() + 100;
+            ctx.fillStyle = '#2d3748';
+            ctx.fillRect(centerX - frameWidth / 2, 20, frameWidth, 10);
+            
+            ctx.fillRect(centerX - frameWidth / 2 - 10, 10, 20, 30);
+            ctx.fillRect(centerX + frameWidth / 2 - 10, 10, 20, 30);
+        }
+        
+        function checkCollisions() {
+            for (let i = 0; i < balls.length - 1; i++) {
+                const b1 = balls[i];
+                const b2 = balls[i + 1];
+                
+                const dist = Math.sqrt((b1.x - b2.x) ** 2 + (b1.y - b2.y) ** 2);
+                const minDist = ballRadius * 2;
+                
+                if (dist < minDist + 0.5) {
+                    // חישוב מהירות יחסית
+                    const dx = b2.x - b1.x;
+                    const dy = b2.y - b1.y;
+                    const normalX = dx / dist;
+                    const normalY = dy / dist;
+                    
+                    // מהירויות לינאריות
+                    const v1x = b1.angleVelocity * Math.cos(b1.angle) * stringLength;
+                    const v1y = b1.angleVelocity * Math.sin(b1.angle) * stringLength;
+                    const v2x = b2.angleVelocity * Math.cos(b2.angle) * stringLength;
+                    const v2y = b2.angleVelocity * Math.sin(b2.angle) * stringLength;
+                    
+                    // מהירות יחסית בכיוון הנורמל
+                    const relVel = (v1x - v2x) * normalX + (v1y - v2y) * normalY;
+                    
+                    // התנגשות רק אם הכדורים מתקרבים
+                    if (relVel > 0) {
+                        // התנגשות אלסטית מושלמת - החלפת מהירויות זוויתיות
+                        const temp = b1.angleVelocity;
+                        b1.angleVelocity = b2.angleVelocity;
+                        b2.angleVelocity = temp;
+                        
+                        // הפרדת כדורים אם יש חדירה
+                        const overlap = minDist - dist;
+                        if (overlap > 0) {
+                            b1.x -= normalX * overlap * 0.5;
+                            b2.x += normalX * overlap * 0.5;
+                            b1.y -= normalY * overlap * 0.5;
+                            b2.y += normalY * overlap * 0.5;
+                        }
+                    }
+                }
+            }
+        }
+        
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            drawFrame();
+            
+            for (let ball of balls) {
+                ball.update();
+            }
+            
+            checkCollisions();
+            
+            for (let ball of balls) {
+                ball.draw();
+            }
+            
+            requestAnimationFrame(animate);
+        }
+        
+        function startSimulation() {
+            balls[0].angle = -Math.PI / 4;
+            balls[0].angleVelocity = 0;
+        }
+        
+        function resetSimulation() {
+            init();
+        }
+        
+        function addBall() {
+            if (numBalls < 10) {
+                numBalls++;
+                init();
+            }
+        }
+        
+        function removeBall() {
+            if (numBalls > 2) {
+                numBalls--;
+                init();
+            }
+        }
+        
+        function updateBallCount() {
+            document.getElementById('ballCount').textContent = numBalls + ' כדורים';
+        }
+        
+        let draggedBall = null;
+        
+        canvas.addEventListener('mousedown', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            for (let ball of balls) {
+                if (ball.isPointInside(x, y)) {
+                    draggedBall = ball;
+                    ball.isDragging = true;
+                    break;
+                }
+            }
+        });
+        
+        canvas.addEventListener('mousemove', (e) => {
+            if (draggedBall) {
+                const rect = canvas.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                const dx = x - draggedBall.originX;
+                const dy = y - draggedBall.originY;
+                draggedBall.angle = Math.atan2(dx, dy);
+                
+                draggedBall.x = draggedBall.originX + stringLength * Math.sin(draggedBall.angle);
+                draggedBall.y = draggedBall.originY + stringLength * Math.cos(draggedBall.angle);
+            }
+        });
+        
+        canvas.addEventListener('mouseup', () => {
+            if (draggedBall) {
+                draggedBall.isDragging = false;
+                draggedBall.angleVelocity = 0;
+                draggedBall = null;
+            }
+        });
+        
+        canvas.addEventListener('mouseleave', () => {
+            if (draggedBall) {
+                draggedBall.isDragging = false;
+                draggedBall.angleVelocity = 0;
+                draggedBall = null;
+            }
+        });
+        
+        init();
+        animate();
+    </script>
+</body>
+</html>

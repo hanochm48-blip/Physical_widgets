@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="he">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>מישור משופע — יישומון</title>
+  <style>
+    body{font-family: Arial; direction:rtl; padding:18px; background:#f6f8fb; color:#0b1a2b}
+    .app{display:grid; grid-template-columns:420px 1fr; gap:16px;}
+    .panel{background:#fff; padding:14px; border-radius:10px; box-shadow:0 6px 18px rgba(10,20,40,0.06)}
+    label{display:block; margin:8px 0 4px; font-weight:600}
+    input[type=range]{width:100%}
+    select,input[type=number]{padding:6px; border-radius:6px; border:1px solid #d6dbe6}
+    button{padding:8px 12px; border-radius:8px; border:0; background:#2463ff; color:white; cursor:pointer}
+    canvas{background:linear-gradient(180deg,#a0d8ff,#f6f8fb); border-radius:10px}
+  </style>
+</head>
+<body>
+  <h1>מישור משופע — יישומון אינטראקטיבי</h1>
+  <div class="app">
+    <div class="panel">
+      <label>זווית שיפוע: <span id="angleLabel">30</span>°</label>
+      <input id="angle" type="range" min="0" max="89" value="30">
+      <label>מסה (ק"ג):</label>
+      <input id="mass" type="number" min="0.01" step="0.1" value="2">
+      <label>חיכוך:</label>
+      <select id="material"></select>
+      <div class="row">
+        <button id="start">הפעל</button>
+        <button id="pause">השהה</button>
+        <button id="reset">אתחול</button>
+      </div>
+      <div class="stats">
+        <div>תאוצה: <span id="acc">—</span></div>
+        <div>מהירות: <span id="vel">—</span></div>
+      </div>
+    </div>
+    <div class="panel"><canvas id="c" width="760" height="420"></canvas></div>
+  </div>
+<script>
+const g=9.81;
+const canvas=document.getElementById('c');
+const ctx=canvas.getContext('2d');
+const angleEl=document.getElementById('angle');
+const angleLabel=document.getElementById('angleLabel');
+const massEl=document.getElementById('mass');
+const materialEl=document.getElementById('material');
+const startBtn=document.getElementById('start');
+const pauseBtn=document.getElementById('pause');
+const resetBtn=document.getElementById('reset');
+const accEl=document.getElementById('acc');
+const velEl=document.getElementById('vel');
+
+const materials=[
+  {name:'עץ על עץ', mu_s:0.4, mu_k:0.3},
+  {name:'מתכת חלקה', mu_s:0.2, mu_k:0.15},
+  {name:'גומי על אספלט', mu_s:1.2, mu_k:1.0},
+  {name:'קרח', mu_s:0.05, mu_k:0.03}
+];
+materials.forEach((m,i)=>{
+  const opt=document.createElement('option');
+  opt.value=i;
+  opt.textContent=`${m.name} (μs=${m.mu_s}, μk=${m.mu_k})`;
+  materialEl.appendChild(opt);
+});
+
+let angle=parseFloat(angleEl.value)*Math.PI/180;
+let mass=parseFloat(massEl.value);
+let matIndex=0;
+let mu_s=materials[matIndex].mu_s;
+let mu_k=materials[matIndex].mu_k;
+let a=0; let v=0; let s=520; // התחלה בראש השיפוע
+let running=false; let lastT=null;
+
+function updateParams(){
+  angle=Number(angleEl.value)*Math.PI/180;
+  angleLabel.textContent=Math.round(Number(angleEl.value));
+  mass=Number(massEl.value);
+  matIndex=Number(materialEl.value);
+  mu_s=materials[matIndex].mu_s;
+  mu_k=materials[matIndex].mu_k;
+  computeForces();
+}
+
+function computeForces(){
+  const fParallel=mass*g*Math.sin(angle);
+  const fNormal=mass*g*Math.cos(angle);
+  const fStaticMax=mu_s*fNormal;
+  const fKinetic=mu_k*fNormal;
+  if(fParallel>fStaticMax){
+    a=-g*(Math.sin(angle)-mu_k*Math.cos(angle)); // היפוך כיוון
+  }else{a=0; v=0;}
+  accEl.textContent=a.toFixed(3)+' m/s²';
+  velEl.textContent=v.toFixed(3)+' m/s';
+}
+
+function draw(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  const pad=60; const len=520;
+  const x1=pad; const y1=canvas.height-pad;
+  const x2=x1+len*Math.cos(angle); const y2=y1-len*Math.sin(angle);
+
+  // רקע: שמש
+  ctx.fillStyle='#fff176'; ctx.beginPath(); ctx.arc(50,50,40,0,2*Math.PI); ctx.fill();
+
+  // מילוי דשא עד המישור האופקי (y1)
+  ctx.fillStyle='#88cc66';
+  ctx.fillRect(0,y1,canvas.width,canvas.height-y1);
+
+  // מישור משופע
+  ctx.lineWidth=6; ctx.strokeStyle='#22345a'; ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke();
+
+  // מסה
+  const blockSize=36;
+  const bx=x1+s*Math.cos(angle); const by=y1-s*Math.sin(angle)-blockSize/2*Math.sin(angle);
+  ctx.save();
+  ctx.translate(bx,by);
+  ctx.rotate(-angle);
+  ctx.fillStyle='#ff7a59'; ctx.fillRect(-blockSize/2,-blockSize/2,blockSize,blockSize);
+  ctx.strokeStyle='#b3472a'; ctx.lineWidth=2; ctx.strokeRect(-blockSize/2,-blockSize/2,blockSize,blockSize);
+  ctx.restore();
+}
+
+function step(t){
+  if(!running){lastT=null; return;}
+  if(!lastT) lastT=t;
+  const dt=(t-lastT)/1000; lastT=t;
+  v+=a*dt;
+  s+=v*dt*180;
+  if(s<0){s=0; v=0;} if(s>520){s=520; v=0; running=false;}
+  computeForces();
+  draw();
+  requestAnimationFrame(step);
+}
+
+angleEl.addEventListener('input',()=>{updateParams(); draw();});
+massEl.addEventListener('input',()=>{updateParams(); draw();});
+materialEl.addEventListener('change',()=>{updateParams(); draw();});
+startBtn.addEventListener('click',()=>{updateParams(); running=true; lastT=null; requestAnimationFrame(step);});
+pauseBtn.addEventListener('click',()=>{running=false; lastT=null;});
+resetBtn.addEventListener('click',()=>{running=false; v=0; s=520; updateParams(); draw();});
+
+updateParams(); draw();
+</script>
+</body>
+</html>

@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>המחשת משפט עבודה–אנרגיה</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@500;700;900&family=Heebo:wght@300;400;500;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#f1ede3;
+    --paper2:#f7f4ec;
+    --panel:#fbfaf5;
+    --ink:#23282f;
+    --ink-soft:#5d6470;
+    --line:#d9d3c4;
+    --ke:#1f6feb;       /* כחול – קינטית */
+    --ke-soft:#bcd4f7;
+    --pe:#d23a2f;       /* אדום – פוטנציאלית */
+    --pe-soft:#f3c2bd;
+    --work:#c2750a;     /* כתום – עבודת כוח חיצוני */
+    --total:#2c333d;
+    --vel:#1f9d55;
+    --grid:rgba(35,40,47,.07);
+    --shadow:0 1px 0 rgba(255,255,255,.6),0 14px 34px -18px rgba(35,40,47,.35);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{
+    background:
+      radial-gradient(120% 120% at 80% -10%, #f8f5ed 0%, var(--paper) 55%),
+      var(--paper);
+    color:var(--ink);
+    font-family:"Heebo",sans-serif;
+    -webkit-font-smoothing:antialiased;
+    padding:clamp(14px,3vw,34px);
+    line-height:1.5;
+  }
+  .wrap{max-width:1180px;margin:0 auto}
+
+  header{margin-bottom:18px}
+  .eyebrow{
+    font-family:"IBM Plex Mono",monospace;font-size:12px;letter-spacing:.18em;
+    color:var(--work);text-transform:uppercase;margin:0 0 4px;
+  }
+  h1{
+    font-family:"Frank Ruhl Libre",serif;font-weight:900;
+    font-size:clamp(28px,5vw,46px);line-height:1.05;margin:0;letter-spacing:-.01em;
+  }
+  h1 .b{color:var(--ke)} h1 .r{color:var(--pe)}
+  .sub{color:var(--ink-soft);margin:8px 0 0;max-width:62ch;font-size:15px}
+
+  .card{
+    background:var(--panel);border:1px solid var(--line);border-radius:16px;
+    box-shadow:var(--shadow);
+  }
+
+  /* ----- controls ----- */
+  .controls{padding:16px 18px;margin:18px 0;display:grid;gap:18px;
+    grid-template-columns:1.3fr 1fr 1fr auto;align-items:end}
+  @media(max-width:880px){.controls{grid-template-columns:1fr 1fr}}
+  @media(max-width:520px){.controls{grid-template-columns:1fr}}
+  .field label{display:block;font-size:13px;font-weight:700;margin-bottom:7px;color:var(--ink)}
+  .field .val{font-family:"IBM Plex Mono",monospace;color:var(--work);font-weight:600}
+  .shapes{display:flex;gap:7px;flex-wrap:wrap}
+  .shape{
+    border:1.5px solid var(--line);background:var(--paper2);color:var(--ink-soft);
+    font-family:"Heebo";font-weight:500;font-size:13px;padding:8px 12px;border-radius:10px;
+    cursor:pointer;transition:.15s;
+  }
+  .shape:hover{border-color:#bcb7a6}
+  .shape.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+  input[type=range]{width:100%;accent-color:var(--work);height:22px;cursor:pointer;direction:ltr}
+  input[type=range]:disabled{opacity:.35;cursor:not-allowed}
+  .field.disabled label{color:var(--ink-soft)}
+  .field.disabled .val{color:var(--ink-soft)}
+  .run{
+    font-family:"Heebo";font-weight:700;font-size:15px;color:#fff;background:var(--ke);
+    border:none;border-radius:12px;padding:13px 22px;cursor:pointer;transition:.15s;
+    box-shadow:0 8px 18px -8px var(--ke);white-space:nowrap;
+  }
+  .run:hover{filter:brightness(1.06)}
+  .run:active{transform:translateY(1px)}
+  .ghost{background:transparent;color:var(--ink-soft);border:1.5px solid var(--line);box-shadow:none}
+  .ghost:hover{border-color:#bcb7a6;color:var(--ink)}
+  .btnrow{display:flex;gap:8px}
+
+  /* ----- stage ----- */
+  .stage{display:flex;gap:14px;margin-bottom:14px}
+  .stage > .track-c{flex:1 1 0;min-width:0}
+  .stage > .bar-c{flex:0 0 200px}
+  @media(max-width:760px){.stage{flex-direction:column}.stage > .bar-c{flex:0 0 auto}}
+  .panel-h{display:flex;align-items:baseline;justify-content:space-between;
+    padding:13px 16px 0}
+  .panel-h h2{font-family:"Frank Ruhl Libre",serif;font-weight:700;font-size:17px;margin:0}
+  .panel-h .tag{font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--ink-soft);letter-spacing:.05em}
+  canvas{display:block;width:100%}
+  .track-c{padding:6px}
+  #track{height:340px}
+  @media(max-width:760px){#track{height:260px}}
+  .bar-c{display:flex;flex-direction:column}
+  #ebar{height:300px;flex:1}
+
+  /* ----- charts ----- */
+  .charts{display:flex;gap:14px;margin-bottom:14px}
+  .charts:not(:has(> *:not([hidden]))){display:none}
+  .charts > *{flex:1 1 0;min-width:0}
+  @media(max-width:760px){.charts{flex-direction:column}}
+  .chart-c{padding:6px 6px 10px}
+  .echart{height:210px}
+
+  /* ----- scrubber ----- */
+  .scrub{padding:14px 18px;display:grid;gap:12px;margin-bottom:14px}
+  .scrub-top{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+  .play{width:46px;height:46px;border-radius:50%;border:none;background:var(--ink);color:#fff;
+    font-size:18px;cursor:pointer;display:grid;place-items:center;flex:none;transition:.15s}
+  .play:hover{filter:brightness(1.12)} .play:active{transform:scale(.95)}
+  .timeread{font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:15px;min-width:92px}
+  .timeread small{color:var(--ink-soft);font-weight:400}
+  #scrubber{flex:1;min-width:160px;accent-color:var(--ink)}
+  .speeds{display:flex;gap:6px}
+  .spd{font-family:"IBM Plex Mono",monospace;font-size:12px;border:1.5px solid var(--line);
+    background:var(--paper2);border-radius:8px;padding:5px 9px;cursor:pointer;color:var(--ink-soft)}
+  .spd.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+
+  /* ----- diagram toggles ----- */
+  .toggles{display:flex;align-items:center;gap:7px;flex-wrap:wrap;
+    border-top:1px dashed var(--line);padding-top:11px}
+  .t-label{font-size:12px;color:var(--ink-soft);font-weight:700;letter-spacing:.03em;margin-left:4px}
+  .chip{
+    font-family:"Heebo";font-size:12.5px;font-weight:500;color:var(--ink);
+    background:var(--paper2);border:1.5px solid var(--line);border-radius:999px;
+    padding:5px 11px 6px;cursor:pointer;transition:.15s;display:inline-flex;align-items:center;gap:5px;
+  }
+  .chip::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--ink-soft);transition:.15s}
+  .chip:hover{border-color:#bcb7a6}
+  .chip.on{background:#fff;border-color:var(--ink);color:var(--ink)}
+  .chip.on::before{background:var(--ke)}
+  .chip:not(.on){opacity:.6;color:var(--ink-soft)}
+  .chip:not(.on)::before{background:transparent;border:1.5px solid var(--ink-soft);width:8px;height:8px}
+
+  /* readouts */
+  .reads{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+  @media(max-width:680px){.reads{grid-template-columns:repeat(2,1fr)}}
+  .read{background:var(--paper2);border:1px solid var(--line);border-radius:11px;padding:10px 12px}
+  .read .k{font-size:12px;color:var(--ink-soft);display:flex;align-items:center;gap:6px}
+  .read .v{font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:19px;margin-top:2px}
+  .dot{width:10px;height:10px;border-radius:3px;display:inline-block}
+  .verify{
+    font-family:"IBM Plex Mono",monospace;font-size:13.5px;color:var(--ink);
+    background:linear-gradient(90deg,rgba(31,111,235,.07),rgba(210,58,47,.07),rgba(194,117,10,.07));
+    border:1px dashed var(--line);border-radius:11px;padding:11px 14px;text-align:center;direction:ltr
+  }
+  .verify b{font-weight:600}
+
+  /* proportional equation */
+  .eqn-card{padding:6px 18px 18px;margin-bottom:14px}
+  .eqn{
+    direction:ltr;
+    display:flex;align-items:baseline;justify-content:center;flex-wrap:nowrap;
+    gap:0.22em;padding:18px 8px 6px;
+    font-family:"Frank Ruhl Libre",serif;font-weight:700;line-height:1;
+    min-height:88px;
+  }
+  .eqn .op{color:var(--ink-soft);font-weight:400;font-size:34px;align-self:center}
+  .eqn .term{transition:font-size .08s linear;display:inline-block}
+  .eqn .term sub{font-size:0.55em;font-weight:600;vertical-align:baseline;
+    position:relative;top:0.16em;letter-spacing:-.02em;margin-right:.02em}
+  .eqn .u{color:var(--total)}
+  .eqn .up{color:var(--pe)}
+  .eqn .ek{color:var(--ke)}
+  .eqn-cap{text-align:center;font-size:12.5px;color:var(--ink-soft);font-family:"Heebo";margin-top:-4px}
+  .foot{color:var(--ink-soft);font-size:12.5px;margin-top:16px;text-align:center}
+  .legend{display:flex;gap:16px;flex-wrap:wrap;font-size:12.5px;color:var(--ink-soft);padding:0 16px 10px}
+  .legend span{display:flex;align-items:center;gap:6px}
+  .hint{font-size:12.5px;color:var(--ink-soft);font-family:"Heebo"}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <p class="eyebrow">Work–Energy Theorem · ניתוח תנועה</p>
+    <h1>משפט <span class="b">עבודה</span>–<span class="r">אנרגיה</span></h1>
+    <p class="sub">גוף מחליק על מסילה עם חיכוך קינטי. הגדירו את הנתונים, הפעילו את התנועה פעם אחת, ואז גררו את ציר הזמן קדימה ואחורה כדי לנתח את האנרגיה הקינטית, הפוטנציאלית ועבודת כוח החיכוך בכל רגע — כמו ניתוח סרטון. <span class="hint">(מסה m=1 ק״ג, g=9.8)</span></p>
+  </header>
+
+  <!-- CONTROLS -->
+  <section class="card controls">
+    <div class="field">
+      <label>צורת המסילה</label>
+      <div class="shapes" id="shapes"></div>
+    </div>
+    <div class="field">
+      <label>מהירות התחלתית <span class="val" id="v0val">3.0</span> מ׳/ש</label>
+      <input type="range" id="v0" min="0" max="20" step="0.5" value="3">
+    </div>
+    <div class="field" id="muField">
+      <label class="lblSlide">עצמת החיכוך μ <span class="val" id="muval">0.12</span></label>
+      <label class="lblFall" hidden>גודל המצנח <span class="val" id="psval">1.0×</span><span id="psNorm"> · v<sub>סופית</sub> ≈ <span class="val" id="vtval">5.0</span> מ׳/ש</span><span id="psZero" hidden> · <span style="color:var(--ink-soft)">אין מצנח, נפילה חופשית</span></span></label>
+      <input type="range" id="mu" min="0" max="0.5" step="0.01" value="0.12">
+      <input type="range" id="ps" min="0" max="4" step="0.1" value="1" hidden>
+    </div>
+    <div class="btnrow">
+      <button class="run" id="run">▶ הפעל תנועה</button>
+      <button class="run ghost" id="reset">איפוס</button>
+    </div>
+  </section>
+
+  <!-- SCRUBBER + READOUTS + TOGGLES (now on top, above the stage) -->
+  <section class="card scrub">
+    <div class="scrub-top">
+      <button class="play" id="play" title="הפעל / השהה">▶</button>
+      <div class="timeread"><span id="tnow">0.00</span> <small>/ <span id="tmax">0.00</span> ש</small></div>
+      <input type="range" id="scrubber" min="0" max="0" step="1" value="0">
+      <div class="speeds" id="speeds">
+        <button class="spd" data-s="0.25">¼×</button>
+        <button class="spd on" data-s="1">1×</button>
+        <button class="spd" data-s="2">2×</button>
+      </div>
+    </div>
+
+    <div class="toggles" id="toggles">
+      <span class="t-label">תצוגה</span>
+      <button class="chip on" data-target="tBar">סרגל אנרגיה</button>
+      <button class="chip on" data-target="tEqn">משוואה</button>
+      <button class="chip on" data-target="tEChart">אנרגיה–זמן</button>
+      <button class="chip on" data-target="tWChart">עבודה–זמן</button>
+    </div>
+
+    <div class="reads">
+      <div class="read"><div class="k"><i class="dot" style="background:var(--ke)"></i> אנרגיה קינטית</div><div class="v" id="rKE">0 J</div></div>
+      <div class="read"><div class="k"><i class="dot" style="background:var(--pe)"></i> אנרגיה פוטנציאלית</div><div class="v" id="rPE">0 J</div></div>
+      <div class="read"><div class="k"><i class="dot" style="background:var(--total)"></i> אנרגיה מכנית</div><div class="v" id="rEM">0 J</div></div>
+      <div class="read"><div class="k"><i class="dot" style="background:var(--work)"></i> עבודת חיכוך</div><div class="v" id="rW">0 J</div></div>
+    </div>
+
+    <div class="verify" id="verify">E<sub>k</sub> + E<sub>p</sub> − W<sub>חיצוני</sub> = E<sub>התחלתית</sub></div>
+  </section>
+
+  <!-- STAGE: track + instantaneous energy bar -->
+  <section class="stage">
+    <div class="card track-c">
+      <div class="panel-h"><h2>המסילה</h2><span class="tag" id="postag">x = – m</span></div>
+      <canvas id="track"></canvas>
+      <div class="legend">
+        <span><i class="dot" style="background:var(--ke)"></i> מהירות (וקטור)</span>
+        <span><i class="dot" style="background:var(--pe-soft);border:1px solid var(--pe)"></i> גובה ⇠ אנרגיה פוטנציאלית</span>
+        <span><i class="dot" style="background:#cfc8b6"></i> מפלס ייחוס (אנרגיה פוטנציאלית = 0)</span>
+      </div>
+    </div>
+    <div class="card bar-c" id="tBar">
+      <div class="panel-h"><h2>אנרגיה כעת</h2></div>
+      <canvas id="ebar"></canvas>
+    </div>
+  </section>
+
+  <!-- EQUATION (proportional font) -->
+  <section class="card eqn-card" id="tEqn">
+    <div class="panel-h"><h2>פירוק האנרגיה המכנית כעת</h2><span class="tag">גודל כל איבר ∝ ערכו</span></div>
+    <div class="eqn">
+      <span class="term u" id="eqU">U</span>
+      <span class="op" id="eqEq">=</span>
+      <span class="term up" id="eqUp">U<sub>p</sub></span>
+      <span class="op" id="eqPlus">+</span>
+      <span class="term ek" id="eqEk">E<sub>k</sub></span>
+    </div>
+    <div class="eqn-cap">האנרגיה המכנית הכוללת מתחלקת לפוטנציאלית וקינטית — וכולה יחד מצטמצמת לאורך הזמן עקב החיכוך</div>
+  </section>
+
+  <!-- CHARTS -->
+  <section class="charts">
+    <div class="card chart-c" id="tEChart">
+      <div class="panel-h"><h2>אנרגיה לאורך הזמן</h2><span class="tag">קינטית · פוטנציאלית · מכנית</span></div>
+      <canvas id="echart" class="echart"></canvas>
+    </div>
+    <div class="card chart-c" id="tWChart">
+      <div class="panel-h"><h2>עבודת הכוח החיצוני</h2><span class="tag">חיכוך · מצטבר עד הזמן הנוכחי</span></div>
+      <canvas id="wchart" class="echart"></canvas>
+    </div>
+  </section>
+
+  <p class="foot">משפט עבודה–אנרגיה: עבודת הכוחות החיצוניים (חיכוך) שווה לשינוי באנרגיה המכנית. שימו לב כיצד <b>E<sub>קינטית</sub> + E<sub>פוטנציאלית</sub> + האנרגיה שאבדה לחיכוך</b> נשמרת קבועה לאורך כל התנועה.</p>
+</div>
+
+<script>
+const g=9.8, m=1;
+const C={ke:'#1f6feb',keSoft:'#bcd4f7',pe:'#d23a2f',peSoft:'#f3c2bd',work:'#c2750a',
+  total:'#2c333d',vel:'#1f9d55',ink:'#23282f',inkSoft:'#5d6470',grid:'rgba(35,40,47,.08)',line:'#d9d3c4'};
+
+/* ---------- track definitions ---------- */
+function makeTrack(f,xMin,xMax,x0,name){
+  const h=1e-4;
+  const t={name,mode:'slide',xMin,xMax,x0,f,
+    fp:x=>(f(x+h)-f(x-h))/(2*h),
+    fpp:x=>(f(x+h)-2*f(x)+f(x-h))/(h*h)};
+  let yMin=Infinity,yMax=-Infinity;
+  for(let x=xMin;x<=xMax;x+=(xMax-xMin)/600){const y=f(x);if(y<yMin)yMin=y;if(y>yMax)yMax=y;}
+  t.yMin=yMin;t.yMax=yMax;return t;
+}
+// quadratic air drag for parachutist: F = -k·v·|v|/m → terminal v = √(g/k)
+// baseK=0.392 → v_terminal ≈ 5 m/s at size 1×. Effective k scales with parachute size.
+function makeFall(name,H){
+  return {name,mode:'fall',H,baseK:0.392,x0:0,xMin:-1,xMax:1,
+    yMin:0,yMax:H,f:x=>0,fp:x=>0,fpp:x=>0};
+}
+const TRACKS=[
+  makeTrack(x=>0.05*x*x, -12,12,-11,'עמק פרבולי'),
+  makeTrack(x=> x<0 ? 0.06*x*x : 0.03*x*x, -10,15,-9.6,'מדרון'),
+  makeTrack(x=>1.8*(1-Math.cos(0.6*x)), -10.472,10.472,-4.6,'גלים'),
+  makeFall('צנחן',60),
+];
+let track=TRACKS[0];
+
+/* ---------- physics ---------- */
+const sgn=a=>a>0?1:(a<0?-1:0);
+function deriv(s,mu){
+  const x=s[0],v=s[1];
+  const fp=track.fp(x),fpp=track.fpp(x);
+  const den=Math.sqrt(1+fp*fp), sinT=fp/den, cosT=1/den;
+  const kappa=fpp/(den*den*den);
+  let Nm=g*cosT+v*v*kappa; if(Nm<0)Nm=0;
+  const fricA=mu*Nm;
+  const a=-g*sinT-fricA*sgn(v);
+  return [v*cosT, a, -m*fricA*Math.abs(v)];
+}
+function rk4(s,mu,dt){
+  const k1=deriv(s,mu);
+  const k2=deriv([s[0]+.5*dt*k1[0],s[1]+.5*dt*k1[1],s[2]+.5*dt*k1[2]],mu);
+  const k3=deriv([s[0]+.5*dt*k2[0],s[1]+.5*dt*k2[1],s[2]+.5*dt*k2[2]],mu);
+  const k4=deriv([s[0]+dt*k3[0],s[1]+dt*k3[1],s[2]+dt*k3[2]],mu);
+  return [0,1,2].map(i=>s[i]+dt/6*(k1[i]+2*k2[i]+2*k3[i]+k4[i]));
+}
+function simulate(mu,v0){
+  if(track.mode==='fall') return simulateFall(v0);
+  let s=[track.x0,v0,0],t=0;
+  const dt=0.0005,recEvery=0.02,maxT=30;
+  const fr=[];let lastRec=-1e9,stop=0;
+  const rec=()=>{const x=s[0],v=s[1],y=track.f(x);
+    fr.push({t:t,x,y,v,KE:0.5*m*v*v,PE:m*g*(y-track.yMin),W:s[2]});};
+  rec();lastRec=0;
+  while(t<maxT){
+    const vp=s[1];let sn=rk4(s,mu,dt);
+    if(sgn(sn[1])!==sgn(vp)&&vp!==0&&Math.abs(track.fp(sn[0]))<=mu){sn[1]=0;s=sn;t+=dt;rec();break;}
+    s=sn;t+=dt;
+    if(s[0]<track.xMin){s[0]=track.xMin;rec();fr[fr.length-1].exit=true;break;}
+    if(s[0]>track.xMax){s[0]=track.xMax;rec();fr[fr.length-1].exit=true;break;}
+    if(Math.abs(s[1])<0.02&&Math.abs(track.fp(s[0]))<=mu){stop++;if(stop>40){rec();break;}}else stop=0;
+    if(t-lastRec>=recEvery-1e-9){rec();lastRec=t;}
+  }
+  return fr;
+}
+function simulateFall(v0){
+  const k=track.baseK*ps;
+  // state: [y(altitude), vy(signed, up=+), W]. Initial: at top, moving down with magnitude v0.
+  let s=[track.H,-v0,0],t=0;
+  const dt=0.0005,recEvery=0.02,maxT=30;
+  const fr=[];let lastRec=-1e9;
+  const dF=st=>{const v=st[1];return [v, -g - k*v*Math.abs(v), -k*v*v*Math.abs(v)];};
+  const step=st=>{const k1=dF(st);
+    const k2=dF([st[0]+.5*dt*k1[0],st[1]+.5*dt*k1[1],st[2]+.5*dt*k1[2]]);
+    const k3=dF([st[0]+.5*dt*k2[0],st[1]+.5*dt*k2[1],st[2]+.5*dt*k2[2]]);
+    const k4=dF([st[0]+dt*k3[0],st[1]+dt*k3[1],st[2]+dt*k3[2]]);
+    return [0,1,2].map(i=>st[i]+dt/6*(k1[i]+2*k2[i]+2*k3[i]+k4[i]));};
+  const rec=()=>{const y=s[0],v=s[1];fr.push({t,x:0,y,v,KE:0.5*m*v*v,PE:m*g*y,W:s[2]});};
+  rec();lastRec=0;
+  while(t<maxT){
+    let sn=step(s);
+    if(sn[0]<=0){sn[0]=0;s=sn;t+=dt;rec();break;}
+    s=sn;t+=dt;
+    if(t-lastRec>=recEvery-1e-9){rec();lastRec=t;}
+  }
+  return fr;
+}
+
+/* ---------- state ---------- */
+let frames=[],idx=0,E0=0,Emax=1,playing=false,speed=1,lastTS=0,acc=0;
+let mu=0.12,v0=3,ps=1;
+
+/* ---------- canvas helpers ---------- */
+function fit(cv){
+  const dpr=window.devicePixelRatio||1, r=cv.getBoundingClientRect();
+  cv.width=r.width*dpr; cv.height=r.height*dpr;
+  const ctx=cv.getContext('2d'); ctx.setTransform(dpr,0,0,dpr,0,0);
+  return {ctx,w:r.width,h:r.height};
+}
+
+/* ---------- draw track ---------- */
+function drawTrack(){
+  const cv=document.getElementById('track');const {ctx,w,h}=fit(cv);
+  ctx.clearRect(0,0,w,h);
+  if(track.mode==='fall') return drawFall(ctx,w,h);
+  // map world->px (uniform scale)
+  const padX=28,padTop=22,padBot=30;
+  const wW=track.xMax-track.xMin, wH=Math.max(track.yMax-track.yMin,1);
+  const sx=(w-2*padX)/wW, sy=(h-padTop-padBot)/wH;
+  const sc=Math.min(sx,sy);
+  const drawW=wW*sc, drawH=wH*sc;
+  const offX=(w-drawW)/2, offY=padTop+((h-padTop-padBot)-drawH)/2;
+  const PX=x=>offX+(x-track.xMin)*sc;
+  const PY=y=>offY+(track.yMax-y)*sc;
+
+  // grid
+  ctx.strokeStyle=C.grid;ctx.lineWidth=1;
+  for(let gx=Math.ceil(track.xMin);gx<=track.xMax;gx+=2){ctx.beginPath();ctx.moveTo(PX(gx),0);ctx.lineTo(PX(gx),h);ctx.stroke();}
+  for(let gy=Math.ceil(track.yMin);gy<=track.yMax;gy+=1){ctx.beginPath();ctx.moveTo(0,PY(gy));ctx.lineTo(w,PY(gy));ctx.stroke();}
+
+  // reference (PE=0) line
+  ctx.strokeStyle='#cfc8b6';ctx.setLineDash([6,5]);ctx.lineWidth=1.5;
+  ctx.beginPath();ctx.moveTo(PX(track.xMin),PY(track.yMin));ctx.lineTo(PX(track.xMax),PY(track.yMin));ctx.stroke();
+  ctx.setLineDash([]);
+
+  // track curve (with subtle thickness/shadow)
+  ctx.beginPath();
+  const N=260;
+  for(let i=0;i<=N;i++){const x=track.xMin+(wW)*i/N;const px=PX(x),py=PY(track.f(x));i?ctx.lineTo(px,py):ctx.moveTo(px,py);}
+  ctx.lineJoin='round';
+  ctx.strokeStyle='rgba(35,40,47,.16)';ctx.lineWidth=9;ctx.stroke();
+  ctx.strokeStyle=C.ink;ctx.lineWidth=3.5;ctx.stroke();
+
+  if(!frames.length){ // idle prompt
+    ctx.fillStyle=C.inkSoft;ctx.font='15px Heebo';ctx.textAlign='center';
+    ctx.fillText('לחצו ״הפעל תנועה״ כדי לחשב את הסימולציה',w/2,offY-4);
+    return;
+  }
+  const fr=frames[idx];
+  const px=PX(fr.x),py=PY(fr.y);
+  const fp=track.fp(fr.x);
+
+  // height drop line (PE visual)
+  ctx.strokeStyle=C.pe;ctx.globalAlpha=.5;ctx.setLineDash([3,4]);ctx.lineWidth=2;
+  ctx.beginPath();ctx.moveTo(px,py);ctx.lineTo(px,PY(track.yMin));ctx.stroke();
+  ctx.setLineDash([]);ctx.globalAlpha=1;
+
+  // skater figure, aligned to slope
+  const angVis=Math.atan2(-fp,1);
+  ctx.save();ctx.translate(px,py);ctx.rotate(angVis);
+  // board
+  ctx.strokeStyle=C.ink;ctx.lineWidth=3;ctx.lineCap='round';
+  ctx.beginPath();ctx.moveTo(-13,0);ctx.lineTo(13,0);ctx.stroke();
+  // legs+body
+  ctx.lineWidth=3;
+  ctx.beginPath();ctx.moveTo(-5,-2);ctx.lineTo(0,-15);ctx.lineTo(5,-2);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(0,-15);ctx.lineTo(0,-26);ctx.stroke();
+  // arms (balancing stance, extended outward)
+  ctx.lineCap='round';
+  ctx.beginPath();ctx.moveTo(-12,-27);ctx.lineTo(-1,-22);ctx.lineTo(1,-22);ctx.lineTo(12,-27);ctx.stroke();
+  // hands (small dots)
+  ctx.fillStyle=C.ink;
+  ctx.beginPath();ctx.arc(-12,-27,2,0,7);ctx.fill();
+  ctx.beginPath();ctx.arc(12,-27,2,0,7);ctx.fill();
+  // head
+  ctx.fillStyle=C.ke;ctx.beginPath();ctx.arc(0,-32,7,0,7);ctx.fill();
+  ctx.restore();
+
+  // velocity vector (green)
+  const den=Math.sqrt(1+fp*fp);
+  let tx=(1/den), ty=(-fp/den); // pixel-space tangent (y flipped)
+  const dir=sgn(fr.v)||1;
+  const len=Math.min(Math.abs(fr.v)*8,90);
+  if(len>3){
+    const ex=px+tx*len*dir, ey=py+ty*len*dir;
+    ctx.strokeStyle=C.vel;ctx.fillStyle=C.vel;ctx.lineWidth=3.5;ctx.lineCap='round';
+    ctx.beginPath();ctx.moveTo(px,py);ctx.lineTo(ex,ey);ctx.stroke();
+    const ah=8,aa=Math.atan2(ey-py,ex-px);
+    ctx.beginPath();ctx.moveTo(ex,ey);
+    ctx.lineTo(ex-ah*Math.cos(aa-0.4),ey-ah*Math.sin(aa-0.4));
+    ctx.lineTo(ex-ah*Math.cos(aa+0.4),ey-ah*Math.sin(aa+0.4));
+    ctx.closePath();ctx.fill();
+  }
+}
+
+/* ---------- draw parachutist scene ---------- */
+function drawParachutist(ctx,ps){
+  const noChute=ps<0.05;
+  // body & limbs (origin at body center near torso)
+  ctx.strokeStyle=C.ink;ctx.lineWidth=2.5;ctx.lineCap='round';ctx.lineJoin='round';
+  // legs
+  ctx.beginPath();ctx.moveTo(-5,12);ctx.lineTo(0,2);ctx.lineTo(5,12);ctx.stroke();
+  // torso
+  ctx.beginPath();ctx.moveTo(0,2);ctx.lineTo(0,-9);ctx.stroke();
+  // arms — raised to harness when chute, spread out when free-falling
+  ctx.beginPath();
+  if(noChute){
+    ctx.moveTo(-16,-6);ctx.lineTo(-1,-10);ctx.lineTo(1,-10);ctx.lineTo(16,-6);
+  }else{
+    ctx.moveTo(-9,-20);ctx.lineTo(-1,-10);ctx.lineTo(1,-10);ctx.lineTo(9,-20);
+  }
+  ctx.stroke();
+  // head
+  ctx.fillStyle=C.ke;ctx.beginPath();ctx.arc(0,-15,5,0,7);ctx.fill();
+  if(noChute) return;
+  // visual scale: sub-linear so dimensions stay readable across 0.1×–4×
+  const vS=Math.min(Math.pow(ps,0.4),1.5);
+  const cw=30*vS, ch=36*vS, yBase=-46, yTop=yBase-ch;
+  // suspension lines from hands to canopy edges & middle attachments
+  ctx.strokeStyle=C.ink;ctx.lineWidth=1;
+  ctx.beginPath();
+  ctx.moveTo(-9,-20);ctx.lineTo(-cw,yBase);
+  ctx.moveTo(-9,-20);ctx.lineTo(-cw/3,yBase-2);
+  ctx.moveTo(9,-20);ctx.lineTo(cw/3,yBase-2);
+  ctx.moveTo(9,-20);ctx.lineTo(cw,yBase);
+  ctx.stroke();
+  // canopy (red dome)
+  const grad=ctx.createLinearGradient(0,yTop,0,yBase);
+  grad.addColorStop(0,'#e95548');grad.addColorStop(1,'#b62a23');
+  ctx.fillStyle=grad;ctx.strokeStyle=C.ink;ctx.lineWidth=1.5;
+  ctx.beginPath();
+  ctx.moveTo(-cw,yBase);
+  ctx.bezierCurveTo(-cw*1.13,yTop-ch*0.1, cw*1.13,yTop-ch*0.1, cw,yBase);
+  ctx.closePath();ctx.fill();ctx.stroke();
+  // panel divisions
+  ctx.strokeStyle='rgba(0,0,0,.22)';ctx.lineWidth=1;
+  ctx.beginPath();
+  ctx.moveTo(-cw/3,yBase-2);ctx.lineTo(-cw*0.43,yBase-ch*0.6);
+  ctx.moveTo(cw/3,yBase-2);ctx.lineTo(cw*0.43,yBase-ch*0.6);
+  ctx.moveTo(0,yBase-3);ctx.lineTo(0,yBase-ch*0.85);
+  ctx.stroke();
+}
+function drawFall(ctx,w,h){
+  const padTop=108,padBot=44;
+  const usable=h-padTop-padBot;
+  const sy=usable/track.H;
+  const PY=alt=>padTop+(track.H-alt)*sy;
+  const cx=w/2;
+
+  // sky-grid (faint horizontal altitude lines)
+  ctx.strokeStyle=C.grid;ctx.lineWidth=1;
+  ctx.font='10px "IBM Plex Mono"';ctx.fillStyle=C.inkSoft;ctx.textAlign='right';
+  for(let alt=0;alt<=track.H;alt+=10){
+    const py=PY(alt);
+    ctx.beginPath();ctx.moveTo(46,py);ctx.lineTo(w-14,py);ctx.stroke();
+    ctx.fillText(alt+' m',42,py+3);
+  }
+  // ground band
+  const gy=PY(0);
+  ctx.fillStyle='#d8d0bb';ctx.fillRect(0,gy,w,h-gy);
+  ctx.strokeStyle='#a39879';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(0,gy);ctx.lineTo(w,gy);ctx.stroke();
+  ctx.strokeStyle='rgba(120,108,85,.55)';ctx.lineWidth=1;
+  for(let dx=-h;dx<w;dx+=10){ctx.beginPath();ctx.moveTo(dx,gy);ctx.lineTo(dx+(h-gy),h);ctx.stroke();}
+
+  if(!frames.length){
+    ctx.fillStyle=C.inkSoft;ctx.font='15px Heebo';ctx.textAlign='center';
+    ctx.fillText('לחצו ״הפעל תנועה״ כדי לחשב את הסימולציה',w/2,padTop-22);
+    // also draw a static figure at the top to indicate the scene
+    ctx.save();ctx.translate(cx,PY(track.H));drawParachutist(ctx,ps);ctx.restore();
+    drawTerminalLabel(ctx,w,h);
+    return;
+  }
+  const fr=frames[idx];
+  const py=PY(fr.y);
+
+  // descent trail (faint)
+  ctx.strokeStyle='rgba(31,111,235,.18)';ctx.setLineDash([2,4]);ctx.lineWidth=1.4;
+  ctx.beginPath();ctx.moveTo(cx,PY(track.H));ctx.lineTo(cx,py);ctx.stroke();ctx.setLineDash([]);
+
+  // parachutist
+  ctx.save();ctx.translate(cx,py);drawParachutist(ctx,ps);ctx.restore();
+
+  // velocity vector below the figure (skip if too close to ground)
+  const speed=Math.abs(fr.v);
+  const aLen=Math.min(speed*5,38);
+  if(speed>0.3 && py+18+aLen<gy-3){
+    ctx.strokeStyle=C.vel;ctx.fillStyle=C.vel;ctx.lineWidth=3;ctx.lineCap='round';
+    const ay=py+16, ey=ay+aLen;
+    ctx.beginPath();ctx.moveTo(cx,ay);ctx.lineTo(cx,ey);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(cx,ey);ctx.lineTo(cx-5,ey-7);ctx.lineTo(cx+5,ey-7);ctx.closePath();ctx.fill();
+    ctx.fillStyle=C.vel;ctx.font='11px "IBM Plex Mono"';ctx.textAlign='left';
+    ctx.fillText(speed.toFixed(1)+' m/s',cx+9,ay+aLen/2+4);
+  }
+  drawTerminalLabel(ctx,w,h);
+}
+function drawTerminalLabel(ctx,w,h){
+  ctx.fillStyle=C.inkSoft;ctx.textAlign='right';ctx.font='10px "IBM Plex Mono"';
+  if(ps<0.05){
+    ctx.fillText('אין מצנח · נפילה חופשית',w-14,h-12);
+  }else{
+    const vT=Math.sqrt(g/(track.baseK*ps));
+    ctx.fillText('v_סופית ≈ '+vT.toFixed(1)+' m/s',w-14,h-12);
+  }
+}
+
+/* ---------- instantaneous energy bar ---------- */
+function drawBar(){
+  const cv=document.getElementById('ebar');const {ctx,w,h}=fit(cv);
+  ctx.clearRect(0,0,w,h);
+  const padT=24,padB=46,padL=42,padR=14;
+  const x0=padL, bw=w-padL-padR, baseY=h-padB, topY=padT, ph=baseY-topY;
+  const sc=ph/Emax; // px per Joule
+  // frame baseline
+  ctx.strokeStyle=C.line;ctx.lineWidth=1.5;
+  ctx.beginPath();ctx.moveTo(x0,baseY);ctx.lineTo(x0+bw,baseY);ctx.stroke();
+
+  const fr=frames.length?frames[idx]:{KE:0,PE:0,W:0};
+  const lost=Math.max(E0-fr.KE-fr.PE,0);
+  const peH=fr.PE*sc, keH=fr.KE*sc, loH=lost*sc;
+  // PE (bottom)
+  ctx.fillStyle=C.pe;ctx.fillRect(x0,baseY-peH,bw,peH);
+  // KE
+  ctx.fillStyle=C.ke;ctx.fillRect(x0,baseY-peH-keH,bw,keH);
+  // lost (hatched)
+  const ly=baseY-peH-keH-loH;
+  ctx.save();ctx.beginPath();ctx.rect(x0,ly,bw,loH);ctx.clip();
+  ctx.fillStyle='#ece6d6';ctx.fillRect(x0,ly,bw,loH);
+  ctx.strokeStyle='#c9bfa6';ctx.lineWidth=1.4;
+  for(let d=-bw;d<bw+loH;d+=8){ctx.beginPath();ctx.moveTo(x0+d,baseY);ctx.lineTo(x0+d+loH+bw,baseY-loH-bw);ctx.stroke();}
+  ctx.restore();
+  // border around stack
+  ctx.strokeStyle='rgba(35,40,47,.18)';ctx.lineWidth=1;ctx.strokeRect(x0,baseY-peH-keH-loH,bw,peH+keH+loH);
+
+  // initial-total dashed line (at the true E0 level)
+  const e0Y=baseY-E0*sc;
+  ctx.strokeStyle=C.total;ctx.setLineDash([5,4]);ctx.lineWidth=1.5;
+  ctx.beginPath();ctx.moveTo(x0-6,e0Y);ctx.lineTo(x0+bw+4,e0Y);ctx.stroke();ctx.setLineDash([]);
+  ctx.fillStyle=C.total;ctx.font='10px "IBM Plex Mono"';ctx.textAlign='left';
+  ctx.fillText('E₀',x0+bw-4,e0Y-5);
+
+  // axis ticks
+  ctx.fillStyle=C.inkSoft;ctx.font='10px "IBM Plex Mono"';ctx.textAlign='right';
+  for(let j=0;j<=4;j++){const val=Emax*j/4, yy=baseY-val*sc;
+    ctx.fillText(val.toFixed(0),x0-6,yy+3);
+    ctx.strokeStyle=C.grid;ctx.beginPath();ctx.moveTo(x0,yy);ctx.lineTo(x0+bw,yy);ctx.stroke();}
+  ctx.save();ctx.translate(12,(topY+baseY)/2);ctx.rotate(-Math.PI/2);
+  ctx.textAlign='center';ctx.fillStyle=C.inkSoft;ctx.font='11px Heebo';ctx.fillText('אנרגיה (J)',0,0);ctx.restore();
+
+  // legend at bottom
+  ctx.textAlign='center';ctx.font='11px Heebo';
+  ctx.fillStyle=C.ke;ctx.fillRect(x0,baseY+12,12,9);
+  ctx.fillStyle=C.inkSoft;ctx.fillText('קינטית',x0+34,baseY+20);
+  ctx.fillStyle=C.pe;ctx.fillRect(x0,baseY+26,12,9);
+  ctx.fillStyle=C.inkSoft;ctx.fillText('פוטנציאלית',x0+44,baseY+34);
+}
+
+/* ---------- time charts ---------- */
+function chartFrame(ctx,w,h,pad){
+  ctx.strokeStyle=C.line;ctx.lineWidth=1.2;
+  ctx.beginPath();ctx.moveTo(pad.l,pad.t);ctx.lineTo(pad.l,h-pad.b);ctx.lineTo(w-pad.r,h-pad.b);ctx.stroke();
+}
+function drawEChart(){
+  const cv=document.getElementById('echart');const {ctx,w,h}=fit(cv);
+  ctx.clearRect(0,0,w,h);
+  const pad={l:40,r:12,t:14,b:24};
+  if(!frames.length){chartFrame(ctx,w,h,pad);return;}
+  const tMax=frames[frames.length-1].t||1;
+  const X=t=>pad.l+(t/tMax)*(w-pad.l-pad.r);
+  const Y=e=>(h-pad.b)-(e/Emax)*(h-pad.b-pad.t);
+  // gridlines
+  ctx.strokeStyle=C.grid;ctx.lineWidth=1;
+  for(let j=0;j<=4;j++){const yy=Y(Emax*j/4);ctx.beginPath();ctx.moveTo(pad.l,yy);ctx.lineTo(w-pad.r,yy);ctx.stroke();
+    ctx.fillStyle=C.inkSoft;ctx.font='9px "IBM Plex Mono"';ctx.textAlign='right';ctx.fillText((Emax*j/4).toFixed(0),pad.l-5,yy+3);}
+  // cursor shaded region up to idx
+  const cx=X(frames[idx].t);
+  ctx.fillStyle='rgba(35,40,47,.04)';ctx.fillRect(pad.l,pad.t,cx-pad.l,h-pad.b-pad.t);
+  const line=(key,col,wd)=>{ctx.strokeStyle=col;ctx.lineWidth=wd;ctx.beginPath();
+    frames.forEach((f,i)=>{const px=X(f.t),py=Y(f[key]);i?ctx.lineTo(px,py):ctx.moveTo(px,py);});ctx.stroke();};
+  line('PE',C.pe,2); line('KE',C.ke,2);
+  // mechanical = KE+PE
+  ctx.strokeStyle=C.total;ctx.lineWidth=2;ctx.setLineDash([4,3]);ctx.beginPath();
+  frames.forEach((f,i)=>{const px=X(f.t),py=Y(f.KE+f.PE);i?ctx.lineTo(px,py):ctx.moveTo(px,py);});ctx.stroke();ctx.setLineDash([]);
+  chartFrame(ctx,w,h,pad);
+  // cursor
+  ctx.strokeStyle=C.work;ctx.lineWidth=1.6;ctx.beginPath();ctx.moveTo(cx,pad.t);ctx.lineTo(cx,h-pad.b);ctx.stroke();
+  ctx.fillStyle=C.work;ctx.beginPath();ctx.arc(cx,Y(frames[idx].KE),3.5,0,7);ctx.fill();
+  ctx.beginPath();ctx.arc(cx,Y(frames[idx].PE),3.5,0,7);ctx.fill();
+  // x label
+  ctx.fillStyle=C.inkSoft;ctx.font='10px Heebo';ctx.textAlign='center';ctx.fillText('זמן (ש)',(w+pad.l-pad.r)/2,h-6);
+}
+function drawWChart(){
+  const cv=document.getElementById('wchart');const {ctx,w,h}=fit(cv);
+  ctx.clearRect(0,0,w,h);
+  const pad={l:46,r:12,t:14,b:24};
+  if(!frames.length){chartFrame(ctx,w,h,pad);return;}
+  const tMax=frames[frames.length-1].t||1;
+  const wMin=Math.min(frames[frames.length-1].W,-0.001); // most negative
+  const X=t=>pad.l+(t/tMax)*(w-pad.l-pad.r);
+  const Y=ww=>pad.t+(ww/wMin)*(h-pad.b-pad.t); // ww in [wMin,0] -> [bottom area]
+  // gridlines
+  ctx.strokeStyle=C.grid;ctx.lineWidth=1;
+  for(let j=0;j<=4;j++){const val=wMin*j/4,yy=Y(val);ctx.beginPath();ctx.moveTo(pad.l,yy);ctx.lineTo(w-pad.r,yy);ctx.stroke();
+    ctx.fillStyle=C.inkSoft;ctx.font='9px "IBM Plex Mono"';ctx.textAlign='right';ctx.fillText(val.toFixed(0),pad.l-5,yy+3);}
+  // zero line
+  ctx.strokeStyle=C.line;ctx.lineWidth=1.2;ctx.beginPath();ctx.moveTo(pad.l,Y(0));ctx.lineTo(w-pad.r,Y(0));ctx.stroke();
+  // area under W up to idx
+  const cx=X(frames[idx].t);
+  ctx.fillStyle='rgba(194,117,10,.10)';ctx.beginPath();ctx.moveTo(X(0),Y(0));
+  for(let i=0;i<=idx;i++){ctx.lineTo(X(frames[i].t),Y(frames[i].W));}
+  ctx.lineTo(cx,Y(0));ctx.closePath();ctx.fill();
+  // full W curve
+  ctx.strokeStyle=C.work;ctx.lineWidth=2.4;ctx.beginPath();
+  frames.forEach((f,i)=>{const px=X(f.t),py=Y(f.W);i?ctx.lineTo(px,py):ctx.moveTo(px,py);});ctx.stroke();
+  chartFrame(ctx,w,h,pad);
+  // cursor + point
+  ctx.strokeStyle=C.total;ctx.lineWidth=1.4;ctx.setLineDash([3,3]);ctx.beginPath();ctx.moveTo(cx,pad.t);ctx.lineTo(cx,h-pad.b);ctx.stroke();ctx.setLineDash([]);
+  ctx.fillStyle=C.work;ctx.beginPath();ctx.arc(cx,Y(frames[idx].W),4,0,7);ctx.fill();
+  ctx.fillStyle=C.inkSoft;ctx.font='10px Heebo';ctx.textAlign='center';ctx.fillText('זמן (ש)',(w+pad.l-pad.r)/2,h-6);
+  ctx.save();ctx.translate(13,(pad.t+h-pad.b)/2);ctx.rotate(-Math.PI/2);ctx.fillText('W (J)',0,0);ctx.restore();
+}
+
+/* ---------- readouts ---------- */
+function fmt(v){return (v>=0?'':'−')+Math.abs(v).toFixed(1)+' J';}
+function updateReads(){
+  const fr=frames.length?frames[idx]:{KE:0,PE:0,W:0,x:track.x0,
+    y:track.mode==='fall'?track.H:(track.f?track.f(track.x0):0),t:0};
+  document.getElementById('rKE').textContent=fmt(fr.KE);
+  document.getElementById('rPE').textContent=fmt(fr.PE);
+  document.getElementById('rEM').textContent=fmt(fr.KE+fr.PE);
+  document.getElementById('rW').textContent=fmt(fr.W);
+  document.getElementById('tnow').textContent=fr.t.toFixed(2);
+  const tag=track.mode==='fall'
+    ? 'h = '+fr.y.toFixed(1)+' m'
+    : 'x = '+fr.x.toFixed(1)+' m'+(fr.exit?'  ·  יצא מהמסילה':'');
+  document.getElementById('postag').textContent=tag;
+  document.getElementById('verify').innerHTML=
+    `<b style="color:${C.ke}">${fr.KE.toFixed(1)}</b> + `+
+    `<b style="color:${C.pe}">${fr.PE.toFixed(1)}</b> + `+
+    `<b style="color:${C.work}">${Math.abs(fr.W).toFixed(1)}</b> (אבד) = `+
+    `<b>${(fr.KE+fr.PE+Math.abs(fr.W)).toFixed(1)} J</b> &nbsp;=&nbsp; E₀ קבועה`;
+}
+
+function updateEqn(){
+  // Font size scales linearly from 0 (term value = 0) up to maxF (term value = E0).
+  // Terms and adjacent operators collapse to display:none when zero so the flex layout closes up.
+  const maxF=64;
+  const fr=frames.length?frames[idx]:{KE:0,PE:0};
+  const denom=Math.max(E0,1e-9);
+  const U=fr.KE+fr.PE;
+  const scale=v=>Math.min(Math.max(v,0)/denom,1)*maxF;
+  const fU=scale(U), fP=scale(fr.PE), fK=scale(fr.KE);
+  // "=" tracks U_p (its right neighbour); "+" tracks E_k. Operator collapses together with
+  // its adjacent term, so we never see a hanging "+" or "=" next to nothing.
+  const set=(id,sz)=>{const el=document.getElementById(id);
+    if(sz<0.3){el.style.display='none';}
+    else{el.style.display='';el.style.fontSize=sz.toFixed(1)+'px';}};
+  set('eqU',fU);
+  set('eqEq',Math.max(fU,fP));
+  set('eqUp',fP);
+  set('eqPlus',Math.min(fP,fK));
+  set('eqEk',fK);
+}
+
+function redraw(){
+  drawTrack();
+  if(!document.getElementById('tBar').hidden) drawBar();
+  if(!document.getElementById('tEChart').hidden) drawEChart();
+  if(!document.getElementById('tWChart').hidden) drawWChart();
+  updateReads();updateEqn();
+}
+
+/* ---------- run / scrub / play ---------- */
+function run(){
+  frames=simulate(mu,v0);
+  E0=frames[0].KE+frames[0].PE;
+  Emax=Math.max(E0*1.04,1);
+  idx=0;
+  const sc=document.getElementById('scrubber');
+  sc.max=frames.length-1;sc.value=0;
+  document.getElementById('tmax').textContent=frames[frames.length-1].t.toFixed(2);
+  playing=false;document.getElementById('play').textContent='▶';
+  redraw();
+  // auto-play once
+  togglePlay(true);
+}
+function setIdx(i){idx=Math.max(0,Math.min(frames.length-1,i|0));
+  document.getElementById('scrubber').value=idx;redraw();}
+
+function loop(ts){
+  if(!playing){return;}
+  if(!lastTS)lastTS=ts;
+  const dt=(ts-lastTS)/1000;lastTS=ts;
+  acc+=dt*speed;
+  const step=0.02; // recorded spacing (s)
+  while(acc>=step){acc-=step;idx++;
+    if(idx>=frames.length-1){idx=frames.length-1;playing=false;
+      document.getElementById('play').textContent='↻';break;}}
+  document.getElementById('scrubber').value=idx;redraw();
+  if(playing)requestAnimationFrame(loop);
+}
+function togglePlay(force){
+  if(!frames.length)return;
+  const want = force!==undefined?force:!playing;
+  if(want){
+    if(idx>=frames.length-1)idx=0;
+    playing=true;lastTS=0;acc=0;
+    document.getElementById('play').textContent='❚❚';
+    requestAnimationFrame(loop);
+  }else{playing=false;document.getElementById('play').textContent=idx>=frames.length-1?'↻':'▶';}
+}
+
+function updateModeUI(){
+  const isFall=track.mode==='fall';
+  const muField=document.getElementById('muField');
+  muField.classList.toggle('disabled',false);
+  document.getElementById('mu').hidden=isFall;
+  document.getElementById('mu').disabled=isFall;
+  document.getElementById('ps').hidden=!isFall;
+  document.getElementById('ps').disabled=!isFall;
+  muField.querySelector('.lblSlide').hidden=isFall;
+  muField.querySelector('.lblFall').hidden=!isFall;
+  if(isFall) updateVtReadout();
+}
+function updateVtReadout(){
+  const baseK=TRACKS.find(t=>t.mode==='fall').baseK;
+  const isZero=ps<0.05;
+  document.getElementById('psval').textContent=ps.toFixed(1)+'×';
+  document.getElementById('psNorm').hidden=isZero;
+  document.getElementById('psZero').hidden=!isZero;
+  if(!isZero){
+    document.getElementById('vtval').textContent=Math.sqrt(g/(baseK*ps)).toFixed(1);
+  }
+}
+
+/* ---------- wire up ---------- */
+const shapesEl=document.getElementById('shapes');
+TRACKS.forEach((t,i)=>{const b=document.createElement('button');b.className='shape'+(i===0?' on':'');
+  b.textContent=t.name;b.onclick=()=>{track=t;[...shapesEl.children].forEach(c=>c.classList.remove('on'));
+    b.classList.add('on');frames=[];idx=0;playing=false;
+    document.getElementById('play').textContent='▶';document.getElementById('scrubber').max=0;
+    document.getElementById('tmax').textContent='0.00';updateModeUI();redraw();};
+  shapesEl.appendChild(b);});
+
+document.getElementById('v0').oninput=e=>{v0=+e.target.value;document.getElementById('v0val').textContent=v0.toFixed(1);};
+document.getElementById('mu').oninput=e=>{mu=+e.target.value;document.getElementById('muval').textContent=mu.toFixed(2);};
+document.getElementById('ps').oninput=e=>{ps=+e.target.value;updateVtReadout();redraw();};
+document.querySelectorAll('.chip[data-target]').forEach(chip=>{
+  chip.onclick=()=>{chip.classList.toggle('on');
+    const el=document.getElementById(chip.dataset.target);
+    if(el)el.hidden=!chip.classList.contains('on');
+    redraw();};
+});
+document.getElementById('run').onclick=run;
+document.getElementById('reset').onclick=()=>{frames=[];idx=0;playing=false;
+  document.getElementById('play').textContent='▶';document.getElementById('scrubber').max=0;document.getElementById('scrubber').value=0;
+  document.getElementById('tmax').textContent='0.00';redraw();};
+document.getElementById('play').onclick=()=>togglePlay();
+document.getElementById('scrubber').oninput=e=>{playing=false;document.getElementById('play').textContent='▶';setIdx(+e.target.value);};
+document.querySelectorAll('.spd').forEach(b=>b.onclick=()=>{speed=+b.dataset.s;
+  document.querySelectorAll('.spd').forEach(s=>s.classList.remove('on'));b.classList.add('on');});
+
+window.addEventListener('resize',()=>{clearTimeout(window._rz);window._rz=setTimeout(redraw,120);});
+updateModeUI();redraw();
+</script>
+</body>
+</html>

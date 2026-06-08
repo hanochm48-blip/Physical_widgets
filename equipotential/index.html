@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>קווי שווי פוטנציאל</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Noto+Sans+Hebrew:wght@300;400;600&display=swap');
+  :root {
+    --bg: #05080f; --panel: #0b1220; --border: #1a2d4a;
+    --accent1: #00d4ff; --accent2: #ff4d6d; --accent3: #a0e080;
+    --text: #c8dff5; --dim: #4a6a8a;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: 'Noto Sans Hebrew', sans-serif;
+    display: flex; flex-direction: column; align-items: center;
+    min-height: 100vh; padding: 20px;
+  }
+  h1 {
+    font-family: 'Rajdhani', sans-serif; font-size: 1.6rem;
+    letter-spacing: 3px; color: var(--accent1); text-transform: uppercase;
+    margin-bottom: 4px; text-shadow: 0 0 20px rgba(0,212,255,0.5);
+  }
+  .subtitle { font-size:0.78rem; color:var(--dim); margin-bottom:20px; letter-spacing:1px; }
+  .container { display:flex; gap:20px; align-items:flex-start; flex-wrap:wrap; justify-content:center; }
+  canvas {
+    border: 1px solid var(--border); border-radius:8px; display:block;
+    box-shadow: 0 0 40px rgba(0,80,150,0.3); cursor:crosshair;
+  }
+  .panel {
+    background:var(--panel); border:1px solid var(--border);
+    border-radius:8px; padding:20px; width:250px;
+    display:flex; flex-direction:column; gap:16px;
+  }
+  .section-title {
+    font-family:'Rajdhani',sans-serif; font-size:0.72rem; font-weight:600;
+    letter-spacing:2px; text-transform:uppercase; color:var(--dim);
+    margin-bottom:2px;
+  }
+  .charge-card { border-radius:6px; padding:12px; border:1px solid; }
+  .charge-card.q1 { border-color:rgba(0,212,255,0.3); background:rgba(0,212,255,0.04); }
+  .charge-card.q2 { border-color:rgba(255,77,109,0.3); background:rgba(255,77,109,0.04); }
+  .dv-card {
+    border-radius:6px; padding:12px; border:1px solid;
+    border-color:rgba(160,224,128,0.35); background:rgba(160,224,128,0.04);
+  }
+  .charge-label { font-family:'Rajdhani',sans-serif; font-size:0.95rem; font-weight:700; letter-spacing:1px; margin-bottom:10px; }
+  .q1 .charge-label { color:var(--accent1); }
+  .q2 .charge-label { color:var(--accent2); }
+  .dv-card .charge-label { color:var(--accent3); }
+  .slider-row { display:flex; flex-direction:column; gap:5px; }
+  .slider-top { display:flex; justify-content:space-between; align-items:baseline; font-size:0.7rem; color:var(--dim); }
+  .slider-value { font-family:'Rajdhani',sans-serif; font-size:1rem; font-weight:700; }
+  .q1 .slider-value { color:var(--accent1); }
+  .q2 .slider-value { color:var(--accent2); }
+  .dv-card .slider-value { color:var(--accent3); }
+  .dv-hint { font-size:0.65rem; color:var(--dim); margin-top:4px; line-height:1.5; }
+
+  input[type=range] { -webkit-appearance:none; width:100%; height:4px; border-radius:2px; outline:none; cursor:pointer; }
+  .q1 input[type=range]   { background:linear-gradient(to right, var(--accent1) var(--pct,50%), #1a2d4a var(--pct,50%)); }
+  .q2 input[type=range]   { background:linear-gradient(to right, var(--accent2) var(--pct,50%), #1a2d4a var(--pct,50%)); }
+  .dv-card input[type=range] { background:linear-gradient(to right, var(--accent3) var(--pct,30%), #1a2d4a var(--pct,30%)); }
+  input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; width:14px; height:14px; border-radius:50%; border:2px solid #fff; cursor:pointer; }
+  .q1 input[type=range]::-webkit-slider-thumb   { background:var(--accent1); box-shadow:0 0 8px var(--accent1); }
+  .q2 input[type=range]::-webkit-slider-thumb   { background:var(--accent2); box-shadow:0 0 8px var(--accent2); }
+  .dv-card input[type=range]::-webkit-slider-thumb { background:var(--accent3); box-shadow:0 0 8px var(--accent3); }
+
+  .legend { font-size:0.68rem; color:var(--dim); line-height:1.8; border-top:1px solid var(--border); padding-top:12px; }
+  .leg-row { display:flex; align-items:center; gap:8px; margin-bottom:2px; }
+  .leg-line { width:28px; height:2px; border-radius:1px; flex-shrink:0; }
+  .toggle-row { display:flex; justify-content:space-between; align-items:center; font-size:0.75rem; color:var(--dim); }
+  .toggle { position:relative; width:36px; height:20px; }
+  .toggle input { display:none; }
+  .toggle-slider { position:absolute; inset:0; background:var(--border); border-radius:10px; cursor:pointer; transition:background 0.2s; }
+  .toggle-slider::before { content:''; position:absolute; left:2px; top:2px; width:16px; height:16px; border-radius:50%; background:var(--dim); transition:transform 0.2s, background 0.2s; }
+  .toggle input:checked + .toggle-slider { background:rgba(0,212,255,0.2); }
+  .toggle input:checked + .toggle-slider::before { transform:translateX(16px); background:var(--accent1); }
+</style>
+</head>
+<body>
+<h1>Equipotential Lines</h1>
+<div class="subtitle">קווי שווי פוטנציאל חשמלי · שני מטענים נקודתיים</div>
+
+<div class="container">
+  <canvas id="canvas" width="610" height="550"></canvas>
+
+  <div class="panel">
+    <!-- Charges -->
+    <div class="charge-card q1">
+      <div class="charge-label">⊕ מטען 1</div>
+      <div class="slider-row">
+        <div class="slider-top"><span>עוצמה</span><span class="slider-value" id="v1">+1.0 μC</span></div>
+        <input type="range" id="s1" min="-30" max="30" value="10" step="1">
+      </div>
+    </div>
+
+    <div class="charge-card q2">
+      <div class="charge-label">⊖ מטען 2</div>
+      <div class="slider-row">
+        <div class="slider-top"><span>עוצמה</span><span class="slider-value" id="v2">−1.0 μC</span></div>
+        <input type="range" id="s2" min="-30" max="30" value="-10" step="1">
+      </div>
+    </div>
+
+    <!-- ΔV Scale -->
+    <div class="dv-card">
+      <div class="charge-label">ΔV — קנה מידה</div>
+      <div class="slider-row">
+        <div class="slider-top">
+          <span>הפרש בין קווים</span>
+          <span class="slider-value" id="dvLabel">100 kV</span>
+        </div>
+        <input type="range" id="sDV" min="1" max="100" value="40" step="1">
+      </div>
+      <div class="dv-hint">
+        קו לכל ΔV וולט — ככל שהערך קטן יותר, יותר קווים מוצגים
+      </div>
+    </div>
+
+    <!-- Toggles -->
+    <div>
+      <div class="toggle-row" style="margin-bottom:10px;">
+        <span>קווי שדה חשמלי</span>
+        <label class="toggle"><input type="checkbox" id="toggleField" checked><div class="toggle-slider"></div></label>
+      </div>
+      <div class="toggle-row">
+        <span>רקע פוטנציאל</span>
+        <label class="toggle"><input type="checkbox" id="toggleBg" checked><div class="toggle-slider"></div></label>
+      </div>
+    </div>
+
+    <!-- Legend -->
+    <div class="legend">
+      <div style="color:var(--text);font-size:0.72rem;margin-bottom:6px;font-weight:600;">מקרא</div>
+      <div class="leg-row"><div class="leg-line" style="background:#4db8ff"></div><span>V חיובי גבוה</span></div>
+      <div class="leg-row"><div class="leg-line" style="background:#aaddff"></div><span>V חיובי נמוך</span></div>
+      <div class="leg-row"><div class="leg-line" style="background:#e8e8e8;height:2.5px"></div><span>V = 0</span></div>
+      <div class="leg-row"><div class="leg-line" style="background:#ffaaaa"></div><span>V שלילי נמוך</span></div>
+      <div class="leg-row"><div class="leg-line" style="background:#ff3355"></div><span>V שלילי גבוה</span></div>
+      <div style="margin-top:8px;border-top:1px solid var(--border);padding-top:8px;font-size:0.66rem;">
+        גרור את המטענים עם העכבר
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const canvas = document.getElementById('canvas');
+const ctx    = canvas.getContext('2d');
+const W = canvas.width, H = canvas.height;
+const k = 9e9;
+const GRID = 4; // px per grid cell (balance between speed & accuracy)
+
+let charges = [
+  { x: W/2 - 110, y: H/2, q: 10e-6 },
+  { x: W/2 + 110, y: H/2, q: -10e-6 }
+];
+let showField = true, showBg = true;
+let dragging = null;
+
+// ΔV between consecutive equipotential lines (in Volts)
+// Slider is log-scale: slider 1→100 maps to ΔV 1e3 → 1e7
+let deltaV = 1e5; // default
+
+function sliderToDV(s) {
+  return Math.pow(10, 3 + (s / 100) * 4); // 1e3 .. 1e7
+}
+function fmtDV(v) {
+  if (v >= 1e6) return (v / 1e6).toPrecision(3) + ' MV';
+  if (v >= 1e3) return (v / 1e3).toPrecision(3) + ' kV';
+  return v.toFixed(0) + ' V';
+}
+
+// ── Grid ──────────────────────────────────────────────────
+const cols = Math.ceil(W / GRID) + 2;
+const rows = Math.ceil(H / GRID) + 2;
+const grid = new Float64Array(cols * rows);
+
+function potential(px, py) {
+  let V = 0;
+  for (const c of charges) {
+    const dx = px - c.x, dy = py - c.y;
+    const r = Math.sqrt(dx*dx + dy*dy);
+    if (r < 5) return NaN;
+    V += k * c.q / r;
+  }
+  return V;
+}
+
+function buildGrid() {
+  for (let r = 0; r < rows; r++)
+    for (let c = 0; c < cols; c++)
+      grid[r * cols + c] = potential(c * GRID, r * GRID);
+}
+
+// ── Background heatmap ────────────────────────────────────
+function drawBackground() {
+  // use the maximum grid value to normalise color scale
+  let vmax = 0;
+  for (let i = 0; i < grid.length; i++) if (!isNaN(grid[i])) vmax = Math.max(vmax, Math.abs(grid[i]));
+  const ref = vmax || 1e5;
+  for (let r = 0; r < rows - 1; r++) {
+    for (let c = 0; c < cols - 1; c++) {
+      const V = grid[r * cols + c];
+      if (isNaN(V)) continue;
+      const t = Math.tanh(V / (ref * 0.4));
+      let color;
+      if (t >= 0) color = `hsla(205,100%,${12 + t*28}%,0.65)`;
+      else        color = `hsla(355,90%,${12 + (-t)*28}%,0.65)`;
+      ctx.fillStyle = color;
+      ctx.fillRect(c * GRID, r * GRID, GRID, GRID);
+    }
+  }
+}
+
+// ── Marching Squares ──────────────────────────────────────
+function marchingSquares(level) {
+  const segs = [];
+  for (let r = 0; r < rows - 1; r++) {
+    for (let c = 0; c < cols - 1; c++) {
+      const v00 = grid[r       * cols + c    ];
+      const v10 = grid[r       * cols + c + 1];
+      const v01 = grid[(r + 1) * cols + c    ];
+      const v11 = grid[(r + 1) * cols + c + 1];
+      if (isNaN(v00) || isNaN(v10) || isNaN(v01) || isNaN(v11)) continue;
+
+      const x0 = c * GRID, y0 = r * GRID, x1 = x0 + GRID, y1 = y0 + GRID;
+
+      function interp(va, vb, a, b) {
+        const d = vb - va;
+        if (Math.abs(d) < 1e-30) return (a + b) * 0.5;
+        return a + (b - a) * (level - va) / d;
+      }
+      const top    = () => ({ x: interp(v00, v10, x0, x1), y: y0 });
+      const bottom = () => ({ x: interp(v01, v11, x0, x1), y: y1 });
+      const left   = () => ({ x: x0, y: interp(v00, v01, y0, y1) });
+      const right  = () => ({ x: x1, y: interp(v10, v11, y0, y1) });
+
+      const bits = ((v00 > level) ? 8 : 0) | ((v10 > level) ? 4 : 0)
+                 | ((v11 > level) ? 2 : 0) | ((v01 > level) ? 1 : 0);
+
+      switch (bits) {
+        case  1: segs.push([left(),   bottom()]); break;
+        case  2: segs.push([bottom(), right()]);  break;
+        case  3: segs.push([left(),   right()]);  break;
+        case  4: segs.push([right(),  top()]);    break;
+        case  5: segs.push([top(),    left()]); segs.push([bottom(), right()]); break;
+        case  6: segs.push([bottom(), top()]);    break;
+        case  7: segs.push([left(),   top()]);    break;
+        case  8: segs.push([top(),    left()]);   break;
+        case  9: segs.push([top(),    bottom()]); break;
+        case 10: segs.push([right(),  bottom()]); segs.push([top(), left()]); break;
+        case 11: segs.push([top(),    right()]);  break;
+        case 12: segs.push([right(),  left()]);   break;
+        case 13: segs.push([bottom(), left()]);   break;
+        case 14: segs.push([right(),  bottom()]); break;
+      }
+    }
+  }
+  return segs;
+}
+
+function linkSegs(segs) {
+  if (!segs.length) return [];
+  const EPS2 = (GRID * 0.8) ** 2;
+  const used = new Uint8Array(segs.length);
+  const chains = [];
+
+  for (let i = 0; i < segs.length; i++) {
+    if (used[i]) continue;
+    used[i] = 1;
+    const chain = [{ ...segs[i][0] }, { ...segs[i][1] }];
+
+    for (let pass = 0; pass < 2; pass++) { // 0=extend tail, 1=extend head
+      let extended = true;
+      while (extended) {
+        extended = false;
+        const pt = pass === 0 ? chain[chain.length - 1] : chain[0];
+        for (let j = 0; j < segs.length; j++) {
+          if (used[j]) continue;
+          const [a, b] = segs[j];
+          const d1 = (pt.x-a.x)**2 + (pt.y-a.y)**2;
+          const d2 = (pt.x-b.x)**2 + (pt.y-b.y)**2;
+          if (d1 < EPS2 || d2 < EPS2) {
+            const next = d1 < EPS2 ? { ...b } : { ...a };
+            pass === 0 ? chain.push(next) : chain.unshift(next);
+            used[j] = 1; extended = true; break;
+          }
+        }
+      }
+    }
+    chains.push(chain);
+  }
+  return chains;
+}
+
+// ── Draw all equipotential contours ──────────────────────
+function drawContours() {
+  // Find range of valid potentials in the grid
+  let vmin = Infinity, vmax = -Infinity;
+  for (let i = 0; i < grid.length; i++) {
+    if (!isNaN(grid[i])) { vmin = Math.min(vmin, grid[i]); vmax = Math.max(vmax, grid[i]); }
+  }
+  if (!isFinite(vmin)) return;
+
+  // Clamp extremes to avoid near-singularity levels (skip if within 2x charge radius)
+  const margin = deltaV; // don't draw the first/last partial lines within 1 ΔV of singularity
+  const lo = Math.ceil((vmin + margin) / deltaV) * deltaV;
+  const hi = Math.floor((vmax - margin) / deltaV) * deltaV;
+
+  // Safety: cap number of lines to avoid freezing
+  const maxLines = 80;
+  const count = Math.min(maxLines, Math.round((hi - lo) / deltaV) + 1);
+
+  for (let n = 0; n < count; n++) {
+    const level = lo + n * deltaV;
+    if (level < vmin || level > vmax) continue;
+
+    const segs   = marchingSquares(level);
+    const chains = linkSegs(segs);
+
+    // Color based on level value
+    const isZero = Math.abs(level) < deltaV * 0.5;
+    let color, width;
+    if (isZero) {
+      color = 'rgba(230,230,230,0.97)'; width = 2.4;
+    } else {
+      // Normalise to [0,1] within visible range
+      const span = Math.max(Math.abs(vmax), Math.abs(vmin));
+      const t    = Math.min(1, Math.abs(level) / (span * 0.7));
+      if (level > 0) {
+        const l = 45 + t * 35;
+        color = `hsla(205,100%,${l}%,0.9)`; width = 1.4;
+      } else {
+        const l = 45 + t * 35;
+        color = `hsla(350,95%,${l}%,0.9)`;  width = 1.4;
+      }
+    }
+
+    ctx.strokeStyle = color;
+    ctx.lineWidth   = width;
+    ctx.lineJoin    = 'round';
+    ctx.lineCap     = 'round';
+    ctx.shadowColor = color;
+    ctx.shadowBlur  = isZero ? 5 : 2;
+
+    for (const chain of chains) {
+      if (chain.length < 2) continue;
+      ctx.beginPath();
+      ctx.moveTo(chain[0].x, chain[0].y);
+      for (let i = 1; i < chain.length; i++) ctx.lineTo(chain[i].x, chain[i].y);
+      ctx.stroke();
+    }
+  }
+  ctx.shadowBlur = 0;
+}
+
+// ── Field lines ───────────────────────────────────────────
+function drawFieldLines() {
+  if (!showField) return;
+  for (const c of charges) {
+    if (c.q === 0) continue;
+    const sign = c.q > 0 ? 1 : -1;
+    const col  = c.q > 0 ? 'rgba(0,212,255,0.2)' : 'rgba(255,77,109,0.2)';
+    for (let i = 0; i < 18; i++) {
+      const angle = (2 * Math.PI * i) / 18;
+      let x = c.x + 18 * Math.cos(angle), y = c.y + 18 * Math.sin(angle);
+      ctx.beginPath(); ctx.moveTo(x, y);
+      for (let s = 0; s < 900; s++) {
+        let fx = 0, fy = 0, ok = true;
+        for (const ch of charges) {
+          const dx = x - ch.x, dy = y - ch.y;
+          const r2 = dx*dx + dy*dy;
+          if (r2 < 100) { ok = false; break; }
+          const r3 = r2 ** 1.5;
+          fx += k * ch.q * dx / r3;
+          fy += k * ch.q * dy / r3;
+        }
+        if (!ok) break;
+        const mag = Math.sqrt(fx*fx + fy*fy);
+        if (!mag) break;
+        x += sign * 3 * fx / mag;
+        y += sign * 3 * fy / mag;
+        if (x < 0 || x > W || y < 0 || y > H) break;
+        ctx.lineTo(x, y);
+      }
+      ctx.strokeStyle = col; ctx.lineWidth = 0.85; ctx.stroke();
+    }
+  }
+}
+
+// ── Charge glows ──────────────────────────────────────────
+function drawCharges() {
+  for (const c of charges) {
+    const col = c.q >= 0 ? '#00d4ff' : '#ff4d6d';
+    const grd = ctx.createRadialGradient(c.x, c.y, 0, c.x, c.y, 32);
+    grd.addColorStop(0, col + 'aa'); grd.addColorStop(1, col + '00');
+    ctx.beginPath(); ctx.arc(c.x, c.y, 32, 0, Math.PI*2);
+    ctx.fillStyle = grd; ctx.fill();
+    ctx.beginPath(); ctx.arc(c.x, c.y, 14, 0, Math.PI*2);
+    ctx.fillStyle = col;
+    ctx.shadowColor = col; ctx.shadowBlur = 18; ctx.fill(); ctx.shadowBlur = 0;
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 16px Rajdhani,monospace';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText(c.q >= 0 ? '+' : '−', c.x, c.y + 1);
+  }
+}
+
+// ── Render ────────────────────────────────────────────────
+function render() {
+  ctx.clearRect(0, 0, W, H);
+  buildGrid();
+  if (showBg) drawBackground();
+  else { ctx.fillStyle = '#05080f'; ctx.fillRect(0, 0, W, H); }
+  drawFieldLines();
+  drawContours();
+  drawCharges();
+}
+
+// ── Helpers ───────────────────────────────────────────────
+function fmtQ(q) { return (q >= 0 ? '+' : '') + (q * 1e6).toFixed(1) + ' μC'; }
+function setPct(el, v) {
+  el.style.setProperty('--pct', ((+v - +el.min) / (+el.max - +el.min) * 100) + '%');
+}
+
+// ── Sliders ───────────────────────────────────────────────
+document.getElementById('s1').addEventListener('input', function() {
+  charges[0].q = +this.value * 1e-6;
+  document.getElementById('v1').textContent = fmtQ(charges[0].q);
+  setPct(this, this.value); render();
+});
+document.getElementById('s2').addEventListener('input', function() {
+  charges[1].q = +this.value * 1e-6;
+  document.getElementById('v2').textContent = fmtQ(charges[1].q);
+  setPct(this, this.value); render();
+});
+
+const sDV = document.getElementById('sDV');
+sDV.addEventListener('input', function() {
+  deltaV = sliderToDV(+this.value);
+  document.getElementById('dvLabel').textContent = fmtDV(deltaV);
+  setPct(this, this.value); render();
+});
+
+document.getElementById('toggleField').addEventListener('change', function() { showField = this.checked; render(); });
+document.getElementById('toggleBg').addEventListener('change',    function() { showBg    = this.checked; render(); });
+
+// ── Drag ──────────────────────────────────────────────────
+canvas.addEventListener('mousedown', e => {
+  const rect = canvas.getBoundingClientRect();
+  const mx = e.clientX - rect.left, my = e.clientY - rect.top;
+  for (let i = 0; i < charges.length; i++) {
+    if ((mx - charges[i].x)**2 + (my - charges[i].y)**2 < 625) { dragging = i; return; }
+  }
+});
+canvas.addEventListener('mousemove', e => {
+  if (dragging === null) return;
+  const rect = canvas.getBoundingClientRect();
+  charges[dragging].x = e.clientX - rect.left;
+  charges[dragging].y = e.clientY - rect.top;
+  render();
+});
+canvas.addEventListener('mouseup',    () => dragging = null);
+canvas.addEventListener('mouseleave', () => dragging = null);
+
+// ── Init ──────────────────────────────────────────────────
+setPct(document.getElementById('s1'), 10);
+setPct(document.getElementById('s2'), -10);
+deltaV = sliderToDV(40);
+document.getElementById('dvLabel').textContent = fmtDV(deltaV);
+setPct(sDV, 40);
+render();
+</script>
+</body>
+</html>
