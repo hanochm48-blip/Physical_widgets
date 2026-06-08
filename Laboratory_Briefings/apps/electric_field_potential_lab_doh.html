@@ -1,0 +1,1585 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>תדריך מעבדה: מיפוי שדה חשמלי ופוטנציאל</title>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]},
+    "HTML-CSS": { availableFonts: ["TeX"], scale: 105 }
+  });
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML" async></script>
+<script src="https://unpkg.com/docx@8.5.0/build/index.umd.js"></script>
+<style>
+    :root {
+        --primary: #1e3a5f;
+        --secondary: #2980b9;
+        --accent: #c0392b;
+        --success: #27ae60;
+        --warning: #f39c12;
+        --locked: #95a5a6;
+        --bg: #f4f7fa;
+        --card: #ffffff;
+        --text: #2c3e50;
+        --field-color: #e74c3c;
+        --potential-color: #8e44ad;
+    }
+    * { box-sizing: border-box; }
+    body {
+        font-family: 'Segoe UI', Tahoma, sans-serif;
+        line-height: 1.7;
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        padding: 20px;
+    }
+    .container {
+        max-width: 1100px;
+        margin: 0 auto;
+        background: var(--card);
+        padding: 30px;
+        border-radius: 14px;
+        box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+    }
+    h1 {
+        color: var(--primary);
+        text-align: center;
+        border-bottom: 3px solid var(--secondary);
+        padding-bottom: 15px;
+        margin-bottom: 8px;
+    }
+    h2 {
+        color: var(--primary);
+        margin-top: 25px;
+    }
+    h3 {
+        color: var(--secondary);
+        border-bottom: 1px dashed #bbb;
+        padding-bottom: 5px;
+    }
+
+    /* פרוגרס בר */
+    .progress-bar {
+        background: #ddd;
+        height: 8px;
+        border-radius: 4px;
+        margin: 20px 0;
+        overflow: hidden;
+    }
+    .progress-fill {
+        background: linear-gradient(90deg, var(--secondary), var(--success));
+        height: 100%;
+        width: 0%;
+        transition: width 0.5s;
+    }
+
+    /* לשוניות */
+    .tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        border-bottom: 2px solid var(--secondary);
+        margin-bottom: 0;
+    }
+    .tab {
+        padding: 12px 20px;
+        cursor: pointer;
+        background: #e8eef5;
+        border-radius: 8px 8px 0 0;
+        font-weight: bold;
+        transition: all 0.3s;
+        position: relative;
+        color: var(--text);
+        font-size: 0.95em;
+    }
+    .tab:hover:not(.locked) {
+        background: #d0dde9;
+    }
+    .tab.active {
+        background: var(--secondary);
+        color: white;
+        box-shadow: 0 -3px 8px rgba(41,128,185,0.25);
+    }
+    .tab.locked {
+        background: #d5dbe0;
+        color: #7f8c8d;
+        cursor: not-allowed;
+        opacity: 0.75;
+    }
+    .tab.locked::after {
+        content: " 🔒";
+        font-size: 0.85em;
+    }
+    .tab.completed::before {
+        content: "✓ ";
+        color: var(--success);
+        font-weight: 900;
+    }
+    .tab.completed.active::before {
+        color: #d4f5dc;
+    }
+
+    .content {
+        display: none;
+        padding: 25px;
+        background: #fbfcfd;
+        border: 1px solid #e0e6ed;
+        border-top: none;
+        border-radius: 0 0 10px 10px;
+        animation: fadeIn 0.4s;
+    }
+    .content.active { display: block; }
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(8px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* תיבת תיאוריה */
+    .theory {
+        background: linear-gradient(135deg, #eaf4fc 0%, #f5fafd 100%);
+        border-right: 4px solid var(--secondary);
+        padding: 18px 22px;
+        margin: 15px 0;
+        border-radius: 8px;
+    }
+    .formula-box {
+        background: #fff8e1;
+        border: 2px dashed var(--warning);
+        padding: 12px 18px;
+        border-radius: 8px;
+        text-align: center;
+        margin: 15px auto;
+        font-size: 1.1em;
+        max-width: 80%;
+    }
+    .note-box {
+        background: #fef5e7;
+        border-right: 4px solid var(--warning);
+        padding: 14px 18px;
+        border-radius: 6px;
+        margin: 15px 0;
+    }
+    .danger-box {
+        background: #fdedec;
+        border-right: 4px solid var(--accent);
+        padding: 14px 18px;
+        border-radius: 6px;
+        margin: 15px 0;
+    }
+
+    /* שאלות הבנה */
+    .quiz {
+        background: #f0f7ff;
+        padding: 18px 22px;
+        border-radius: 10px;
+        margin: 15px 0;
+        border-right: 4px solid var(--secondary);
+    }
+    .question { font-weight: bold; margin-bottom: 12px; color: var(--primary); font-size: 1.05em; }
+    .option {
+        background: white;
+        padding: 11px 16px;
+        margin: 7px 0;
+        border-radius: 7px;
+        cursor: pointer;
+        border: 2px solid #ddd;
+        transition: all 0.25s;
+    }
+    .option:hover {
+        background: #e8f1fb;
+        border-color: var(--secondary);
+        transform: translateX(-3px);
+    }
+    .option.correct {
+        background: #d4edda;
+        border-color: var(--success);
+        font-weight: bold;
+    }
+    .option.wrong {
+        background: #f8d7da;
+        border-color: var(--accent);
+    }
+    .feedback {
+        margin-top: 12px;
+        padding: 12px;
+        border-radius: 6px;
+        display: none;
+        font-size: 0.97em;
+    }
+
+    /* טבלאות */
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 15px 0;
+        background: white;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    }
+    th, td {
+        border: 1px solid #cfd8dc;
+        padding: 10px 12px;
+        text-align: center;
+    }
+    th {
+        background: var(--secondary);
+        color: white;
+        font-weight: bold;
+    }
+    .field-th { background: var(--field-color); }
+    .potential-th { background: var(--potential-color); }
+    tr:nth-child(even) td { background: #f7f9fb; }
+    input[type="number"] {
+        width: 100px;
+        padding: 7px 9px;
+        border: 1px solid #b0bec5;
+        border-radius: 5px;
+        text-align: center;
+        font-size: 1em;
+    }
+    input[type="number"]:focus {
+        outline: none;
+        border-color: var(--secondary);
+        box-shadow: 0 0 4px rgba(41,128,185,0.4);
+    }
+
+    /* כפתורים */
+    .complete-section {
+        margin-top: 30px;
+        padding: 22px;
+        background: #ecf6ec;
+        border-radius: 10px;
+        text-align: center;
+        border: 2px dashed var(--success);
+    }
+    .complete-btn {
+        background: var(--success);
+        color: white;
+        padding: 13px 30px;
+        border: none;
+        border-radius: 8px;
+        font-size: 1.05em;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+    .complete-btn:hover:not(:disabled) {
+        background: #229954;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 12px rgba(39,174,96,0.4);
+    }
+    .complete-btn:disabled {
+        background: var(--locked);
+        cursor: not-allowed;
+    }
+    .calc-btn {
+        background: var(--secondary);
+        color: white;
+        padding: 11px 22px;
+        border: none;
+        border-radius: 7px;
+        font-size: 1em;
+        font-weight: bold;
+        cursor: pointer;
+        margin: 10px 5px;
+        transition: all 0.3s;
+    }
+    .calc-btn:hover {
+        background: #1f618d;
+        transform: translateY(-2px);
+    }
+    .complete-msg {
+        display: none;
+        margin-top: 15px;
+        color: var(--success);
+        font-weight: bold;
+        font-size: 1.1em;
+    }
+
+    /* תוצאות חישוב */
+    .summary-box {
+        background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+        padding: 22px;
+        border-radius: 10px;
+        margin: 20px 0;
+        border: 2px solid var(--success);
+    }
+    .summary-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 0;
+        border-bottom: 1px solid rgba(0,0,0,0.08);
+        font-size: 1.05em;
+    }
+    .summary-row:last-child { border-bottom: none; }
+    .summary-label { font-weight: bold; color: var(--primary); }
+    .summary-value { color: var(--accent); font-weight: bold; }
+
+    .two-col {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 22px;
+        margin: 15px 0;
+    }
+    @media (max-width: 800px) {
+        .two-col { grid-template-columns: 1fr; }
+    }
+
+    .equipment-list {
+        background: #f8f9fa;
+        padding: 15px 22px;
+        border-radius: 8px;
+        border-right: 4px solid var(--secondary);
+    }
+    ul { line-height: 1.9; }
+    .highlight { background: #fff3cd; padding: 2px 6px; border-radius: 4px; }
+    .vector { font-weight: bold; color: var(--field-color); }
+    .scalar { font-weight: bold; color: var(--potential-color); }
+
+    /* ===== textarea סיכום בכל לשונית ===== */
+    .tab-summary {
+        background: #f0f4f8;
+        border: 2px dashed var(--secondary);
+        border-radius: 10px;
+        padding: 18px 20px;
+        margin: 25px 0 15px 0;
+    }
+    .tab-summary > label {
+        display: block;
+        font-weight: bold;
+        color: var(--primary);
+        margin-bottom: 10px;
+        font-size: 1.05em;
+    }
+    .tab-summary textarea {
+        width: 100%;
+        min-height: 110px;
+        padding: 12px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        font-family: inherit;
+        font-size: 1em;
+        line-height: 1.6;
+        resize: vertical;
+        box-sizing: border-box;
+        direction: rtl;
+        background: white;
+    }
+    .tab-summary textarea:focus {
+        outline: none;
+        border-color: var(--secondary);
+        box-shadow: 0 0 0 3px rgba(41,128,185,0.15);
+    }
+
+    /* ===== העלאת תמונות (ציוד + גרפים) ===== */
+    .upload-section {
+        background: white;
+        padding: 18px;
+        border-radius: 8px;
+        border: 1px dashed var(--secondary);
+        margin: 15px 0;
+    }
+    .upload-section input[type="file"] {
+        padding: 8px;
+        background: #f8f9fa;
+        border: 1px dashed var(--secondary);
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 0.95em;
+    }
+    .image-gallery {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 14px;
+    }
+    .image-gallery .thumb {
+        position: relative;
+        max-width: 220px;
+    }
+    .image-gallery img {
+        max-width: 100%;
+        border: 1px solid #cfd8dc;
+        border-radius: 6px;
+        display: block;
+    }
+    .image-gallery .remove-btn {
+        position: absolute;
+        top: 4px;
+        left: 4px;
+        background: var(--accent);
+        color: white;
+        border: none;
+        width: 26px;
+        height: 26px;
+        border-radius: 50%;
+        cursor: pointer;
+        font-weight: bold;
+        font-size: 0.95em;
+        line-height: 1;
+    }
+
+    /* ===== שדות פרטי תלמיד וכפתור הורדה ===== */
+    .student-info {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 18px;
+        margin: 15px 0;
+        background: white;
+        padding: 14px 18px;
+        border-radius: 8px;
+    }
+    .student-info > div { display: flex; align-items: center; gap: 8px; }
+    .student-info label { font-weight: bold; color: var(--primary); }
+    .student-info input {
+        padding: 7px 10px;
+        border: 1px solid #b0bec5;
+        border-radius: 5px;
+        font-size: 1em;
+    }
+
+    /* ===== שדות שיפוע (Tab 5) ===== */
+    .slope-inputs {
+        background: #fff8e1;
+        padding: 16px 20px;
+        border-radius: 10px;
+        border: 2px solid var(--warning);
+        margin: 18px 0;
+    }
+    .slope-inputs > div {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin: 10px 0;
+    }
+    .slope-inputs label {
+        font-weight: bold;
+        color: var(--primary);
+        min-width: 280px;
+    }
+    .slope-inputs input {
+        padding: 8px 12px;
+        border: 1px solid #b0bec5;
+        border-radius: 5px;
+        font-size: 1em;
+        width: 130px;
+    }
+</style>
+</head>
+<body>
+
+<div class="container">
+    <h1>תדריך מעבדה: מיפוי שדה חשמלי ופוטנציאל</h1>
+    <p style="text-align:center; color:#666; font-style:italic;">
+        מטרת הניסוי: מדידת תלות השדה החשמלי $\vec{E}$ והפוטנציאל $V$ במרחק $r$ ממטען נקודתי, וחישוב קבוע קולון $k$ בשתי שיטות בלתי-תלויות.
+    </p>
+
+    <div class="progress-bar">
+        <div class="progress-fill" id="progressFill"></div>
+    </div>
+
+    <div class="tabs">
+        <div class="tab active" data-tab="tab1" onclick="openTab(event, 'tab1')">1. רקע תיאורטי</div>
+        <div class="tab" data-tab="tab2" onclick="openTab(event, 'tab2')">2. לינאריזציה</div>
+        <div class="tab" data-tab="tab3" onclick="openTab(event, 'tab3')">3. תכנון וציוד</div>
+        <div class="tab" data-tab="tab4" onclick="openTab(event, 'tab4')">4. ביצוע ואיסוף נתונים</div>
+        <div class="tab" data-tab="tab5" onclick="openTab(event, 'tab5')">5. ניתוח ותוצאות</div>
+        <div class="tab" data-tab="tab6" onclick="openTab(event, 'tab6')">6. שגיאות ומסקנות</div>
+    </div>
+
+    <!-- ===== לשונית 1: רקע תיאורטי ===== -->
+    <div id="tab1" class="content active">
+        <div class="theory">
+            <h2>שלב 1: רקע תיאורטי - שדה ופוטנציאל של מטען נקודתי</h2>
+
+            <h3>חוק קולון</h3>
+            <p>הכוח החשמלי בין שני מטענים נקודתיים $q_1, q_2$ במרחק $r$ זה מזה ניתן על-ידי <strong>חוק קולון</strong>:</p>
+            <div class="formula-box">
+                $$F = k \cdot \frac{|q_1 \cdot q_2|}{r^2}$$
+            </div>
+            <p>כאשר $k$ הוא <strong>קבוע קולון</strong>, שערכו במערכת SI:</p>
+            <div class="formula-box">
+                $$k = 8.99 \times 10^9 \ \frac{\text{N} \cdot \text{m}^2}{\text{C}^2}$$
+            </div>
+
+            <h3>השדה החשמלי <span class="vector">$\vec{E}$</span> — גודל וקטורי</h3>
+            <p>השדה החשמלי שיוצר מטען נקודתי $Q$ בנקודה במרחק $r$ ממנו מוגדר כיחס בין הכוח שיופעל על מטען מבחן $q$ באותה נקודה, לגודל מטען המבחן:</p>
+            <div class="formula-box">
+                $$\vec{E} = \frac{\vec{F}}{q}  \quad\Longrightarrow\quad E = \frac{k \cdot Q}{r^2}$$
+            </div>
+            <p>השדה <strong>פוחת כריבוע המרחק</strong> — אם המרחק מוכפל פי 2, גודל השדה קטן פי 4. יחידות: $\text{V/m}$ או באופן שקול $\text{N/C}$.</p>
+
+            <h3>הפוטנציאל החשמלי <span class="scalar">$V$</span> — גודל סקלרי</h3>
+            <p>הפוטנציאל החשמלי בנקודה הוא העבודה הדרושה כדי להביא מטען-יחידה חיובי מאינסוף לאותה נקודה, מחולקת בגודל המטען:</p>
+            <div class="formula-box">
+                $$V = \frac{W_{\infty \to r}}{q} \quad\Longrightarrow\quad V = \frac{k \cdot Q}{r}$$
+            </div>
+            <p>הפוטנציאל <strong>פוחת כמרחק עצמו</strong> — אם המרחק מוכפל פי 2, הפוטנציאל קטן פי 2 בלבד. יחידות: $\text{V}$ (וולט).</p>
+
+            <h3>הקשר בין השדה לפוטנציאל</h3>
+            <p>שני הגדלים אינם בלתי-תלויים. הקשר היסודי ביניהם הוא:</p>
+            <div class="formula-box">
+                $$E = -\frac{d\varphi}{dx} \approx -\frac{\Delta \varphi}{\Delta x}$$
+            </div>
+            <p>כלומר השדה החשמלי שווה לנגזרת השלילית של הפוטנציאל לפי המקום. בכיוון אחד-ממדי, השדה מצביע מאזור פוטנציאל גבוה לאזור פוטנציאל נמוך.</p>
+        </div>
+
+        <h3>שאלות הבנה</h3>
+
+        <div class="quiz">
+            <p class="question">שאלה 1: מה ההבדל היסודי בין $\vec{E}$ ל-$V$ מבחינת הטיפול המתמטי?</p>
+            <div class="option" onclick="checkAns(this, false, 'לא נכון - שניהם תלויים במרחק.')">$\vec{E}$ תלוי במרחק ו-$V$ לא.</div>
+            <div class="option" onclick="checkAns(this, true, 'מצוין! $\\vec{E}$ הוא וקטור (יש לו כיוון), בעוד ש-$V$ הוא סקלר (רק גודל). בסכימה: שדות מתחברים וקטורית, פוטנציאלים מתחברים אריתמטית - וזה הופך חישובי פוטנציאל לפשוטים הרבה יותר.', 'q1_1')">$\vec{E}$ הוא וקטור ו-$V$ סקלר.</div>
+            <div class="option" onclick="checkAns(this, false, 'לא נכון - שניהם נמדדים ביחידות קשורות, אבל לא זהות. $\\vec{E}$ ביחידות N/C או V/m, ו-V ביחידות וולט.')">לשני הגדלים יש בדיוק את אותן יחידות.</div>
+            <div class="feedback"></div>
+        </div>
+
+        <div class="quiz">
+            <p class="question">שאלה 2: מטען נקודתי $Q$ יוצר שדה $E_0$ ופוטנציאל $V_0$ במרחק $r_0$. במרחק $2r_0$ (כפול) - מה יקרה?</p>
+            <div class="option" onclick="checkAns(this, false, 'לא נכון - השדה תלוי ב-$1/r^2$, אז במרחק כפול הוא לא חצי אלא רבע. בדוק שוב את ההתנהגות של 1/r².')">השדה והפוטנציאל יקטנו פי 2.</div>
+            <div class="option" onclick="checkAns(this, true, 'בדיוק! השדה תלוי ב-$1/r^2$ ולכן במרחק כפול הוא קטן פי $2^2 = 4$. הפוטנציאל תלוי ב-$1/r$ ולכן קטן רק פי 2. זוהי הסיבה שבסביבת מטענים השדה משתנה מהר יותר מהפוטנציאל.', 'q1_2')">השדה יקטן פי 4, הפוטנציאל פי 2 בלבד.</div>
+            <div class="option" onclick="checkAns(this, false, 'לא נכון - השדה דווקא קטן מהר יותר מהפוטנציאל. שניהם תלויים ב-r, אך בחזקה שונה.')">השדה יקטן פי 2, הפוטנציאל פי 4.</div>
+            <div class="feedback"></div>
+        </div>
+
+        <div class="quiz">
+            <p class="question">שאלה 3: מהי המשמעות הפיזיקלית של הסימן השלילי בנוסחה $E = -\frac{d\varphi}{dx}$?</p>
+            <div class="option" onclick="checkAns(this, false, 'לא. ערכי E עצמם יכולים להיות חיוביים או שליליים, תלוי בקואורדינטה.')">הוא מציין שהשדה תמיד שלילי.</div>
+            <div class="option" onclick="checkAns(this, true, 'מצוין! מטען חיובי נדחף בכיוון השדה - כלומר מאזור פוטנציאל גבוה לנמוך. לכן השדה מצביע &quot;במורד&quot; הפוטנציאל, ומכאן הסימן השלילי. זה אנלוגי לכוח הכובד שמצביע &quot;במורד&quot; של אנרגיה פוטנציאלית.', 'q1_3')">השדה מצביע מפוטנציאל גבוה לנמוך.</div>
+            <div class="option" onclick="checkAns(this, false, 'לא. הקשר לסימן המטען Q קיים בנפרד - הסימן השלילי בנוסחה הוא תוצאה של ההגדרה הפיזיקלית של פוטנציאל, לא של סימן המטען.')">הוא מציין שהמטען היוצר תמיד שלילי.</div>
+            <div class="feedback"></div>
+        </div>
+
+        <div class="tab-summary">
+            <label for="summary1">📝 סיכום הלשונית / נוסחאות חשובות (טקסט חופשי):</label>
+            <textarea id="summary1" placeholder="כתבו כאן את הנוסחאות המרכזיות, ההגדרות והקשרים שלמדתם..."></textarea>
+        </div>
+
+        <div class="complete-section">
+            <p>סיימת ללמוד את הרקע התיאורטי? לחץ כדי לעבור לשלב הלינאריזציה.</p>
+            <button class="complete-btn" id="btn1" onclick="completeStage(1)">✓ הבנתי את הרקע</button>
+            <div class="complete-msg" id="msg1">מצוין! שלב הלינאריזציה נפתח 🔓</div>
+        </div>
+    </div>
+
+    <!-- ===== לשונית 2: לינאריזציה ===== -->
+    <div id="tab2" class="content">
+        <div class="theory">
+            <h2>שלב 2: לינאריזציה — איך הופכים גרף עקום לקו ישר?</h2>
+
+            <h3>למה אנחנו צריכים לינאריזציה?</h3>
+            <p>אם נשרטט את $E$ מול $r$ ישירות, נקבל גרף <strong>היפרבולי</strong> (פרבולה הופכית) — קשה מאוד למדוד ממנו את $k$ באופן מדויק. גם הגרף של $V$ מול $r$ הוא היפרבולי. הפתרון הסטנדרטי בפיזיקה: <strong>להחליף משתנה</strong> כך שהגרף יהפוך לקו ישר.</p>
+
+            <h3>הרעיון הכללי</h3>
+            <p>אם הקשר הוא $y = A \cdot f(x)$ עבור פונקציה כלשהי $f$, אז ציור של $y$ מול $f(x)$ ייתן קו ישר ששיפועו $A$. כל מה שנדרש הוא לזהות את $f(x)$ הנכון.</p>
+
+            <h3>חלק א — השדה החשמלי</h3>
+            <p>הנוסחה היא $E = k \cdot Q \cdot \frac{1}{r^2}$. נגדיר משתנה חדש:</p>
+            <div class="formula-box">
+                $$u = \frac{1}{r^2} \quad\Longrightarrow\quad E = (kQ) \cdot u$$
+            </div>
+            <p>כעת גרף של $E$ מול $u$ הוא קו ישר העובר דרך הראשית, ושיפועו $m_E = kQ$.</p>
+
+            <h3>חלק ב — הפוטנציאל החשמלי</h3>
+            <p>הנוסחה היא $V = k \cdot Q \cdot \frac{1}{r}$. נגדיר משתנה חדש:</p>
+            <div class="formula-box">
+                $$w = \frac{1}{r} \quad\Longrightarrow\quad V = (kQ) \cdot w$$
+            </div>
+            <p>גרף של $V$ מול $w$ הוא קו ישר העובר דרך הראשית, ושיפועו $m_V = kQ$.</p>
+
+            <h3>חישוב $k$ משני המקורות</h3>
+            <p>אם נמדוד את הערך של $Q$ (גודל המטען המוצב בסימולציה), נוכל לחלץ את $k$ פעמיים בלתי-תלויות:</p>
+            <div class="formula-box">
+                $$k_E = \frac{m_E}{Q} \quad,\quad k_V = \frac{m_V}{Q}$$
+            </div>
+            <div class="note-box">
+                💡 <strong>למה שני חישובים?</strong> זוהי בדיקה עצמית של הניסוי. שתי שיטות בלתי-תלויות חייבות לתת תוצאה זהה (בתחום השגיאה) - אם הן חורגות, סימן שיש בעיה במדידה או בהנחות.
+            </div>
+        </div>
+
+        <h3>שאלות הבנה</h3>
+
+        <div class="quiz">
+            <p class="question">שאלה 1: מדוע לא מספיק לצייר $E$ מול $r$ ולמדוד את "השיפוע"?</p>
+            <div class="option" onclick="checkAns(this, false, 'לא. אם נמדוד את E ו-r ישירות, הגרף הוא היפרבולה - יש לו עקמומיות משתנה ואין לו שיפוע אחד.')">השיפוע של גרף $E$ מול $r$ נותן ישירות את $kQ$.</div>
+            <div class="option" onclick="checkAns(this, true, 'מצוין! גרף $E$ מול $r$ הוא היפרבולה - בכל נקודה יש לו שיפוע שונה. אי אפשר &quot;למדוד את השיפוע&quot; של עקומה לא-לינארית. רק קו ישר מאפשר שיפוע אחד מוגדר היטב, ומכאן הצורך בהחלפת משתנה.', 'q2_1')">הגרף הוא היפרבולה, ושיפועו אינו קבוע.</div>
+            <div class="option" onclick="checkAns(this, false, 'לא נכון. גרף E מול r ניתן לציור - אך הוא לא ישר ולא נותן באופן ישיר את הקבוע שמעניין אותנו.')">לא ניתן לשרטט גרף של $E$ מול $r$ ישירות.</div>
+            <div class="feedback"></div>
+        </div>
+
+        <div class="quiz">
+            <p class="question">שאלה 2: נניח שמדדת ערכי $E$ במרחקים $r = 1, 2, 3$ מטר. מה ערכי $u = 1/r^2$?</p>
+            <div class="option" onclick="checkAns(this, false, 'לא נכון. ערכים אלו הם 1/r, לא 1/r².')">$u = 1.00, \ 0.50, \ 0.33 \ \text{m}^{-1}$</div>
+            <div class="option" onclick="checkAns(this, true, 'מצוין! $u = 1/r^2$, ולכן: $1/1 = 1.00$, $1/4 = 0.25$, $1/9 \\approx 0.111$. שים לב לקצב הירידה המהיר - זוהי הסיבה שהשדה דועך מהר עם המרחק.', 'q2_2')">$u = 1.00, \ 0.25, \ 0.11 \ \text{m}^{-2}$</div>
+            <div class="option" onclick="checkAns(this, false, 'לא. אלו ערכי $r^2$, לא $1/r^2$. החילוף הוא הופכי.')">$u = 1.00, \ 4.00, \ 9.00 \ \text{m}^2$</div>
+            <div class="feedback"></div>
+        </div>
+
+        <div class="quiz">
+            <p class="question">שאלה 3: מהי החשיבות של המעבר דרך הראשית בגרפים המלינאריים?</p>
+            <div class="option" onclick="checkAns(this, false, 'לא נכון - העובדה שהקו עובר דרך הראשית נובעת מהפיזיקה, לא רק &quot;נוחות&quot;.')">זה רק נוח לציור.</div>
+            <div class="option" onclick="checkAns(this, true, 'בדיוק! במרחק אינסופי ($r \\to \\infty$) השדה והפוטנציאל שואפים לאפס, וזה אומר ש-$1/r^2 \\to 0$ ו-$1/r \\to 0$. אם המדידות יוצרות קו שלא עובר דרך הראשית, סימן שיש שגיאה שיטתית - חיתוך לא-אפסי מצביע על תקלה.', 'q2_3')">דרישה פיזיקלית: כש-$r \to \infty$, $E$ ו-$V$ שואפים לאפס.</div>
+            <div class="option" onclick="checkAns(this, false, 'לא. ה-Q לא משפיע על חיתוך הציר, רק על השיפוע.')">המעבר דרך הראשית תלוי בגודל המטען Q.</div>
+            <div class="feedback"></div>
+        </div>
+
+        <div class="tab-summary">
+            <label for="summary2">📝 סיכום הלשונית / שיטת הלינאריזציה (טקסט חופשי):</label>
+            <textarea id="summary2" placeholder="הסבירו את שיטת הלינאריזציה, מהם המשתנים החדשים שבחרתם ולמה..."></textarea>
+        </div>
+
+        <div class="complete-section">
+            <p>הבנת את עיקרון הלינאריזציה? לחץ כדי לעבור לתכנון הניסוי.</p>
+            <button class="complete-btn" id="btn2" onclick="completeStage(2)">✓ סיימתי, הבנתי</button>
+            <div class="complete-msg" id="msg2">מעולה! שלב התכנון נפתח 🔓</div>
+        </div>
+    </div>
+
+    <!-- ===== לשונית 3: תכנון וציוד ===== -->
+    <div id="tab3" class="content">
+        <h2>שלב 3: תכנון הניסוי וציוד</h2>
+
+        <div class="theory">
+            <h3>הסביבה: סימולציית PhET</h3>
+            <p>נשתמש בסימולציית <strong>Charges and Fields</strong> של אוניברסיטת קולורדו (PhET). זוהי סביבה ויזואלית המאפשרת להציב מטענים נקודתיים על משטח דו-ממדי ולמדוד את השדה והפוטנציאל בכל נקודה.</p>
+            <p>קישור: <code>https://phet.colorado.edu/sims/html/charges-and-fields/latest/charges-and-fields_all.html</code></p>
+        </div>
+
+        <h3>הציוד הוירטואלי שנשתמש בו</h3>
+        <div class="equipment-list">
+            <ul>
+                <li><strong>מטען נקודתי חיובי</strong> — בגודל $Q = +1\ \text{nC} = 1 \times 10^{-9}\ \text{C}$ (זהו הגודל הסטנדרטי של מטענים בסימולציה).</li>
+                <li><strong>סרט מדידה (Tape Measure)</strong> — לקביעת המרחק $r$ בין המטען לנקודת המדידה. יחידות: מטרים.</li>
+                <li><strong>חיישן שדה חשמלי (E-Field Sensor)</strong> — חיישן צהוב שמראה את גודל וכיוון $\vec{E}$ בנקודת ההצבה. יחידות: $\text{V/m}$.</li>
+                <li><strong>מד פוטנציאל (Voltmeter)</strong> — מטרה כתומה שמראה את הפוטנציאל $V$ בנקודת ההצבה. יחידות: $\text{V}$.</li>
+            </ul>
+        </div>
+
+        <div class="note-box">
+            ⚠ <strong>חשוב:</strong> ודאו שלפני תחילת המדידות, רק <em>מטען אחד</em> נמצא על המשטח. כל מטען נוסף ישנה את ערכי $E$ ו-$V$ ויגרום לסטיות גדולות מהתיאוריה.
+        </div>
+
+        <h3>תכנון תחום המדידות</h3>
+        <div class="two-col">
+            <div class="theory">
+                <h4>חלק א — מדידת $E$ מול $r$</h4>
+                <ul>
+                    <li>הציבו את המטען במרכז המשטח</li>
+                    <li>בחרו 5 ערכי מרחק שונים בתחום ~$0.5 - 2.5\ \text{m}$</li>
+                    <li>בכל מרחק: הניחו את חיישן השדה, מדדו את גודל $E$</li>
+                    <li>רישמו בטבלה הראשונה (לשונית 4)</li>
+                </ul>
+            </div>
+            <div class="theory">
+                <h4>חלק ב — מדידת $V$ מול $r$</h4>
+                <ul>
+                    <li>אותו המטען נשאר במקומו</li>
+                    <li>בחרו 5 ערכי מרחק זהים או חדשים</li>
+                    <li>בכל מרחק: הניחו את מד הפוטנציאל, מדדו את $V$</li>
+                    <li>רישמו בטבלה השנייה</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="danger-box">
+            <strong>טיפ למדידה מדויקת:</strong> ה-PhET מציג ערכים עם דיוק של 2 ספרות אחרי הנקודה. נסו <em>לקרב</em> את הסרט כך שהמרחק יהיה ערך עגול (לדוגמה $r = 1.00\ \text{m}$ ולא $r = 1.03\ \text{m}$) — זה יפשט מאוד את החישובים ויקטין שגיאות קריאה.
+        </div>
+
+        <h3>שאלות תכנון</h3>
+
+        <div class="quiz">
+            <p class="question">שאלה 1: מדוע אסור שיהיו על המשטח מטענים נוספים בזמן המדידה?</p>
+            <div class="option" onclick="checkAns(this, false, 'לא נכון. הסימולציה עצמה עובדת בסדר עם מטענים מרובים - אבל ההנחות התיאורטיות שלנו מתבססות על מטען בודד.')">הסימולציה לא תפעל נכון.</div>
+            <div class="option" onclick="checkAns(this, true, 'בדיוק! החיישן מודד את $\\vec{E}$ הכולל - שהוא סכום (וקטורי) של תרומות מכל המטענים. מטען שני יוסיף שדה משלו ויערב את הניסוי. אנחנו בודקים את הנוסחה $E = kQ/r^2$, שתקפה רק עבור מטען בודד.', 'q3_1')">החיישן מודד את השדה הכולל מכל המטענים.</div>
+            <div class="option" onclick="checkAns(this, false, 'לא נכון. השאלה היא לא של עומס חישובי אלא של הפיזיקה - שדה הוא מציאות פיזית, וכל המטענים תורמים לו.')">זה גורם לעומס חישובי על המחשב.</div>
+            <div class="feedback"></div>
+        </div>
+
+        <div class="quiz">
+            <p class="question">שאלה 2: מדוע מספר נקודות מדידה $\geq 5$ עדיף על 2 נקודות בלבד?</p>
+            <div class="option" onclick="checkAns(this, true, 'מצוין! שני זוגות נתונים מספיקים מתמטית כדי להעביר קו ישר, אבל אז אין בקרה - אם אחת המדידות שגויה, אין לנו דרך לדעת. עם 5 נקודות, סטייה של נקודה אחת מהקו ניכרת מיד, וניתן לבחון את איכות ההתאמה (R²) ולחשב שיפוע ע&quot;י &quot;ריבועים פחותים&quot; שממוצע על פני כל הנקודות.', 'q3_2')">יותר נקודות מספקות בקרה לזיהוי סטיות.</div>
+            <div class="option" onclick="checkAns(this, false, 'לא נכון - מתמטית 2 נקודות מספיקות לקו, אבל הן לא מספיקות מבחינת אמינות הניסוי.')">אי אפשר להעביר קו דרך 2 נקודות.</div>
+            <div class="option" onclick="checkAns(this, false, 'דווקא ההפך. יותר נקודות = יותר מידע = פחות שגיאה.')">יותר נקודות גורמות ליותר שגיאה.</div>
+            <div class="feedback"></div>
+        </div>
+
+        <div class="complete-section" style="border-color: var(--accent); background: linear-gradient(135deg, #fff5e6 0%, #ffe0b3 100%); margin-top: 25px;">
+            <h3 style="margin-top:0; color:var(--accent);">📷 צילום מערכת הניסוי</h3>
+            <p>ניתן לצלם את מערכת הניסוי שהקמתם (צילום מסך של הסימולציה עם המטען, החיישן והמדידים) ולצרף כאן. התמונות יופיעו בדו"ח תחת חלק תכנון הציוד.</p>
+            <input type="file" id="setupUpload" accept="image/*" multiple onchange="handleSetupUpload(event)" style="display:inline-block; padding:10px; background:white; border:2px dashed var(--accent); border-radius:8px; cursor:pointer; max-width:100%;">
+            <div id="setupGallery" class="image-gallery" style="justify-content:center; margin-top:18px;"></div>
+        </div>
+
+        <div class="tab-summary">
+            <label for="summary3">📝 סיכום הלשונית / תכנון הניסוי (טקסט חופשי):</label>
+            <textarea id="summary3" placeholder="תכנון הניסוי, בחירת מרחקי המדידה, שיקולים ובעיות שצפיתם..."></textarea>
+        </div>
+
+        <div class="complete-section">
+            <p>סיימת את התכנון? לחץ כדי לעבור לאיסוף הנתונים.</p>
+            <button class="complete-btn" id="btn3" onclick="completeStage(3)">✓ סיימתי את התכנון</button>
+            <div class="complete-msg" id="msg3">מעולה! שלב איסוף הנתונים נפתח 🔓</div>
+        </div>
+    </div>
+
+    <!-- ===== לשונית 4: ביצוע ואיסוף נתונים ===== -->
+    <div id="tab4" class="content">
+        <h2>שלב 4: ביצוע הניסוי ואיסוף נתונים</h2>
+
+        <div class="theory">
+            <p>הפעילו את הסימולציה, הציבו מטען חיובי בודד, וערכו את 5+5 המדידות. רשמו את הנתונים בשתי הטבלאות למטה. <strong>חישוב המשתנים החדשים</strong> ($1/r^2$, $1/r$) יתבצע אוטומטית בלשונית הבאה.</p>
+        </div>
+
+        <h3>גודל המטען</h3>
+        <p>הזינו את גודל המטען החיובי שהצבתם בסימולציה:</p>
+        <p style="background:#fff8e1; padding:12px 18px; border-radius:8px; display:inline-block;">
+            $Q$ = <input type="number" id="Q_value" step="0.1" value="1" style="width:80px;"> × 10⁻⁹ C
+            (ברירת מחדל: 1 nC, גודל מטען סטנדרטי ב-PhET)
+        </p>
+
+        <h3>חלק א — מדידות שדה חשמלי $E$ מול מרחק $r$</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>מדידה #</th>
+                    <th>$r$ (m)</th>
+                    <th class="field-th">$E$ (V/m)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td>1</td><td><input type="number" id="r_E_1" step="0.01" placeholder="0.50"></td><td><input type="number" id="E_1" step="0.01" placeholder="36.00"></td></tr>
+                <tr><td>2</td><td><input type="number" id="r_E_2" step="0.01" placeholder="0.75"></td><td><input type="number" id="E_2" step="0.01" placeholder="16.00"></td></tr>
+                <tr><td>3</td><td><input type="number" id="r_E_3" step="0.01" placeholder="1.00"></td><td><input type="number" id="E_3" step="0.01" placeholder="9.00"></td></tr>
+                <tr><td>4</td><td><input type="number" id="r_E_4" step="0.01" placeholder="1.50"></td><td><input type="number" id="E_4" step="0.01" placeholder="4.00"></td></tr>
+                <tr><td>5</td><td><input type="number" id="r_E_5" step="0.01" placeholder="2.00"></td><td><input type="number" id="E_5" step="0.01" placeholder="2.25"></td></tr>
+            </tbody>
+        </table>
+
+        <h3>חלק ב — מדידות פוטנציאל $V$ מול מרחק $r$</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>מדידה #</th>
+                    <th>$r$ (m)</th>
+                    <th class="potential-th">$V$ (V)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td>1</td><td><input type="number" id="r_V_1" step="0.01" placeholder="0.50"></td><td><input type="number" id="V_1" step="0.01" placeholder="18.00"></td></tr>
+                <tr><td>2</td><td><input type="number" id="r_V_2" step="0.01" placeholder="0.75"></td><td><input type="number" id="V_2" step="0.01" placeholder="12.00"></td></tr>
+                <tr><td>3</td><td><input type="number" id="r_V_3" step="0.01" placeholder="1.00"></td><td><input type="number" id="V_3" step="0.01" placeholder="9.00"></td></tr>
+                <tr><td>4</td><td><input type="number" id="r_V_4" step="0.01" placeholder="1.50"></td><td><input type="number" id="V_4" step="0.01" placeholder="6.00"></td></tr>
+                <tr><td>5</td><td><input type="number" id="r_V_5" step="0.01" placeholder="2.00"></td><td><input type="number" id="V_5" step="0.01" placeholder="4.50"></td></tr>
+            </tbody>
+        </table>
+
+        <div class="note-box">
+            ערכי הדוגמא בתיבות מתאימים בקירוב למטען של $Q = 1\ \text{nC}$ (אפשר להזין אותם לבדיקה). הזינו את הערכים <strong>שמדדתם בסימולציה</strong>.
+        </div>
+
+        <div class="tab-summary">
+            <label for="summary4">📝 סיכום הלשונית / תצפיות במהלך המדידה (טקסט חופשי):</label>
+            <textarea id="summary4" placeholder="תצפיות תוך כדי איסוף הנתונים, התנהגות החיישנים, קשיים שעלו..."></textarea>
+        </div>
+
+        <div class="complete-section">
+            <p>סיימת להזין את כל הנתונים? לחץ כדי לעבור לניתוח.</p>
+            <button class="complete-btn" id="btn4" onclick="validateAndCompleteStage4()">✓ הזנתי את כל הנתונים</button>
+            <div class="complete-msg" id="msg4">מעולה! שלב הניתוח נפתח 🔓</div>
+        </div>
+    </div>
+
+    <!-- ===== לשונית 5: ניתוח ותוצאות ===== -->
+    <div id="tab5" class="content">
+        <h2>שלב 5: עיבוד הנתונים בעזרת Excel</h2>
+
+        <div class="theory">
+            <p>בשלב זה תעבירו את הנתונים ל-<strong>Excel</strong> או לגיליון אלקטרוני אחר, תיצרו שני גרפים מלינאריים עם <strong>קווי מגמה</strong>, ותחלצו את קבוע קולון $k$ מהשיפועים.</p>
+
+            <h3>צעדים</h3>
+            <ol>
+                <li>העתיקו את הנתונים שהזנתם בלשונית 4 ל-Excel.</li>
+                <li>חשבו ב-Excel את העמודות החדשות: $1/r^2$ (לחלק א') ו-$1/r$ (לחלק ב'). הערכים מוצגים גם בטבלאות למטה לנוחותכם.</li>
+                <li>בנו שני גרפים נפרדים:
+                    <ul>
+                        <li><strong>גרף א':</strong> $E$ (ציר Y) מול $1/r^2$ (ציר X)</li>
+                        <li><strong>גרף ב':</strong> $V$ (ציר Y) מול $1/r$ (ציר X)</li>
+                    </ul>
+                </li>
+                <li>הוסיפו לכל גרף <strong>קו מגמה</strong> (Trendline) לינארי. בהגדרות קו המגמה: סמנו "הצג משוואה בגרף" (Display Equation) וסמנו "הגדר חיתוך = 0" (Set Intercept = 0).</li>
+                <li>קראו את השיפועים $m_E$ ו-$m_V$ ממשוואות הקווים, והזינו אותם למטה.</li>
+                <li>צרפו את צילומי הגרפים בתחתית הלשונית.</li>
+            </ol>
+        </div>
+
+        <h3>טבלת לינאריזציה — חלק א' ($E$ מול $1/r^2$)</h3>
+        <div id="tableA_lin"></div>
+
+        <h3>טבלת לינאריזציה — חלק ב' ($V$ מול $1/r$)</h3>
+        <div id="tableB_lin"></div>
+
+        <h3>הזנת השיפועים מקווי המגמה ב-Excel</h3>
+        <div class="slope-inputs">
+            <div>
+                <label>שיפוע גרף א' ($E$ מול $1/r^2$): $m_E$ =</label>
+                <input type="number" id="slope_E" step="any" placeholder="9.00">
+                <span>V·m</span>
+            </div>
+            <div>
+                <label>שיפוע גרף ב' ($V$ מול $1/r$): $m_V$ =</label>
+                <input type="number" id="slope_V" step="any" placeholder="9.00">
+                <span>V·m</span>
+            </div>
+            <div style="text-align:center; margin-top:8px;">
+                <button class="calc-btn" onclick="computeK()">🧮 חשב את $k$</button>
+            </div>
+        </div>
+
+        <h3>תוצאות החישוב</h3>
+        <div id="kResults"></div>
+
+        <div class="theory" style="margin-top:25px;">
+            <h3>הסבר החישוב</h3>
+            <p>מקו המגמה הלינארי קיבלתם שיפוע. השיפוע הזה הוא בדיוק $kQ$ (מתוך הקשרים $E = (kQ)\cdot(1/r^2)$ ו-$V = (kQ)\cdot(1/r)$). לכן:</p>
+            <div class="formula-box">
+                $$k_E = \frac{m_E}{Q} \quad,\quad k_V = \frac{m_V}{Q}$$
+            </div>
+            <p>אחוז הסטייה בין שתי השיטות מחושב לפי הנוסחה הסטנדרטית:</p>
+            <div class="formula-box">
+                $$\text{אחוז סטייה} = \frac{|k_V - k_E|}{(k_V + k_E)/2} \times 100\%$$
+            </div>
+        </div>
+
+        <div class="complete-section" style="border-color: var(--accent); background: linear-gradient(135deg, #fff5e6 0%, #ffe0b3 100%); margin-top: 25px;">
+            <h3 style="margin-top:0; color:var(--accent);">📊 צירוף צילומי הגרפים מ-Excel</h3>
+            <p>צרפו את צילומי שני הגרפים שיצרתם ב-Excel (כולל קווי המגמה והמשוואות). התמונות יופיעו בדו"ח.</p>
+            <input type="file" id="graphUpload" accept="image/*" multiple onchange="handleGraphUpload(event)" style="display:inline-block; padding:10px; background:white; border:2px dashed var(--accent); border-radius:8px; cursor:pointer; max-width:100%;">
+            <div id="graphGallery" class="image-gallery" style="justify-content:center; margin-top:18px;"></div>
+        </div>
+
+        <div class="tab-summary">
+            <label for="summary5">📝 סיכום הלשונית / ניתוח הגרפים (טקסט חופשי):</label>
+            <textarea id="summary5" placeholder="ניתוח הגרפים: האם הם אכן לינאריים? איזה $R^2$ קיבלתם? השוואה בין שני ערכי $k$, השוואה לערך התיאורטי..."></textarea>
+        </div>
+
+        <div class="complete-section">
+            <p>בחנת את התוצאות? לחץ כדי לעבור לדיון במסקנות ובשגיאות.</p>
+            <button class="complete-btn" id="btn5" onclick="completeStage(5)">✓ הבנתי את התוצאות</button>
+            <div class="complete-msg" id="msg5">מצוין! השלב האחרון נפתח 🔓</div>
+        </div>
+    </div>
+
+    <!-- ===== לשונית 6: שגיאות ומסקנות ===== -->
+    <div id="tab6" class="content">
+        <h2>שלב 6: שגיאות, מסקנות והקשר $E = -\Delta\varphi/\Delta x$</h2>
+
+        <div class="theory">
+            <h3>מקורות שגיאה אפשריים</h3>
+            <ul>
+                <li><strong>קריאת הסרט והמדידים</strong> — ל-PhET רזולוציה סופית; קריאה לא מדויקת של $r$ פוגעת חזק יותר בחלק א (כי $1/r^2$ רגיש מאוד ל-$r$ קטן).</li>
+                <li><strong>מיקום החיישן ביחס למרכז המטען</strong> — אם החיישן מוצב לא בדיוק על קו ישר מהמטען, $r$ האפקטיבי שונה מהקריאה.</li>
+                <li><strong>מטענים נוספים שלא ראינו</strong> — בדקו תמיד שאין מטענים אחרים על המשטח לפני המדידה.</li>
+                <li><strong>שגיאה שיטתית בערך $Q$</strong> — אם $Q$ שונה ממה שהנחנו, $k_E$ ו-$k_V$ יחרגו במידה זהה - וההפרש ביניהם יישאר קטן. <strong>שים לב:</strong> שגיאה ב-$Q$ מתבטאת בערך $k$ אבל לא באחוז הסטייה בין שתי השיטות.</li>
+            </ul>
+
+            <h3>החלק האחרון: מדידת הקשר $E = -\frac{\Delta\varphi}{\Delta x}$</h3>
+            <p>נציע שיטה מעשית למדידת קשר זה בסימולציה:</p>
+
+            <h4>הצעת ביצוע</h4>
+            <ol>
+                <li>בחרו <strong>שתי נקודות סמוכות</strong> על קו ישר היוצא מהמטען: נקודה $A$ במרחק $r_A$, ונקודה $B$ במרחק $r_B = r_A + \Delta x$. בחרו $\Delta x$ קטן (לדוגמה $0.1\ \text{m}$).</li>
+                <li>מדדו את הפוטנציאל בשתי הנקודות: $V_A$ ו-$V_B$, וחשבו $\Delta \varphi = V_B - V_A$ (שלילי, כי הפוטנציאל יורד עם המרחק).</li>
+                <li>חשבו את ערך השדה הצפוי: $E_{\text{מ-V}} = -\frac{\Delta\varphi}{\Delta x}$.</li>
+                <li>מדדו את השדה ישירות עם החיישן בנקודה האמצעית $\bar{r} = (r_A + r_B)/2$. סמנו את הערך $E_{\text{ישיר}}$.</li>
+                <li>השוו: שני הערכים אמורים להיות שווים בקירוב טוב. אחוז הסטייה ביניהם מעיד על איכות הקירוב $\Delta\varphi/\Delta x \approx d\varphi/dx$.</li>
+            </ol>
+
+            <div class="note-box">
+                💡 <strong>תובנה:</strong> ככל ש-$\Delta x$ קטן יותר, הקירוב טוב יותר - אבל גם השגיאה היחסית בקריאת $\Delta\varphi$ גדלה. צריך למצוא איזון.
+            </div>
+        </div>
+
+        <h3>שאלות סיכום</h3>
+
+        <div class="quiz">
+            <p class="question">שאלה 1: הניסוי שלך הניב $k_E = 9.1 \times 10^9$ ו-$k_V = 8.7 \times 10^9$. הערך התיאורטי הוא $k = 8.99 \times 10^9$. מה תוכל להסיק?</p>
+            <div class="option" onclick="checkAns(this, false, 'לא. שני הערכים בטווח של פחות מ-5% מהערך האמיתי - זוהי תוצאה טובה. הניסוי תקין.')">הניסוי נכשל - כי הערכים לא זהים זה לזה.</div>
+            <div class="option" onclick="checkAns(this, true, 'בדיוק! שני הערכים סוטים פחות מ-3% מהערך המקובל - זהו דיוק מצוין לניסוי כיתתי. השוני בין $k_E$ ל-$k_V$ (כ-4.5%) משקף את ההבדל ברגישות של שתי השיטות לשגיאות מדידה. שיטת ה-$V$ עמידה יותר כי $V \\propto 1/r$, בעוד $E \\propto 1/r^2$ מגביר שגיאות במרחקים קטנים.', 'q6_1')">תוצאות סבירות; הפער נובע משגיאות מדידה.</div>
+            <div class="option" onclick="checkAns(this, false, 'לא נכון. הערכים תואמים יפה את התיאוריה. ההפרש הקטן הוא תוצאה טבעית של שגיאות מדידה, לא של פגם תיאורטי.')">חוק קולון לא נכון בתחום שנמדד.</div>
+            <div class="feedback"></div>
+        </div>
+
+        <div class="quiz">
+            <p class="question">שאלה 2: למה במדידת $E = -\Delta\varphi/\Delta x$ עדיף לבחור $\Delta x$ קטן יחסית?</p>
+            <div class="option" onclick="checkAns(this, true, 'מצוין! הקשר $E = -d\\varphi/dx$ הוא מקומי (נגזרת). הקירוב $\\Delta\\varphi/\\Delta x$ תקף רק אם $\\Delta x$ קטן מספיק כדי שהשדה ייחשב קבוע בתוך הקטע. עבור $\\Delta x$ גדול, השדה משתנה בתוך הקטע ולכן הקירוב נסחב.', 'q6_2')">הקירוב לנגזרת תקף רק ב-$\Delta x$ קטן.</div>
+            <div class="option" onclick="checkAns(this, false, 'לא נכון - דווקא $\\Delta x$ קטן מקטין את $\\Delta\\varphi$ ויכול להגביר שגיאה יחסית בקריאה. זה מצדיק זהירות, אבל אינו הסיבה לבחור $\\Delta x$ קטן.')">כדי שהקריאות של $V$ יהיו מדויקות יותר.</div>
+            <div class="option" onclick="checkAns(this, false, 'לא. הסימולציה אדישה לערך של $\\Delta x$ בטווח הסביר.')">ה-PhET תומך רק ב-$\\Delta x$ קטן.</div>
+            <div class="feedback"></div>
+        </div>
+
+        <div class="quiz">
+            <p class="question">שאלה 3: בחרת $\Delta x = 0.10\ \text{m}$ במרחק $\bar{r} = 1.00\ \text{m}$ מהמטען. מדדת $V_A = 9.45\ \text{V}$, $V_B = 8.57\ \text{V}$. מהו $E$ המחושב?</p>
+            <div class="option" onclick="checkAns(this, false, 'בדוק את החשבון: $\\Delta\\varphi = V_B - V_A = -0.88$. ואז $-\\Delta\\varphi/\\Delta x = +0.88/0.10 = 8.8$, לא 0.88.')">$E = 0.88$ V/m</div>
+            <div class="option" onclick="checkAns(this, true, 'מצוין! $\\Delta\\varphi = 8.57 - 9.45 = -0.88\\ \\text{V}$. אז $E = -\\Delta\\varphi/\\Delta x = +0.88/0.10 = 8.8\\ \\text{V/m}$. השוואה: בנוסחה $E = kQ/r^2 = (9 \\times 10^9)(10^{-9})/1 = 9\\ \\text{V/m}$. סטייה של כ-2% — הקירוב מעולה!', 'q6_3')">$E = 8.8$ V/m</div>
+            <div class="option" onclick="checkAns(this, false, 'לא. הסימן בנוסחה הוא חלק מההגדרה הפיזיקלית - $\\Delta\\varphi$ עצמו שלילי, והמינוס &quot;מבטל&quot; אותו, כך שמקבלים E חיובי, לא שלילי.')">$E = -8.8$ V/m</div>
+            <div class="feedback"></div>
+        </div>
+
+        <div class="tab-summary">
+            <label for="summary6">📝 סיכום הלשונית / מסקנות ודיון (טקסט חופשי):</label>
+            <textarea id="summary6" placeholder="דיון מסכם: שגיאות עיקריות, מקורות אי-הוודאות, מסקנות הניסוי, רעיונות לשיפור או להמשך..." style="min-height:160px;"></textarea>
+        </div>
+
+        <div class="complete-section">
+            <p>סיכום הניסוי, חישוב אחוז הסטייה, דיון בשגיאות, והצעת המדידה של $E = -\Delta\varphi/\Delta x$ - הכל נכנס לדו"ח שלך.</p>
+            <button class="complete-btn" id="btn6" onclick="completeStage(6)">✓ סיימתי, רשמתי בדו"ח</button>
+            <div class="complete-msg" id="msg6">🎓 ברכות! השלמת את כל שלבי תדריך המעבדה! 🎉</div>
+        </div>
+    </div>
+
+    <!-- ===== הורדת דו"ח Word ===== -->
+    <div class="complete-section" style="border-color: var(--success); margin-top: 30px;">
+        <h3 style="margin-top:0; color:var(--success);">📄 קובץ דו"ח מלא (Word / docx)</h3>
+        <p>הדו"ח יכלול: תקציר של כל לשונית, השאלות והתשובות שבחרתם, הטקסט החופשי שכתבתם בכל לשונית, טבלת הנתונים, החישובים, ותמונות שצירפתם (מערכת הניסוי וגרפים). הקובץ ניתן לעריכה ב-Word, Google Docs ו-LibreOffice.</p>
+
+        <div class="student-info">
+            <div><label>שם התלמיד/ה:</label><input type="text" id="studentName" placeholder="שם מלא"></div>
+            <div><label>כיתה:</label><input type="text" id="studentClass" placeholder="לדוגמה: י'3"></div>
+            <div><label>תאריך:</label><input type="date" id="reportDate"></div>
+        </div>
+
+        <button class="complete-btn" onclick="downloadDocxReport()">⬇️ הורד דו"ח Word (.docx)</button>
+        <p id="summaryFileMsg" style="display:none; margin-top:14px; color:var(--success); font-weight:bold; font-size:1.05em;"></p>
+    </div>
+</div>
+
+<script>
+const totalStages = 6;
+const completedStages = new Set([1]);
+
+// תמונות שהועלו + תשובות התלמיד
+window.setupImages = [];
+window.graphImages = [];
+window.userAnswers = {};
+
+// ===== ניווט בין לשוניות (ללא נעילה) =====
+function openTab(evt, tabName) {
+    const contents = document.getElementsByClassName("content");
+    for (let i = 0; i < contents.length; i++) contents[i].classList.remove('active');
+    const tabs = document.getElementsByClassName("tab");
+    for (let i = 0; i < tabs.length; i++) tabs[i].classList.remove('active');
+
+    document.getElementById(tabName).classList.add('active');
+    evt.currentTarget.classList.add('active');
+
+    if (tabName === 'tab5') {
+        renderLinTables();
+    }
+    if (window.MathJax) MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
+}
+
+// ===== שאלות הבנה + שמירת תשובות התלמיד =====
+function checkAns(el, isCorrect, message, qid) {
+    const questionContainer = el.closest('.quiz');
+    const options = questionContainer.getElementsByClassName('option');
+    const feedback = questionContainer.querySelector('.feedback');
+    for (let opt of options) opt.className = 'option';
+    feedback.style.display = 'block';
+    feedback.innerText = message;
+    if (isCorrect) {
+        el.className = 'option correct';
+        feedback.style.backgroundColor = '#d4edda';
+        feedback.style.color = '#155724';
+        feedback.style.border = '1px solid #c3e6cb';
+    } else {
+        el.className = 'option wrong';
+        feedback.style.backgroundColor = '#f8d7da';
+        feedback.style.color = '#721c24';
+        feedback.style.border = '1px solid #f5c6cb';
+    }
+    if (qid) {
+        const qText = questionContainer.querySelector('.question').innerText.trim();
+        window.userAnswers[qid] = {
+            question: qText,
+            chosen: el.innerText.trim(),
+            isCorrect: isCorrect
+        };
+    }
+    if (window.MathJax) MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
+}
+
+// ===== סימון השלמת שלב (סימון ויזואלי בלבד, אין נעילה) =====
+function completeStage(stage) {
+    completedStages.add(stage);
+    const tabEl = document.querySelector(`.tab[data-tab="tab${stage}"]`);
+    tabEl.classList.add('completed');
+    const btn = document.getElementById(`btn${stage}`);
+    btn.disabled = true;
+    btn.style.background = 'var(--locked)';
+    btn.innerText = '✓ הושלם';
+    document.getElementById(`msg${stage}`).style.display = 'block';
+    updateProgress();
+}
+
+function updateProgress() {
+    const percent = (completedStages.size / totalStages) * 100;
+    document.getElementById('progressFill').style.width = percent + '%';
+}
+
+function validateAndCompleteStage4() {
+    const ids = ['Q_value'];
+    for (let i = 1; i <= 5; i++) ids.push(`r_E_${i}`, `E_${i}`, `r_V_${i}`, `V_${i}`);
+    const missing = [];
+    for (const id of ids) {
+        const v = document.getElementById(id).value;
+        if (v === '' || isNaN(parseFloat(v))) missing.push(id);
+    }
+    if (missing.length > 0) {
+        alert(`חסרים ${missing.length} ערכים. מלא את כל התאים בטבלאות.`);
+        return;
+    }
+    completeStage(4);
+}
+
+// ===== טבלאות לינאריזציה (לעזר לתלמיד בעבודה ב-Excel) =====
+function renderLinTables() {
+    let html = '<table><thead><tr><th>#</th><th>r (m)</th><th class="field-th">E (V/m)</th><th>1/r² (m⁻²)</th></tr></thead><tbody>';
+    for (let i = 1; i <= 5; i++) {
+        const r = parseFloat(document.getElementById(`r_E_${i}`).value);
+        const e = parseFloat(document.getElementById(`E_${i}`).value);
+        const u = (isFinite(r) && r !== 0) ? (1 / (r * r)).toFixed(4) : '—';
+        html += `<tr><td>${i}</td><td>${isFinite(r) ? r.toFixed(2) : '—'}</td><td>${isFinite(e) ? e.toFixed(3) : '—'}</td><td>${u}</td></tr>`;
+    }
+    html += '</tbody></table>';
+    document.getElementById('tableA_lin').innerHTML = html;
+
+    html = '<table><thead><tr><th>#</th><th>r (m)</th><th class="potential-th">V (V)</th><th>1/r (m⁻¹)</th></tr></thead><tbody>';
+    for (let i = 1; i <= 5; i++) {
+        const r = parseFloat(document.getElementById(`r_V_${i}`).value);
+        const v = parseFloat(document.getElementById(`V_${i}`).value);
+        const w = (isFinite(r) && r !== 0) ? (1 / r).toFixed(4) : '—';
+        html += `<tr><td>${i}</td><td>${isFinite(r) ? r.toFixed(2) : '—'}</td><td>${isFinite(v) ? v.toFixed(3) : '—'}</td><td>${w}</td></tr>`;
+    }
+    html += '</tbody></table>';
+    document.getElementById('tableB_lin').innerHTML = html;
+}
+
+// ===== חישוב k משיפועי Excel =====
+function computeK() {
+    const Q_nC = parseFloat(document.getElementById('Q_value').value);
+    const m_E = parseFloat(document.getElementById('slope_E').value);
+    const m_V = parseFloat(document.getElementById('slope_V').value);
+    if (!isFinite(Q_nC) || !isFinite(m_E) || !isFinite(m_V)) {
+        document.getElementById('kResults').innerHTML =
+            '<div class="note-box">יש להזין את גודל המטען Q (לשונית 4) ואת שני השיפועים שקראתם מ-Excel.</div>';
+        return;
+    }
+    const Q = Q_nC * 1e-9;
+    const k_E = m_E / Q;
+    const k_V = m_V / Q;
+    const k_th = 8.99e9;
+    const dev = Math.abs(k_V - k_E) / ((k_V + k_E) / 2) * 100;
+    const devE = Math.abs(k_E - k_th) / k_th * 100;
+    const devV = Math.abs(k_V - k_th) / k_th * 100;
+
+    document.getElementById('kResults').innerHTML = `
+        <div class="summary-box">
+            <div class="summary-row"><span class="summary-label">$k_E = m_E / Q$:</span> <span class="summary-value">${k_E.toExponential(3)} N·m²/C²</span></div>
+            <div class="summary-row"><span class="summary-label">$k_V = m_V / Q$:</span> <span class="summary-value">${k_V.toExponential(3)} N·m²/C²</span></div>
+            <div class="summary-row"><span class="summary-label">$k$ תיאורטי:</span> <span class="summary-value">${k_th.toExponential(3)} N·m²/C²</span></div>
+            <div class="summary-row"><span class="summary-label">סטיית $k_E$ מהתיאורטי:</span> <span class="summary-value">${devE.toFixed(2)}%</span></div>
+            <div class="summary-row"><span class="summary-label">סטיית $k_V$ מהתיאורטי:</span> <span class="summary-value">${devV.toFixed(2)}%</span></div>
+            <div class="summary-row"><span class="summary-label">אחוז סטייה בין השיטות:</span> <span class="summary-value">${dev.toFixed(2)}%</span></div>
+        </div>`;
+    if (window.MathJax) MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
+}
+
+// ===== ניהול תמונות (מערכת + גרפים) =====
+function handleSetupUpload(event) { handleImageUpload(event, window.setupImages, renderSetupGallery); }
+function handleGraphUpload(event) { handleImageUpload(event, window.graphImages, renderGraphGallery); }
+function handleImageUpload(event, store, renderFn) {
+    const files = Array.from(event.target.files);
+    let pending = files.length;
+    if (pending === 0) return;
+    files.forEach(file => {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            store.push({ dataUrl: e.target.result, name: file.name });
+            pending--;
+            if (pending === 0) renderFn();
+        };
+        reader.readAsDataURL(file);
+    });
+    event.target.value = '';
+}
+function renderSetupGallery() { renderGallery(window.setupImages, 'setupGallery', 'removeSetupImage'); }
+function renderGraphGallery() { renderGallery(window.graphImages, 'graphGallery', 'removeGraphImage'); }
+function renderGallery(store, galleryId, removeFnName) {
+    const g = document.getElementById(galleryId);
+    g.innerHTML = '';
+    store.forEach((img, idx) => {
+        const div = document.createElement('div');
+        div.className = 'thumb';
+        div.innerHTML = `<img src="${img.dataUrl}" alt="${img.name || 'תמונה'}"><button class="remove-btn" onclick="${removeFnName}(${idx})">×</button>`;
+        g.appendChild(div);
+    });
+}
+function removeSetupImage(idx) { window.setupImages.splice(idx, 1); renderSetupGallery(); }
+function removeGraphImage(idx) { window.graphImages.splice(idx, 1); renderGraphGallery(); }
+
+// ===================================================================
+// ==================== יצירת דו"ח Word (docx) =======================
+// ===================================================================
+
+function getDocx() {
+    if (!window.docx) {
+        alert('ספריית docx לא נטענה. בדוק את חיבור האינטרנט ורענן את הדף.');
+        throw new Error('docx library not loaded');
+    }
+    return window.docx;
+}
+function escapeText(s) { return (s === null || s === undefined) ? '' : String(s); }
+function hasHebrew(s) { return /[\u0590-\u05FF]/.test(String(s)); }
+
+function P(text, opts) {
+    opts = opts || {};
+    const d = getDocx();
+    return new d.Paragraph({
+        bidirectional: true,
+        alignment: opts.alignment || d.AlignmentType.RIGHT,
+        spacing: opts.spacing || { after: 100 },
+        children: [new d.TextRun({
+            text: escapeText(text),
+            font: 'Arial',
+            size: opts.size || 22,
+            bold: opts.bold || false,
+            italics: opts.italics || false,
+            rtl: true,
+            color: opts.color || '000000'
+        })]
+    });
+}
+function P_mixed(parts, opts) {
+    opts = opts || {};
+    const d = getDocx();
+    return new d.Paragraph({
+        bidirectional: true,
+        alignment: opts.alignment || d.AlignmentType.RIGHT,
+        spacing: opts.spacing || { after: 100 },
+        children: parts.map(p => new d.TextRun({
+            text: escapeText(p.text),
+            font: 'Arial',
+            size: p.size || 22,
+            bold: p.bold || false,
+            italics: p.italics || false,
+            rtl: true,
+            color: p.color || '000000'
+        }))
+    });
+}
+function H1(text) {
+    const d = getDocx();
+    return new d.Paragraph({
+        bidirectional: true,
+        alignment: d.AlignmentType.CENTER,
+        spacing: { before: 200, after: 200 },
+        children: [new d.TextRun({ text: escapeText(text), font: 'Arial', size: 36, bold: true, rtl: true, color: '1e3a5f' })]
+    });
+}
+function H2(text) {
+    const d = getDocx();
+    return new d.Paragraph({
+        bidirectional: true,
+        alignment: d.AlignmentType.RIGHT,
+        spacing: { before: 300, after: 150 },
+        children: [new d.TextRun({ text: escapeText(text), font: 'Arial', size: 28, bold: true, rtl: true, color: '1e3a5f' })]
+    });
+}
+function H3(text) {
+    const d = getDocx();
+    return new d.Paragraph({
+        bidirectional: true,
+        alignment: d.AlignmentType.RIGHT,
+        spacing: { before: 200, after: 100 },
+        children: [new d.TextRun({ text: escapeText(text), font: 'Arial', size: 24, bold: true, rtl: true, color: '2980b9' })]
+    });
+}
+function bullet(text) { return P('• ' + text, { spacing: { after: 60 } }); }
+
+function formula(text) {
+    const d = getDocx();
+    return new d.Paragraph({
+        alignment: d.AlignmentType.CENTER,
+        spacing: { before: 120, after: 120 },
+        shading: { fill: 'fff8e1' },
+        border: {
+            top: { style: 'single', color: 'f39c12', size: 8 },
+            bottom: { style: 'single', color: 'f39c12', size: 8 },
+            left: { style: 'single', color: 'f39c12', size: 8 },
+            right: { style: 'single', color: 'f39c12', size: 8 }
+        },
+        children: [new d.TextRun({ text: escapeText(text), font: 'Cambria Math', size: 26, bold: true })]
+    });
+}
+
+function tcell(text, opts) {
+    opts = opts || {};
+    const d = getDocx();
+    const isHeb = hasHebrew(text);
+    return new d.TableCell({
+        width: opts.width ? { size: opts.width, type: d.WidthType.DXA } : undefined,
+        shading: opts.fill ? { fill: opts.fill } : undefined,
+        children: [new d.Paragraph({
+            bidirectional: isHeb,
+            alignment: d.AlignmentType.CENTER,
+            children: [new d.TextRun({
+                text: escapeText(text),
+                font: 'Arial',
+                size: opts.size || 22,
+                bold: opts.bold || false,
+                rtl: isHeb,
+                color: opts.color || '000000'
+            })]
+        })]
+    });
+}
+function buildTable(headers, rows, colWidths) {
+    const d = getDocx();
+    const headerCells = headers.map((h, i) => tcell(h, {
+        width: colWidths ? colWidths[i] : undefined,
+        bold: true, fill: '2980b9', color: 'ffffff'
+    }));
+    const headerRow = new d.TableRow({ children: headerCells, tableHeader: true });
+    const dataRows = rows.map(row => new d.TableRow({
+        children: row.map((cell, i) => tcell(cell, { width: colWidths ? colWidths[i] : undefined }))
+    }));
+    return new d.Table({
+        rows: [headerRow].concat(dataRows),
+        width: { size: 100, type: d.WidthType.PERCENTAGE }
+    });
+}
+
+function dataUrlToBytes(dataUrl) {
+    const base64 = dataUrl.split(',')[1];
+    const binary = atob(base64);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+    return bytes;
+}
+function getImageType(dataUrl) {
+    const m = dataUrl.match(/^data:image\/(\w+);/);
+    let t = m ? m[1].toLowerCase() : 'png';
+    if (t === 'jpeg') t = 'jpg';
+    return t;
+}
+function getImageDims(dataUrl) {
+    return new Promise(resolve => {
+        const img = new Image();
+        img.onload = () => resolve({ w: img.width, h: img.height });
+        img.onerror = () => resolve({ w: 400, h: 300 });
+        img.src = dataUrl;
+    });
+}
+async function buildImageParagraph(imgObj) {
+    const d = getDocx();
+    const dims = await getImageDims(imgObj.dataUrl);
+    const maxW = 480;
+    const scale = Math.min(1, maxW / dims.w);
+    const w = Math.round(dims.w * scale);
+    const h = Math.round(dims.h * scale);
+    return new d.Paragraph({
+        alignment: d.AlignmentType.CENTER,
+        spacing: { before: 100, after: 100 },
+        children: [new d.ImageRun({
+            data: dataUrlToBytes(imgObj.dataUrl),
+            transformation: { width: w, height: h },
+            type: getImageType(imgObj.dataUrl)
+        })]
+    });
+}
+
+// ===== בוני תוכן ספציפיים =====
+function buildTab1Content() {
+    return [
+        H2('1. רקע תיאורטי'),
+        H3('חוק קולון'),
+        P('הכוח החשמלי בין שני מטענים נקודתיים q₁ ו-q₂ במרחק r ביניהם:'),
+        formula('F = k · |q₁·q₂| / r²'),
+        P('כאשר k הוא קבוע קולון. ערכו במערכת SI: k = 8.99 × 10⁹ N·m²/C².'),
+        H3('השדה החשמלי E (וקטור)'),
+        P('השדה החשמלי שיוצר מטען נקודתי Q במרחק r ממנו:'),
+        formula('E = k · Q / r²'),
+        P('השדה פוחת כריבוע המרחק. יחידות: V/m או N/C.'),
+        H3('הפוטנציאל החשמלי V (סקלר)'),
+        P('הפוטנציאל החשמלי במרחק r ממטען נקודתי Q:'),
+        formula('V = k · Q / r'),
+        P('הפוטנציאל פוחת כמרחק עצמו. יחידות: וולט (V).'),
+        H3('הקשר בין השדה לפוטנציאל'),
+        formula('E = -dφ/dx  ≈  -Δφ/Δx'),
+        P('השדה החשמלי שווה לנגזרת השלילית של הפוטנציאל. הוא מצביע מאזור פוטנציאל גבוה לנמוך.')
+    ];
+}
+function buildTab2Content() {
+    return [
+        H2('2. לינאריזציה'),
+        P('הקשרים E = kQ/r² ו-V = kQ/r אינם לינאריים, ולכן לא ניתן לחלץ את k מגרף ישיר. הפתרון: החלפת משתנים שמייצרת קו ישר.'),
+        H3("חלק א': השדה החשמלי"),
+        P('נגדיר משתנה חדש u = 1/r². אז:'),
+        formula('E = (k·Q) · u'),
+        P('גרף של E מול u הוא קו ישר העובר דרך הראשית, שיפועו m_E = k·Q.'),
+        H3("חלק ב': הפוטנציאל החשמלי"),
+        P('נגדיר משתנה חדש w = 1/r. אז:'),
+        formula('V = (k·Q) · w'),
+        P('גרף של V מול w הוא קו ישר העובר דרך הראשית, שיפועו m_V = k·Q.'),
+        P('שני החישובים אמורים לתת אותו k - וזוהי בדיקה עצמית של איכות הניסוי.')
+    ];
+}
+function buildTab3Content() {
+    return [
+        H2('3. תכנון וציוד'),
+        P('הניסוי בוצע בסביבת סימולציית PhET "Charges and Fields".'),
+        H3('ציוד וירטואלי'),
+        bullet('מטען נקודתי חיובי בגודל Q = 1 nC (10⁻⁹ קולון)'),
+        bullet('סרט מדידה לקביעת המרחק r ביחידות מטרים'),
+        bullet('חיישן שדה חשמלי (E-Field Sensor) - מציג גודל וכיוון של E ב-V/m'),
+        bullet('מד פוטנציאל (Voltmeter) - מציג את V ביחידות וולט'),
+        H3('תכנון המדידות'),
+        bullet("חלק א': מדידת E ב-5 מרחקים שונים מהמטען, בתחום 0.5-2.5 מ' לערך"),
+        bullet("חלק ב': מדידת V באותם 5 מרחקים"),
+        bullet('יש לוודא שאין מטענים נוספים על המשטח בזמן המדידה')
+    ];
+}
+function buildTab6Content() {
+    return [
+        H2('6. שגיאות, מסקנות וקשר השדה-פוטנציאל'),
+        H3('מקורות שגיאה אפשריים'),
+        bullet('רזולוציה סופית של PhET בקריאת המרחקים והערכים'),
+        bullet('מיקום החיישן ביחס למרכז המטען - r אפקטיבי שונה מהקריאה הנומינלית'),
+        bullet('מטענים נוספים על המשטח שלא הוסרו - מערבים את השדה'),
+        bullet('שגיאה ב-Q: משפיעה על k אך לא על אחוז הסטייה בין השיטות'),
+        H3('מדידת הקשר E = -Δφ/Δx'),
+        P('הצעת ביצוע:'),
+        bullet('בחירת שתי נקודות סמוכות A ו-B על קו ישר מהמטען, במרחק Δx זו מזו'),
+        bullet('מדידת הפוטנציאל בכל נקודה: V_A ו-V_B, וחישוב Δφ = V_B - V_A'),
+        bullet('חישוב השדה הצפוי: E = -Δφ/Δx'),
+        bullet('מדידת השדה ישירות עם החיישן בנקודה האמצעית'),
+        bullet('השוואת שני הערכים - אחוז הסטייה מעיד על איכות הקירוב')
+    ];
+}
+
+function buildDataChildren() {
+    const Q_nC = parseFloat(document.getElementById('Q_value').value);
+    const Q_text = isFinite(Q_nC) ? (Q_nC + ' × 10⁻⁹ C = ' + (Q_nC * 1e-9).toExponential(3) + ' C') : '(לא הוזן)';
+    const children = [
+        H2('4. נתונים גולמיים'),
+        P_mixed([
+            { text: 'גודל המטען החיובי בסימולציה: Q = ', bold: true },
+            { text: Q_text }
+        ])
+    ];
+    const rowsE = [];
+    for (let i = 1; i <= 5; i++) {
+        rowsE.push([String(i), document.getElementById(`r_E_${i}`).value || '—', document.getElementById(`E_${i}`).value || '—']);
+    }
+    children.push(H3("חלק א': מדידות שדה חשמלי E מול r"));
+    children.push(buildTable(['#', 'r (m)', 'E (V/m)'], rowsE, [1500, 3000, 3000]));
+    children.push(P(''));
+    const rowsV = [];
+    for (let i = 1; i <= 5; i++) {
+        rowsV.push([String(i), document.getElementById(`r_V_${i}`).value || '—', document.getElementById(`V_${i}`).value || '—']);
+    }
+    children.push(H3("חלק ב': מדידות פוטנציאל V מול r"));
+    children.push(buildTable(['#', 'r (m)', 'V (V)'], rowsV, [1500, 3000, 3000]));
+    return children;
+}
+
+function buildCalculationsChildren() {
+    const children = [
+        H2('5. עיבוד הנתונים (Excel) וחישוב קבוע קולון'),
+        P('הנתונים הועברו ל-Excel, נוצרו עמודות לינאריות (1/r² ו-1/r), ובוצעה התאמה לינארית עם קו מגמה (Trendline) דרך הראשית.')
+    ];
+    const Q_nC = parseFloat(document.getElementById('Q_value').value);
+    const Q = Q_nC * 1e-9;
+
+    const rowsA = [];
+    for (let i = 1; i <= 5; i++) {
+        const r = parseFloat(document.getElementById(`r_E_${i}`).value);
+        const e = document.getElementById(`E_${i}`).value || '—';
+        const u = (isFinite(r) && r !== 0) ? (1 / (r * r)).toFixed(4) : '—';
+        rowsA.push([String(i), isFinite(r) ? r.toFixed(2) : '—', e, u]);
+    }
+    children.push(H3("טבלת לינאריזציה - חלק א' (E מול 1/r²)"));
+    children.push(buildTable(['#', 'r (m)', 'E (V/m)', '1/r² (m⁻²)'], rowsA, [1000, 2200, 2200, 2200]));
+    children.push(P(''));
+
+    const rowsB = [];
+    for (let i = 1; i <= 5; i++) {
+        const r = parseFloat(document.getElementById(`r_V_${i}`).value);
+        const v = document.getElementById(`V_${i}`).value || '—';
+        const w = (isFinite(r) && r !== 0) ? (1 / r).toFixed(4) : '—';
+        rowsB.push([String(i), isFinite(r) ? r.toFixed(2) : '—', v, w]);
+    }
+    children.push(H3("טבלת לינאריזציה - חלק ב' (V מול 1/r)"));
+    children.push(buildTable(['#', 'r (m)', 'V (V)', '1/r (m⁻¹)'], rowsB, [1000, 2200, 2200, 2200]));
+    children.push(P(''));
+
+    const m_E = parseFloat(document.getElementById('slope_E').value);
+    const m_V = parseFloat(document.getElementById('slope_V').value);
+    children.push(H3('שיפועי קווי המגמה מ-Excel'));
+    children.push(P_mixed([
+        { text: 'שיפוע גרף E מול 1/r²: ', bold: true },
+        { text: 'm_E = ' + (isFinite(m_E) ? String(m_E) : '___') + ' V·m' }
+    ]));
+    children.push(P_mixed([
+        { text: 'שיפוע גרף V מול 1/r: ', bold: true },
+        { text: 'm_V = ' + (isFinite(m_V) ? String(m_V) : '___') + ' V·m' }
+    ]));
+
+    if (isFinite(m_E) && isFinite(m_V) && isFinite(Q_nC) && Q > 0) {
+        const k_E = m_E / Q;
+        const k_V = m_V / Q;
+        const k_th = 8.99e9;
+        const dev = Math.abs(k_V - k_E) / ((k_V + k_E) / 2) * 100;
+        const devE = Math.abs(k_E - k_th) / k_th * 100;
+        const devV = Math.abs(k_V - k_th) / k_th * 100;
+        children.push(H3('חישוב קבוע קולון'));
+        children.push(P('k_E = m_E / Q = ' + k_E.toExponential(3) + ' N·m²/C²'));
+        children.push(P('k_V = m_V / Q = ' + k_V.toExponential(3) + ' N·m²/C²'));
+        children.push(P('k תיאורטי = 8.99 × 10⁹ N·m²/C²'));
+        children.push(P('סטיית k_E מהתיאורטי: ' + devE.toFixed(2) + '%'));
+        children.push(P('סטיית k_V מהתיאורטי: ' + devV.toFixed(2) + '%'));
+        children.push(P_mixed([
+            { text: 'אחוז סטייה בין השיטות: ', bold: true },
+            { text: dev.toFixed(2) + '%' }
+        ]));
+    }
+    return children;
+}
+
+function buildAnswersChildren(qids) {
+    const ua = window.userAnswers || {};
+    const answered = qids.filter(q => ua[q]);
+    if (answered.length === 0) return [];
+    const children = [H3('שאלות הבנה ותשובות התלמיד')];
+    answered.forEach(qid => {
+        const a = ua[qid];
+        children.push(P_mixed([{ text: 'שאלה: ', bold: true }, { text: a.question }]));
+        const mark = a.isCorrect ? '✓ ' : '✗ ';
+        children.push(P_mixed([
+            { text: mark + 'תשובה שנבחרה: ', bold: true, color: a.isCorrect ? '27ae60' : 'c0392b' },
+            { text: a.chosen }
+        ]));
+        children.push(P(''));
+    });
+    return children;
+}
+
+function buildUserSummaryChildren(summaryId) {
+    const ta = document.getElementById(summaryId);
+    const text = ta ? ta.value.trim() : '';
+    if (!text) return [];
+    const children = [H3('📝 סיכום התלמיד')];
+    text.split('\n').forEach(line => children.push(P(line || ' ')));
+    return children;
+}
+
+async function buildSetupImagesChildren() {
+    const imgs = window.setupImages || [];
+    if (!imgs.length) return [];
+    const children = [H3('תמונות מערכת הניסוי')];
+    for (const img of imgs) children.push(await buildImageParagraph(img));
+    return children;
+}
+async function buildGraphsChildren() {
+    const imgs = window.graphImages || [];
+    if (!imgs.length) return [];
+    const children = [H3('גרפים מצורפים מ-Excel')];
+    for (const img of imgs) children.push(await buildImageParagraph(img));
+    return children;
+}
+
+// ===== פונקציית הורדה ראשית =====
+async function downloadDocxReport() {
+    try {
+        const d = getDocx();
+        const studentName = (document.getElementById('studentName').value || '').trim();
+        const studentClass = (document.getElementById('studentClass').value || '').trim();
+        const dateInput = document.getElementById('reportDate').value;
+        const reportDateStr = dateInput ? new Date(dateInput).toLocaleDateString('he-IL') : new Date().toLocaleDateString('he-IL');
+
+        const children = [];
+        children.push(H1('דו"ח מעבדה: מיפוי שדה חשמלי ופוטנציאל'));
+        children.push(buildTable(
+            ['שם התלמיד/ה', 'כיתה', 'תאריך'],
+            [[studentName || '___', studentClass || '___', reportDateStr]],
+            [3500, 2000, 2500]
+        ));
+        children.push(P(''));
+        children.push(P_mixed([
+            { text: 'מטרת הניסוי: ', bold: true },
+            { text: 'מדידת תלות השדה החשמלי E והפוטנציאל V במרחק r ממטען נקודתי, וחישוב קבוע קולון k בשתי שיטות בלתי-תלויות באמצעות ניתוח גרפי ב-Excel.' }
+        ], { spacing: { after: 200 } }));
+
+        buildTab1Content().forEach(c => children.push(c));
+        buildAnswersChildren(['q1_1', 'q1_2', 'q1_3']).forEach(c => children.push(c));
+        buildUserSummaryChildren('summary1').forEach(c => children.push(c));
+
+        buildTab2Content().forEach(c => children.push(c));
+        buildAnswersChildren(['q2_1', 'q2_2', 'q2_3']).forEach(c => children.push(c));
+        buildUserSummaryChildren('summary2').forEach(c => children.push(c));
+
+        buildTab3Content().forEach(c => children.push(c));
+        (await buildSetupImagesChildren()).forEach(c => children.push(c));
+        buildAnswersChildren(['q3_1', 'q3_2']).forEach(c => children.push(c));
+        buildUserSummaryChildren('summary3').forEach(c => children.push(c));
+
+        buildDataChildren().forEach(c => children.push(c));
+        buildUserSummaryChildren('summary4').forEach(c => children.push(c));
+
+        buildCalculationsChildren().forEach(c => children.push(c));
+        (await buildGraphsChildren()).forEach(c => children.push(c));
+        buildUserSummaryChildren('summary5').forEach(c => children.push(c));
+
+        buildTab6Content().forEach(c => children.push(c));
+        buildAnswersChildren(['q6_1', 'q6_2', 'q6_3']).forEach(c => children.push(c));
+        buildUserSummaryChildren('summary6').forEach(c => children.push(c));
+
+        const doc = new d.Document({
+            styles: { default: { document: { run: { font: 'Arial', size: 22 } } } },
+            sections: [{
+                properties: { page: { margin: { top: 1080, right: 1080, bottom: 1080, left: 1080 } } },
+                children: children
+            }]
+        });
+
+        const blob = await d.Packer.toBlob(doc);
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        const safeName = studentName ? studentName.replace(/[\\/:*?"<>|]/g, '') : 'תלמיד';
+        a.download = `דוח_מעבדה_${safeName}.docx`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+
+        const msg = document.getElementById('summaryFileMsg');
+        msg.style.display = 'block';
+        msg.innerText = '✓ הדו"ח הופק והורד בהצלחה!';
+    } catch (err) {
+        console.error('שגיאה בהפקת הדו"ח:', err);
+        alert('שגיאה בהפקת הדו"ח: ' + (err.message || err));
+    }
+}
+
+// ===== טעינה ראשונית =====
+window.addEventListener('load', () => {
+    updateProgress();
+    if (window.MathJax) MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
+});
+</script>
+
+</body>
+</html>

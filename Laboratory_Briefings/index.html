@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>תדריכי מעבדה</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@500;700;900&family=Heebo:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#f3ede1;
+    --paper-2:#ece3d2;
+    --card:#fbf7ee;
+    --ink:#211d18;
+    --ink-soft:#6a6053;
+    --accent:#b5532a;
+    --accent-deep:#8a3d1d;
+    --line:#d9cdb6;
+    --line-soft:#e6dcc8;
+    --shadow:rgba(60,45,25,.16);
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0}
+
+  html{scroll-behavior:smooth}
+
+  body{
+    font-family:"Heebo",sans-serif;
+    color:var(--ink);
+    background-color:var(--paper);
+    background-image:
+      radial-gradient(circle at 12% 18%, rgba(181,83,42,.06), transparent 42%),
+      radial-gradient(circle at 88% 8%, rgba(120,95,40,.06), transparent 40%),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+    min-height:100vh;
+    line-height:1.5;
+  }
+
+  .wrap{max-width:1120px;margin:0 auto;padding:0 24px}
+
+  /* ---------- Header ---------- */
+  header{
+    padding:64px 0 30px;
+    border-bottom:1px solid var(--line);
+    position:relative;
+  }
+  .eyebrow{
+    font-family:"JetBrains Mono",monospace;
+    font-size:.72rem;
+    letter-spacing:.28em;
+    text-transform:uppercase;
+    color:var(--accent-deep);
+    margin-bottom:14px;
+    opacity:0;animation:rise .7s .05s ease forwards;
+  }
+  h1{
+    font-family:"Frank Ruhl Libre",serif;
+    font-weight:900;
+    font-size:clamp(2.6rem,6vw,4.4rem);
+    line-height:1.02;
+    letter-spacing:-.01em;
+    opacity:0;animation:rise .7s .12s ease forwards;
+  }
+  h1 .dot{color:var(--accent)}
+  .sub{
+    margin-top:16px;
+    max-width:46ch;
+    color:var(--ink-soft);
+    font-size:1.05rem;
+    font-weight:300;
+    opacity:0;animation:rise .7s .2s ease forwards;
+  }
+  .count-badge{
+    position:absolute;top:64px;left:0;
+    font-family:"JetBrains Mono",monospace;
+    font-size:.8rem;color:var(--ink-soft);
+    border:1px solid var(--line);
+    border-radius:999px;padding:7px 16px;
+    background:var(--card);
+    opacity:0;animation:rise .7s .28s ease forwards;
+  }
+  .count-badge b{color:var(--accent-deep);font-weight:700}
+
+  /* ---------- Toolbar ---------- */
+  .toolbar{
+    position:sticky;top:0;z-index:20;
+    background:linear-gradient(var(--paper) 72%, transparent);
+    padding:22px 0 16px;
+    margin-bottom:10px;
+  }
+  .search-row{position:relative;margin-bottom:16px}
+  .search-row svg{
+    position:absolute;right:18px;top:50%;transform:translateY(-50%);
+    width:19px;height:19px;stroke:var(--ink-soft);pointer-events:none;
+  }
+  #search{
+    width:100%;
+    font-family:"Heebo",sans-serif;font-size:1.02rem;
+    padding:15px 50px 15px 18px;
+    border:1.5px solid var(--line);
+    border-radius:14px;
+    background:var(--card);
+    color:var(--ink);
+    transition:border-color .2s, box-shadow .2s;
+  }
+  #search::placeholder{color:#a89a83}
+  #search:focus{
+    outline:none;border-color:var(--accent);
+    box-shadow:0 0 0 4px rgba(181,83,42,.12);
+  }
+
+  .chips{display:flex;flex-wrap:wrap;gap:9px}
+  .chip{
+    font-family:"Heebo",sans-serif;font-size:.9rem;font-weight:500;
+    padding:8px 16px;border-radius:999px;
+    border:1.5px solid var(--line);
+    background:transparent;color:var(--ink-soft);
+    cursor:pointer;transition:all .18s;
+  }
+  .chip:hover{border-color:var(--accent);color:var(--accent-deep)}
+  .chip.active{
+    background:var(--ink);color:var(--paper);border-color:var(--ink);
+  }
+
+  /* ---------- Grid ---------- */
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(290px,1fr));
+    gap:20px;
+    padding:14px 0 80px;
+  }
+
+  .card{
+    display:flex;flex-direction:column;
+    text-decoration:none;color:inherit;
+    background:var(--card);
+    border:1.5px solid var(--line-soft);
+    border-radius:18px;
+    padding:24px 24px 18px;
+    position:relative;overflow:hidden;
+    transition:transform .22s cubic-bezier(.2,.7,.3,1), box-shadow .22s, border-color .22s;
+    animation:pop .5s ease both;
+  }
+  .card::before{
+    content:"";position:absolute;inset:0 auto 0 0;width:4px;
+    background:var(--accent);transform:scaleY(0);transform-origin:bottom;
+    transition:transform .25s ease;
+  }
+  .card:hover{
+    transform:translateY(-5px);
+    box-shadow:0 16px 34px -16px var(--shadow);
+    border-color:var(--line);
+  }
+  .card:hover::before{transform:scaleY(1)}
+  .card:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+
+  .card-icon{
+    font-size:2.1rem;line-height:1;margin-bottom:16px;
+    width:58px;height:58px;border-radius:14px;overflow:hidden;
+    display:flex;align-items:center;justify-content:center;
+    background:var(--paper-2);border:1px solid var(--line-soft);
+  }
+  .card-icon img{width:100%;height:100%;object-fit:cover;display:block}
+  .card-name{
+    font-family:"Frank Ruhl Libre",serif;font-weight:700;
+    font-size:1.42rem;margin-bottom:8px;
+  }
+  .card-desc{
+    color:var(--ink-soft);font-size:.96rem;font-weight:300;
+    flex:1;margin-bottom:18px;
+  }
+  .card-tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px}
+  .tag{
+    font-family:"JetBrains Mono",monospace;font-size:.68rem;
+    color:var(--accent-deep);background:rgba(181,83,42,.08);
+    padding:3px 9px;border-radius:6px;
+  }
+  .card-foot{
+    display:flex;align-items:center;justify-content:space-between;
+    border-top:1px solid var(--line-soft);padding-top:13px;
+  }
+  .card-path{
+    font-family:"JetBrains Mono",monospace;font-size:.72rem;
+    color:#a2937c;direction:ltr;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:80%;
+  }
+  .card-go{
+    display:flex;align-items:center;gap:5px;
+    font-size:.82rem;font-weight:500;color:var(--accent-deep);
+    white-space:nowrap;
+  }
+  .card-go svg{width:14px;height:14px;stroke:var(--accent-deep);
+    transition:transform .2s}
+  .card:hover .card-go svg{transform:translateX(-4px)}
+
+  /* category corner label */
+  .card-cat{
+    position:absolute;top:24px;left:24px;
+    font-family:"JetBrains Mono",monospace;font-size:.66rem;
+    letter-spacing:.05em;color:#b3a48d;
+  }
+
+  /* ---------- Empty state ---------- */
+  .empty{
+    grid-column:1/-1;text-align:center;padding:70px 20px;color:var(--ink-soft);
+  }
+  .empty .big{font-size:2.4rem;margin-bottom:10px}
+  .empty p{font-weight:300}
+
+  footer{
+    border-top:1px solid var(--line);
+    padding:26px 0 50px;
+    font-size:.84rem;color:var(--ink-soft);font-weight:300;
+    display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;
+  }
+  footer code{
+    font-family:"JetBrains Mono",monospace;font-size:.78rem;
+    background:var(--paper-2);padding:2px 7px;border-radius:5px;color:var(--accent-deep);
+  }
+
+  @keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+  @keyframes pop{from{opacity:0;transform:translateY(10px) scale(.985)}to{opacity:1;transform:translateY(0) scale(1)}}
+
+  @media (max-width:560px){
+    header{padding-top:46px}
+    .count-badge{position:static;display:inline-block;margin-top:18px}
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow">// תדריכי מעבדה</div>
+    <h1>תדריכי<br>מעבדה<span class="dot">.</span></h1>
+    <p class="sub">כל היישומונים במקום אחד. חפש, סנן לפי קטגוריה, ולחץ על כרטיס כדי לפתוח.</p>
+    <div class="count-badge"><b id="count">0</b> יישומונים</div>
+  </header>
+
+  <div class="toolbar">
+    <div class="search-row">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+      <input id="search" type="text" placeholder="חיפוש לפי שם, תיאור או תגית…" autocomplete="off">
+    </div>
+    <div class="chips" id="chips"></div>
+  </div>
+
+  <main class="grid" id="grid"></main>
+
+  <footer>
+    <span>נבנה לפריסה ב־Netlify · ערוך את הרשימה בקובץ <code>apps.js</code></span>
+    <span id="stamp"></span>
+  </footer>
+
+</div>
+
+<!-- =========================================================================
+     נתוני ברירת מחדל (לתצוגה מקדימה בלבד). הקובץ apps.js שנטען בהמשך
+     דורס את הרשימה הזו בנתונים האמיתיים שלך. ערוך תמיד את apps.js.
+     ========================================================================= -->
+<script>
+  window.APP_DATABASE = [
+    { name:"מחשבון", path:"apps/calculator.html", description:"מחשבון פשוט לפעולות חשבון בסיסיות.", icon:"🧮", category:"כלים", tags:["חישוב","מספרים"] },
+    { name:"טיימר", path:"apps/timer.html", description:"טיימר ספירה לאחור עם התראה.", icon:"⏱️", category:"כלים", tags:["זמן","שעון"] },
+    { name:"רשימת מטלות", path:"apps/todo.html", description:"ניהול רשימת משימות.", icon:"✅", category:"פרודוקטיביות", tags:["משימות","רשימה"] }
+  ];
+</script>
+<script src="apps.js"></script>
+
+<!-- ===================== לוגיקת קובץ הארגון ===================== -->
+<script>
+(function(){
+  const DB = Array.isArray(window.APP_DATABASE) ? window.APP_DATABASE : [];
+  const grid    = document.getElementById("grid");
+  const chipsEl = document.getElementById("chips");
+  const countEl = document.getElementById("count");
+  const search  = document.getElementById("search");
+
+  let activeCat = "הכל";
+  let query = "";
+
+  // בניית רשימת קטגוריות
+  const cats = ["הכל", ...Array.from(new Set(DB.map(a => a.category).filter(Boolean)))];
+  chipsEl.innerHTML = cats.map(c =>
+    `<button class="chip${c==="הכל"?" active":""}" data-cat="${c}">${c}</button>`
+  ).join("");
+
+  chipsEl.addEventListener("click", e => {
+    const btn = e.target.closest(".chip");
+    if(!btn) return;
+    activeCat = btn.dataset.cat;
+    [...chipsEl.children].forEach(c => c.classList.toggle("active", c===btn));
+    render();
+  });
+
+  search.addEventListener("input", e => { query = e.target.value.trim().toLowerCase(); render(); });
+
+  function matches(app){
+    if(activeCat !== "הכל" && app.category !== activeCat) return false;
+    if(!query) return true;
+    const hay = [app.name, app.description, app.category, ...(app.tags||[])]
+      .filter(Boolean).join(" ").toLowerCase();
+    return hay.includes(query);
+  }
+
+  function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+
+  // אם ה-icon הוא נתיב לתמונה (png/jpg/svg/webp/gif) או כתובת — מציגים תמונה; אחרת אימוג'י/טקסט.
+  function renderIcon(icon){
+    if(!icon) return "📦";
+    if(/\.(png|jpe?g|svg|webp|gif|avif|ico)$/i.test(icon) || /^https?:\/\//i.test(icon)){
+      return `<img src="${encodeURI(icon)}" alt="" loading="lazy">`;
+    }
+    return escapeHtml(icon);
+  }
+
+  function render(){
+    const list = DB.filter(matches);
+    countEl.textContent = list.length;
+
+    if(list.length === 0){
+      grid.innerHTML = `<div class="empty"><div class="big">🗂️</div>
+        <p>לא נמצאו יישומונים מתאימים.</p></div>`;
+      return;
+    }
+
+    grid.innerHTML = list.map((app,i) => {
+      const tags = (app.tags||[]).map(t=>`<span class="tag">${escapeHtml(t)}</span>`).join("");
+      return `<a class="card" href="${encodeURI(app.path||'#')}" style="animation-delay:${i*0.04}s">
+        ${app.category?`<span class="card-cat">${escapeHtml(app.category)}</span>`:""}
+        <div class="card-icon">${renderIcon(app.icon)}</div>
+        <div class="card-name">${escapeHtml(app.name||"ללא שם")}</div>
+        <div class="card-desc">${escapeHtml(app.description||"")}</div>
+        ${tags?`<div class="card-tags">${tags}</div>`:""}
+        <div class="card-foot">
+          <span class="card-path">${escapeHtml(app.path||"")}</span>
+          <span class="card-go">פתח
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="m12 5-7 7 7 7"/></svg>
+          </span>
+        </div>
+      </a>`;
+    }).join("");
+  }
+
+  document.getElementById("stamp").textContent = `${DB.length} רשומות במסד הנתונים`;
+  render();
+})();
+</script>
+
+</body>
+</html>

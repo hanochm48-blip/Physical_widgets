@@ -1,0 +1,2266 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>מעבדת פיזיקה - תנועת כדור מנתר</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML" async></script>
+    <script src="https://unpkg.com/docx@8.5.0/build/index.umd.js"></script>
+    <style>
+        :root {
+            --primary: #1e3a5f;
+            --secondary: #2980b9;
+            --accent: #e67e22;
+            --success: #27ae60;
+            --error: #e74c3c;
+            --locked: #95a5a6;
+            --bg: #f4f7f6;
+        }
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background-color: var(--bg);
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        .container {
+            max-width: 1050px;
+            margin: auto;
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: var(--primary);
+            border-bottom: 3px solid var(--secondary);
+            padding-bottom: 12px;
+            font-size: 1.8em;
+        }
+        h2 { color: var(--primary); margin-top: 0; }
+        h3 { color: var(--secondary); }
+
+        /* ניווט */
+        .tabs {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+            background: #eee;
+            border-radius: 10px;
+            padding: 5px;
+            margin-bottom: 25px;
+        }
+        .tab {
+            flex: 1;
+            min-width: 130px;
+            padding: 10px;
+            text-align: center;
+            cursor: pointer;
+            font-weight: bold;
+            border-radius: 8px;
+            transition: 0.3s;
+            margin: 2px;
+            font-size: 0.9em;
+            position: relative;
+        }
+        .tab:hover:not(.locked) { background: #ddd; }
+        .tab.active { background: var(--secondary); color: white; }
+        .tab.locked {
+            color: var(--locked);
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+        .tab.completed::after {
+            content: "✓";
+            position: absolute;
+            top: 2px;
+            left: 5px;
+            color: var(--success);
+            font-weight: bold;
+        }
+        .tab.locked::after {
+            content: "🔒";
+            position: absolute;
+            top: 2px;
+            left: 5px;
+            font-size: 0.8em;
+        }
+
+        /* תוכן */
+        .content {
+            display: none;
+            border-right: 5px solid var(--secondary);
+            padding-right: 20px;
+            animation: fadeIn 0.4s;
+        }
+        .content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .theory { margin-bottom: 20px; font-size: 1.1em; line-height: 1.7; }
+        .example {
+            background: #fff9c4;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #fbc02d;
+            margin: 15px 0;
+        }
+        .important {
+            background: #e8f5e9;
+            border-right: 5px solid var(--success);
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+        .warning {
+            background: #ffebee;
+            border-right: 5px solid var(--error);
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+        .formula {
+            background: #f0f4f8;
+            border: 1px dashed var(--secondary);
+            padding: 15px;
+            text-align: center;
+            font-size: 1.2em;
+            margin: 15px 0;
+            border-radius: 8px;
+        }
+
+        /* שאלות */
+        .quiz {
+            background: #e3f2fd;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            border-right: 4px solid var(--secondary);
+        }
+        .question {
+            font-weight: bold;
+            font-size: 1.05em;
+            margin-bottom: 15px;
+            color: var(--primary);
+        }
+        .option {
+            background: white;
+            border: 2px solid var(--secondary);
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: 0.2s;
+            font-weight: 500;
+        }
+        .option:hover { background: #bbdefb; }
+        .option.correct { background: #c8e6c9; border-color: var(--success); }
+        .option.wrong { background: #ffcdd2; border-color: var(--error); }
+        .feedback {
+            font-weight: bold;
+            margin-top: 10px;
+            display: none;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        /* סקיצות */
+        .sketch-container {
+            text-align: center;
+            margin: 25px 0;
+            background: #fff;
+            padding: 25px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+        }
+        svg { max-width: 100%; height: auto; }
+
+        /* טבלת נתונים */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        .data-table th {
+            background: var(--primary);
+            color: white;
+            padding: 12px;
+            font-size: 1.05em;
+        }
+        .data-table td {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            text-align: center;
+        }
+        .data-table input {
+            width: 90%;
+            padding: 8px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            text-align: center;
+            font-size: 1em;
+            transition: 0.2s;
+        }
+        .data-table input:focus {
+            outline: none;
+            border-color: var(--secondary);
+            background: #f0f8ff;
+        }
+
+        /* טבלת מסה */
+        .mass-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            background: #fff3e0;
+            padding: 15px;
+            border-radius: 8px;
+            border: 2px dashed var(--accent);
+            margin: 20px 0;
+        }
+        .mass-row label { font-weight: bold; color: var(--primary); font-size: 1.1em; }
+        .mass-row input {
+            width: 120px;
+            padding: 8px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            text-align: center;
+            font-size: 1em;
+        }
+        .mass-row input:focus {
+            outline: none;
+            border-color: var(--accent);
+            background: white;
+        }
+
+        /* כפתור סיום שלב */
+        .complete-section {
+            margin-top: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, #ecf0f1 0%, #d5dbdb 100%);
+            border-radius: 10px;
+            text-align: center;
+            border: 2px dashed var(--secondary);
+        }
+        .complete-btn {
+            background: var(--success);
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            font-size: 1.05em;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.3s;
+            box-shadow: 0 3px 8px rgba(39, 174, 96, 0.3);
+        }
+        .complete-btn:hover {
+            background: #229954;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 12px rgba(39, 174, 96, 0.4);
+        }
+        .complete-btn:disabled {
+            background: var(--locked);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        .complete-msg {
+            display: none;
+            margin-top: 15px;
+            color: var(--success);
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+
+        /* סיכום נתונים */
+        .summary-box {
+            background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+            padding: 25px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border: 2px solid var(--success);
+        }
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(0,0,0,0.08);
+            font-size: 1.05em;
+        }
+        .summary-row:last-child { border-bottom: none; }
+        .summary-label { font-weight: bold; color: var(--primary); }
+        .summary-value { color: var(--accent); font-weight: bold; }
+
+        /* פרוגרס בר */
+        .progress-bar {
+            background: #ddd;
+            height: 8px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            background: linear-gradient(90deg, var(--secondary), var(--success));
+            height: 100%;
+            width: 0%;
+            transition: width 0.5s;
+        }
+
+        ul { line-height: 1.8; }
+
+        /* ===== העלאת גרפים ===== */
+        .upload-area {
+            border: 2px dashed var(--secondary);
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            background: #f0f9ff;
+            margin: 15px 0;
+        }
+        .upload-btn {
+            display: inline-block;
+            padding: 10px 22px;
+            background: var(--secondary);
+            color: white;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.95em;
+        }
+        .upload-btn:hover { opacity: 0.9; }
+        #graphUpload { display: none; }
+        .graph-previews {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 15px;
+            justify-content: center;
+        }
+        .graph-thumb {
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            padding: 8px;
+            background: white;
+            max-width: 230px;
+        }
+        .graph-thumb img {
+            max-width: 210px;
+            max-height: 160px;
+            display: block;
+            border-radius: 4px;
+        }
+        .graph-thumb .thumb-name {
+            font-size: 0.8em;
+            color: #666;
+            margin: 6px 0;
+            word-break: break-all;
+        }
+        .graph-thumb button {
+            background: var(--error);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 4px 10px;
+            cursor: pointer;
+            font-size: 0.85em;
+        }
+        .report-fields {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+            margin: 15px 0;
+        }
+        .report-fields label {
+            display: flex;
+            flex-direction: column;
+            font-weight: bold;
+            color: var(--primary);
+            font-size: 0.9em;
+            gap: 4px;
+        }
+        .report-fields input {
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 1em;
+            font-family: inherit;
+        }
+        .pdf-btn {
+            display: block;
+            margin: 20px auto;
+            padding: 14px 32px;
+            background: linear-gradient(135deg, var(--error), #c0392b);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            font-family: inherit;
+        }
+        .pdf-btn:hover { opacity: 0.92; }
+
+        /* ===== סיכום חופשי בכל לשונית ===== */
+        .tab-summary {
+            background: #f0f4f8;
+            border: 2px dashed var(--secondary);
+            border-radius: 10px;
+            padding: 18px 20px;
+            margin: 25px 0 15px 0;
+        }
+        .tab-summary > label {
+            display: block;
+            font-weight: bold;
+            color: var(--primary);
+            margin-bottom: 10px;
+            font-size: 1.05em;
+        }
+        .tab-summary textarea {
+            width: 100%;
+            min-height: 110px;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 1em;
+            line-height: 1.6;
+            resize: vertical;
+            box-sizing: border-box;
+            direction: rtl;
+            background: white;
+        }
+        .tab-summary textarea:focus {
+            outline: none;
+            border-color: var(--secondary);
+            box-shadow: 0 0 0 3px rgba(41, 128, 185, 0.15);
+        }
+
+        /* ===== פרטי תלמיד ===== */
+        .student-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .student-info > div {
+            display: flex;
+            flex-direction: column;
+        }
+        .student-info label {
+            font-weight: bold;
+            color: var(--primary);
+            font-size: 0.95em;
+            margin-bottom: 5px;
+        }
+        .student-info input {
+            padding: 9px 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-family: inherit;
+            font-size: 1em;
+        }
+        .student-info input:focus {
+            outline: none;
+            border-color: var(--secondary);
+            box-shadow: 0 0 0 3px rgba(41, 128, 185, 0.15);
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>תדריך מעבדה: תנועת כדור מנתר</h1>
+    <p style="text-align:center; color:#666; font-style:italic;">מטרת הניסוי: מדידת תאוצת הנפילה החופשית g וחקר השפעת חיכוך האוויר על תנועת הכדור</p>
+
+    <div class="progress-bar">
+        <div class="progress-fill" id="progressFill"></div>
+    </div>
+
+    <div class="tabs">
+        <div class="tab active" data-tab="tab1" onclick="openTab(event, 'tab1')">1. רקע תיאורטי</div>
+        <div class="tab" data-tab="tab2" onclick="openTab(event, 'tab2')">2. ניתוח הכוחות</div>
+        <div class="tab" data-tab="tab3" onclick="openTab(event, 'tab3')">3. תכנון וציוד</div>
+        <div class="tab" data-tab="tab4" onclick="openTab(event, 'tab4')">4. ביצוע ואיסוף נתונים</div>
+        <div class="tab" data-tab="tab5" onclick="openTab(event, 'tab5')">5. ניתוח ותוצאות</div>
+        <div class="tab" data-tab="tab6" onclick="openTab(event, 'tab6')">6. שגיאות ומסקנות</div>
+    </div>
+
+    <!-- ===== לשונית 1: רקע תיאורטי ===== -->
+    <div id="tab1" class="content active">
+        <div class="theory">
+            <h2>שלב 1: רקע תיאורטי - נפילה עם חיכוך אוויר</h2>
+            <p>בנפילה חופשית "טהורה" - תנועה תחת השפעת כוח הכובד בלבד - תאוצת הגוף קבועה ושווה ל-\(g \approx 9.81 \, \text{m/s}^2\), בלי תלות במסה. אך במציאות, האוויר מפעיל על הכדור <strong>כוח חיכוך</strong> שמתנגד תמיד לכיוון התנועה. בניסוי נשתמש בעובדה זו כדי למדוד גם את \(g\) <strong>וגם</strong> את כוח החיכוך - באמצעות מדידת תאוצת הכדור בנפרד בעלייה ובירידה.</p>
+        </div>
+
+        <div class="sketch-container">
+            <h3>הדמיה דינמית - הכוחות בתנועה</h3>
+            <p style="color:#555; font-size:0.95em; margin: 5px 0 15px;">
+                שים לב: כוח הכובד (אדום) תמיד פונה מטה, אך כוח החיכוך (סגול) והמהירות (כחול) מתהפכים בכל ניתור. גם הניתורים הולכים ומצטמצמים - השפעה ישירה של איבוד אנרגיה לחיכוך.
+            </p>
+            <svg id="bouncingBallAnim" viewBox="0 0 400 380" style="background: linear-gradient(180deg, #f0f9ff 0%, #e1f5fe 100%); border-radius: 8px; max-width: 400px; width: 100%;">
+                <!-- קרקע -->
+                <line x1="20" y1="350" x2="380" y2="350" stroke="#333" stroke-width="3"/>
+                <pattern id="groundPat" x="0" y="0" width="20" height="8" patternUnits="userSpaceOnUse">
+                    <line x1="0" y1="0" x2="20" y2="8" stroke="#999" stroke-width="1"/>
+                </pattern>
+                <rect x="20" y="350" width="360" height="25" fill="url(#groundPat)"/>
+
+                <!-- צל הכדור -->
+                <ellipse id="ballShadow" cx="200" cy="352" rx="16" ry="3" fill="rgba(0,0,0,0.3)"/>
+
+                <!-- חיצי כוחות -->
+                <line id="gravLine" x1="200" y1="50" x2="200" y2="95" stroke="#e74c3c" stroke-width="3" marker-end="url(#gravArr)"/>
+                <text id="gravLabel" x="208" y="80" font-size="13" fill="#e74c3c" font-weight="bold">mg</text>
+
+                <line id="fricLine" x1="220" y1="50" x2="220" y2="30" stroke="#8e44ad" stroke-width="3" marker-end="url(#fricArr)" opacity="0.8"/>
+                <text id="fricLabel" x="226" y="40" font-size="13" fill="#8e44ad" font-weight="bold">f</text>
+
+                <line id="velLine" x1="170" y1="50" x2="170" y2="80" stroke="#2980b9" stroke-width="3" marker-end="url(#velArr)" opacity="0.8"/>
+                <text id="velLabel" x="148" y="68" font-size="13" fill="#2980b9" font-weight="bold">v</text>
+
+                <!-- הכדור עצמו (אחרי החיצים כדי שיהיה למעלה) -->
+                <circle id="bouncingBall" cx="200" cy="50" r="16" fill="url(#ballGrad)" stroke="#bf360c" stroke-width="1.5"/>
+                <ellipse id="ballHighlight" cx="194" cy="44" rx="5" ry="3" fill="rgba(255,255,255,0.6)"/>
+
+                <defs>
+                    <radialGradient id="ballGrad" cx="35%" cy="35%">
+                        <stop offset="0%" stop-color="#ffd54f"/>
+                        <stop offset="60%" stop-color="#ff9800"/>
+                        <stop offset="100%" stop-color="#e65100"/>
+                    </radialGradient>
+                    <marker id="gravArr" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                        <path d="M0,0 L0,6 L9,3 z" fill="#e74c3c"/>
+                    </marker>
+                    <marker id="fricArr" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                        <path d="M0,0 L0,6 L9,3 z" fill="#8e44ad"/>
+                    </marker>
+                    <marker id="velArr" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                        <path d="M0,0 L0,6 L9,3 z" fill="#2980b9"/>
+                    </marker>
+                </defs>
+            </svg>
+            <div style="margin-top:10px;">
+                <button onclick="restartBouncingBall()" style="padding:8px 18px; background: var(--secondary); color:white; border:none; border-radius:5px; cursor:pointer; font-weight:bold; font-size:0.95em;">↻ הפעל מחדש</button>
+            </div>
+        </div>
+
+        <div class="sketch-container">
+            <h3>הכדור בשני שלבי תנועתו - לפני ואחרי הניתור</h3>
+            <svg viewBox="0 0 600 320" xmlns="http://www.w3.org/2000/svg">
+                <!-- קרקע -->
+                <line x1="20" y1="290" x2="580" y2="290" stroke="#333" stroke-width="3"/>
+                <text x="50" y="285" font-size="11" fill="#666">▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓</text>
+
+                <!-- מצב 1: כדור יורד -->
+                <g transform="translate(150, 130)">
+                    <text x="0" y="-80" font-size="16" fill="var(--primary)" font-weight="bold" text-anchor="middle">תנועה כלפי מטה</text>
+                    <text x="0" y="-62" font-size="13" fill="#666" text-anchor="middle">(לפני הניתור)</text>
+                    <circle cx="0" cy="0" r="22" fill="#ff9800" stroke="#e65100" stroke-width="2"/>
+                    <text x="0" y="5" font-size="12" fill="white" text-anchor="middle" font-weight="bold">m</text>
+                    <!-- חץ מהירות (מטה) -->
+                    <line x1="-40" y1="-15" x2="-40" y2="35" stroke="var(--secondary)" stroke-width="3" marker-end="url(#arrowBlue)"/>
+                    <text x="-65" y="15" font-size="14" fill="var(--secondary)" font-weight="bold">v</text>
+                    <!-- כוח כובד (מטה) -->
+                    <line x1="0" y1="22" x2="0" y2="80" stroke="var(--error)" stroke-width="3" marker-end="url(#arrowRed)"/>
+                    <text x="8" y="60" font-size="14" fill="var(--error)" font-weight="bold">mg</text>
+                    <!-- כוח חיכוך (מעלה - מתנגד למהירות) -->
+                    <line x1="35" y1="-5" x2="35" y2="-55" stroke="#8e44ad" stroke-width="3" marker-end="url(#arrowPurple)"/>
+                    <text x="42" y="-30" font-size="14" fill="#8e44ad" font-weight="bold">f</text>
+                </g>
+
+                <!-- מצב 2: כדור עולה -->
+                <g transform="translate(450, 130)">
+                    <text x="0" y="-80" font-size="16" fill="var(--primary)" font-weight="bold" text-anchor="middle">תנועה כלפי מעלה</text>
+                    <text x="0" y="-62" font-size="13" fill="#666" text-anchor="middle">(אחרי הניתור)</text>
+                    <circle cx="0" cy="0" r="22" fill="#ff9800" stroke="#e65100" stroke-width="2"/>
+                    <text x="0" y="5" font-size="12" fill="white" text-anchor="middle" font-weight="bold">m</text>
+                    <!-- חץ מהירות (מעלה) -->
+                    <line x1="-40" y1="15" x2="-40" y2="-35" stroke="var(--secondary)" stroke-width="3" marker-end="url(#arrowBlue)"/>
+                    <text x="-65" y="-10" font-size="14" fill="var(--secondary)" font-weight="bold">v</text>
+                    <!-- כוח כובד (מטה) -->
+                    <line x1="0" y1="22" x2="0" y2="80" stroke="var(--error)" stroke-width="3" marker-end="url(#arrowRed)"/>
+                    <text x="8" y="60" font-size="14" fill="var(--error)" font-weight="bold">mg</text>
+                    <!-- כוח חיכוך (מטה - מתנגד למהירות) -->
+                    <line x1="35" y1="22" x2="35" y2="60" stroke="#8e44ad" stroke-width="3" marker-end="url(#arrowPurple)"/>
+                    <text x="42" y="48" font-size="14" fill="#8e44ad" font-weight="bold">f</text>
+                </g>
+
+                <defs>
+                    <marker id="arrowRed" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                        <path d="M0,0 L0,6 L9,3 z" fill="var(--error)"/>
+                    </marker>
+                    <marker id="arrowBlue" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                        <path d="M0,0 L0,6 L9,3 z" fill="var(--secondary)"/>
+                    </marker>
+                    <marker id="arrowPurple" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                        <path d="M0,0 L0,6 L9,3 z" fill="#8e44ad"/>
+                    </marker>
+                </defs>
+            </svg>
+        </div>
+
+        <div class="important">
+            <strong>📌 תובנה מרכזית - כיוון כוח החיכוך:</strong>
+            <ul>
+                <li>כוח הכובד <strong>תמיד</strong> פועל כלפי מטה: \(\vec{F}_g = m\vec{g}\) (כיוון מטה).</li>
+                <li>כוח החיכוך <strong>תמיד</strong> מתנגד לכיוון התנועה (לכיוון המהירות \(\vec{v}\)).</li>
+                <li><strong>כשהכדור יורד:</strong> מהירות מטה ⟸ חיכוך פועל מעלה (כנגד הכובד). שני הכוחות מתנגדים זה לזה.</li>
+                <li><strong>כשהכדור עולה:</strong> מהירות מעלה ⟸ חיכוך פועל מטה (באותו כיוון של הכובד). שני הכוחות מצטרפים.</li>
+                <li>מסקנה: התאוצה כלפי מטה (בעלייה) <strong>גדולה יותר</strong> מהתאוצה כלפי מטה (בירידה)!</li>
+            </ul>
+        </div>
+
+        <div class="example">
+            <strong>למה זה חשוב?</strong> אם נצליח למדוד את שתי התאוצות בנפרד - בירידה ובעלייה - נוכל באמצעות צירוף מתמטי פשוט "להפריד" בין השפעת הכובד להשפעת החיכוך. כך נקבל מדידה ניסויית של \(g\) שאינה מושפעת כלל מהחיכוך, ואף נחשב את גודל כוח החיכוך עצמו!
+        </div>
+
+        <!-- שאלות -->
+        <div class="quiz">
+            <p class="question">שאלה 1: כדור פינג-פונג נופל מטה. מהו כיוונו של כוח חיכוך האוויר הפועל עליו?</p>
+            <div class="option" onclick="checkAns(this, false, 'לא נכון. כוח החיכוך תמיד מתנגד לכיוון המהירות, ולא לכיוון הכובד.')">כלפי מטה, מצטרף לכובד ומגדיל את התאוצה.</div>
+            <div class="option" onclick="checkAns(this, true, 'מצוין! כוח החיכוך תמיד מתנגד לכיוון התנועה (כיוון \\(\\vec{v}\\)). בנפילה - המהירות כלפי מטה ולכן החיכוך כלפי מעלה.', 'q1_1')">כלפי מעלה, מתנגד למהירות הכלפי-מטה.</div>
+            <div class="option" onclick="checkAns(this, false, 'לא. אין שום כיוון &quot;אופקי&quot; אופייני לכוח חיכוך אוויר על כדור הנע אנכית.')">אופקי, ניצב לציר התנועה האנכי.</div>
+            <div class="feedback"></div>
+        </div>
+
+        <div class="quiz">
+            <p class="question">שאלה 2: באיזה שלב של התנועה - בעלייה או בירידה - תאוצת הכדור (כלפי מטה) צפויה להיות גדולה יותר?</p>
+            <div class="option" onclick="checkAns(this, true, 'נכון! בעלייה כוח הכובד וכוח החיכוך פועלים שניהם כלפי מטה ומצטרפים, ולכן התאוצה כלפי מטה גדולה יותר. בירידה הם מתקזזים חלקית, ולכן התאוצה כלפי מטה קטנה יותר.', 'q1_2')">בעלייה - הכובד והחיכוך מצטרפים באותו כיוון.</div>
+            <div class="option" onclick="checkAns(this, false, 'לא. דווקא בירידה החיכוך פועל הפוך לכובד ומקטין את התאוצה.')">בירידה - מהירות גדלה ומגבירה את תאוצת הכובד.</div>
+            <div class="option" onclick="checkAns(this, false, 'לא נכון. נוכחות חיכוך גורמת לכך שהתאוצות בעלייה ובירידה שונות זו מזו.')">שווה - תאוצת הכובד היא קבועה ללא תלות בכיוון.</div>
+            <div class="feedback"></div>
+        </div>
+
+        <div class="quiz">
+            <p class="question">שאלה 3: מדוע בוחרים דווקא בכדור פינג-פונג (או קלקר) עבור הניסוי, ולא בכדור מתכת כבד?</p>
+            <div class="option" onclick="checkAns(this, false, 'לא רלוונטי - תוכנת Tracker עובדת זהה עם כל סוגי הכדורים, אין הגבלת ציוד.')">תוכנת Tracker לא מסוגלת לעקוב אחר עצמים כבדים.</div>
+            <div class="option" onclick="checkAns(this, true, 'בדיוק! בכדור כבד מאוד ההפרש בין תאוצת העלייה לירידה זניח כי החיכוך זניח ביחס למשקל. בכדור פינג-פונג היחס \\(f/m\\) משמעותי, ולכן ההפרש בין התאוצות מובהק וניתן למדידה.', 'q1_3')">בכדור קל היחס f/m משמעותי וההפרש בתאוצות נראה.</div>
+            <div class="option" onclick="checkAns(this, false, 'לא נכון. כדור מתכת אכן עף יותר אנכית, אבל זה לא הסיבה הפיזיקלית - הסיבה היא עוצמת החיכוך.')">כדור כבד נוטה לסטות מאנכי ומקשה על הניתוח.</div>
+            <div class="feedback"></div>
+        </div>
+
+        <div class="tab-summary">
+            <label for="summary1">📝 סיכום הלשונית / נוסחאות חשובות (טקסט חופשי):</label>
+            <textarea id="summary1" placeholder="רשום כאן את העקרון הפיזיקלי המרכזי, הנוסחאות החשובות, ומה אתה מצפה לראות בניסוי..."></textarea>
+        </div>
+
+        <!-- כפתור סיום -->
+        <div class="complete-section">
+            <p>לאחר קריאת הרקע ומענה על שאלות ההבנה, רשום את הנקודות העיקריות בדו"ח שלך.</p>
+            <button class="complete-btn" id="btn1" onclick="completeStage(1)">✓ סיימתי, הבנתי ורשמתי בדו"ח</button>
+            <div class="complete-msg" id="msg1">השלב הושלם בהצלחה! ניתן לעבור לשלב הבא 🎉</div>
+        </div>
+    </div>
+
+    <!-- ===== לשונית 2: ניתוח הכוחות ===== -->
+    <div id="tab2" class="content">
+        <div class="theory">
+            <h2>שלב 2: ניתוח הכוחות וגזירת המשוואות</h2>
+            <p>נחיל את חוק ניוטון השני בכל אחד משני השלבים של התנועה. הסכמה: כיוון חיובי מטה. נסמן את גודל התאוצה כלפי מטה בירידה כ-\(a_{\text{מטה}}\), ובעלייה כ-\(a_{\text{מעלה}}\) (זוהי תאוצת הבלימה - תמיד כלפי מטה).</p>
+        </div>
+
+        <div class="important">
+            <strong>📌 גזירה - תנועה כלפי מטה (ירידה):</strong>
+            <ul>
+                <li>כוחות פועלים: \(mg\) (מטה, חיובי), \(f\) (מעלה, שלילי).</li>
+                <li>חוק ניוטון השני: \(\Sigma F = mg - f = m \cdot a_{\text{מטה}}\)</li>
+                <li>מסקנה: \(a_{\text{מטה}} = g - \dfrac{f}{m}\) - תאוצה <strong>קטנה</strong> מ-g.</li>
+            </ul>
+        </div>
+
+        <div class="important">
+            <strong>📌 גזירה - תנועה כלפי מעלה (עלייה):</strong>
+            <ul>
+                <li>כוחות פועלים: \(mg\) (מטה, חיובי), \(f\) (גם מטה - כי המהירות כלפי מעלה).</li>
+                <li>חוק ניוטון השני: \(\Sigma F = mg + f = m \cdot a_{\text{מעלה}}\)</li>
+                <li>מסקנה: \(a_{\text{מעלה}} = g + \dfrac{f}{m}\) - תאוצה <strong>גדולה</strong> מ-g.</li>
+            </ul>
+        </div>
+
+        <h3 style="margin-top:30px;">הצעד המתמטי - שתי משוואות, שני נעלמים</h3>
+        <p style="line-height:1.7;">יש לנו שתי משוואות עם שני נעלמים: \(g\) ו-\(f\). נמצא אותם באמצעות חיבור וחיסור המשוואות:</p>
+
+        <div class="formula">
+            <strong>חיבור המשוואות (לחילוץ g):</strong><br>
+            \(m \cdot a_{\text{מטה}} + m \cdot a_{\text{מעלה}} = (mg - f) + (mg + f) = 2mg\)<br><br>
+            \(\boxed{\, g = \dfrac{a_{\text{מעלה}} + a_{\text{מטה}}}{2} \,}\)
+        </div>
+
+        <div class="formula">
+            <strong>חיסור המשוואות (לחילוץ f):</strong><br>
+            \(m \cdot a_{\text{מעלה}} - m \cdot a_{\text{מטה}} = (mg + f) - (mg - f) = 2f\)<br><br>
+            \(\boxed{\, f = \dfrac{m \cdot (a_{\text{מעלה}} - a_{\text{מטה}})}{2} \,}\)
+        </div>
+
+        <div class="example">
+            <strong>💡 היופי בשיטה:</strong> ממוצע שתי התאוצות "מבטל" לחלוטין את השפעת החיכוך ונותן את \(g\) הנקי. ההפרש ביניהן, לעומת זאת, "מבודד" את החיכוך - ההפרש בין שתי התאוצות הוא בדיוק פי שניים מ-\(f/m\). כך שמדידה אחת מספקת לנו <strong>שני</strong> גדלים פיזיקליים שונים.
+        </div>
+
+        <div class="warning">
+            <strong>⚠️ הנחה מרכזית:</strong> השיטה מניחה שכוח החיכוך \(f\) הוא בעל אותו גודל בעלייה ובירידה. בפועל, חיכוך אוויר תלוי בריבוע המהירות (כוח דראג): \(f \propto v^2\), ולכן ההנחה נכונה <strong>בקירוב טוב</strong> רק כשהמהירויות בעלייה ובירידה דומות בגודלן - וזה אכן המצב סמוך לניתור (במהירויות נמוכות, החיכוך קטן וגם השוני בו בין השלבים קטן).
+        </div>
+
+        <!-- שאלות -->
+        <div class="quiz">
+            <p class="question">שאלה 1: מדוע <strong>חיבור</strong> שתי המשוואות מבטל את כוח החיכוך?</p>
+            <div class="option" onclick="checkAns(this, false, 'לא נכון. החיכוך לא &quot;מתבטל&quot; כי הוא קטן - הוא מתבטל מתמטית בגלל סימני +/-.')">החיכוך זניח לעומת הכובד והשפעתו מתבטלת.</div>
+            <div class="option" onclick="checkAns(this, true, 'בדיוק! במשוואה אחת \\(f\\) מופיע בסימן מינוס, ובשנייה בסימן פלוס. בחיבור הם מתקזזים בדיוק וכל שנותר הוא \\(2mg\\).', 'q2_1')">במשוואה אחת f חיובי ובאחרת שלילי - מתקזזים.</div>
+            <div class="option" onclick="checkAns(this, false, 'לא. הכובד דווקא נשמר ומופיע פעמיים - בחיבור מקבלים 2mg.')">הכובד מתבטל בחיבור ונשאר רק חיכוך בנוסחה.</div>
+            <div class="feedback"></div>
+        </div>
+
+        <div class="quiz">
+            <p class="question">שאלה 2: לפי המשוואה \(a_{\text{מעלה}} - a_{\text{מטה}} = \dfrac{2f}{m}\), אם בניסוי מסוים שתי התאוצות יוצאות שוות לחלוטין, מה זה אומר?</p>
+            <div class="option" onclick="checkAns(this, true, 'נכון! אם \\(a_{\\text{מעלה}} = a_{\\text{מטה}}\\) אז \\(2f/m = 0\\) ולכן \\(f = 0\\). זה היה המצב התיאורטי של נפילה חופשית טהורה ללא אוויר (בריק מוחלט).', 'q2_2')">חיכוך זניח, כמו תנועה בריק מוחלט.</div>
+            <div class="option" onclick="checkAns(this, false, 'לא נכון. דווקא ההיפך - תאוצות שוות אומרות שאין הבדל בין השלבים, כלומר אין חיכוך מורגש.')">חיכוך גדול שמשפיע על שני השלבים שווה.</div>
+            <div class="option" onclick="checkAns(this, false, 'לא נכון. תאוצות שוות לא קשורות לטעות - הן מצב פיזיקלי תקין (שיתאים לחלל).')">בהכרח טעות מדידה - תאוצות חייבות להיות שונות.</div>
+            <div class="feedback"></div>
+        </div>
+
+        <div class="quiz">
+            <p class="question">שאלה 3: מהי הסיבה הפיזיקלית לכך ש-\(a_{\text{מעלה}} > a_{\text{מטה}}\) (התאוצה כלפי מטה גדולה יותר בעלייה)?</p>
+            <div class="option" onclick="checkAns(this, false, 'לא. כוח הכובד אינו תלוי בכיוון התנועה - הוא תמיד \\(mg\\) כלפי מטה.')">הכובד פועל יותר חזק בעלייה כי הכדור מאט.</div>
+            <div class="option" onclick="checkAns(this, true, 'מדויק! בעלייה הכובד והחיכוך פועלים שניהם כלפי מטה ומצטרפים: \\(F_{\\text{נטו}} = mg + f\\). בירידה הם מתנגדים: \\(F_{\\text{נטו}} = mg - f\\). לכן בעלייה הכוח השקול גדול יותר וגם התאוצה.', 'q2_3')">בעלייה כובד וחיכוך מצטרפים, בירידה מתנגדים.</div>
+            <div class="option" onclick="checkAns(this, false, 'לא. המסה קבועה לאורך כל התנועה.')">המסה משתנה תוך כדי תנועה ומשפיעה על התאוצה.</div>
+            <div class="feedback"></div>
+        </div>
+
+        <div class="tab-summary">
+            <label for="summary2">📝 סיכום הלשונית / פירוט הגזירה (טקסט חופשי):</label>
+            <textarea id="summary2" placeholder="רשום את שני המקרים (עלייה וירידה), המשוואות שגזרת, ואיך הגעת לנוסחאות עבור g ועבור f..."></textarea>
+        </div>
+
+        <div class="complete-section">
+            <p>ודא שהבנת את הגזירה במלואה ושרשמת את שתי המשוואות בדו"ח.</p>
+            <button class="complete-btn" id="btn2" onclick="completeStage(2)">✓ סיימתי, הבנתי ורשמתי בדו"ח</button>
+            <div class="complete-msg" id="msg2">השלב הושלם בהצלחה! ניתן לעבור לשלב הבא 🎉</div>
+        </div>
+    </div>
+
+    <!-- ===== לשונית 3: תכנון וציוד ===== -->
+    <div id="tab3" class="content">
+        <div class="theory">
+            <h2>שלב 3: הכרת הציוד ותכנון הניסוי</h2>
+            <p>בשיטה זו נצלם בווידאו זריקה אנכית של כדור, ננתח את התנועה פריים-אחר-פריים בתוכנת <strong>Tracker</strong>, ונעבד את הנתונים ב-<strong>Excel</strong>. השיטה גמישה, אינה דורשת חיישנים ייעודיים, ומאפשרת לנו לראות בעיניים את התנועה שאנו מודדים.</p>
+        </div>
+
+        <div class="sketch-container">
+            <h3>הרכבת המערכת לצילום</h3>
+            <svg viewBox="0 0 560 360" xmlns="http://www.w3.org/2000/svg">
+                <!-- רצפה -->
+                <line x1="0" y1="340" x2="560" y2="340" stroke="#333" stroke-width="3"/>
+
+                <!-- חצובה ומצלמה -->
+                <g transform="translate(80, 200)">
+                    <!-- רגלי החצובה -->
+                    <line x1="-15" y1="140" x2="0" y2="20" stroke="#5d4037" stroke-width="2"/>
+                    <line x1="15" y1="140" x2="0" y2="20" stroke="#5d4037" stroke-width="2"/>
+                    <line x1="0" y1="140" x2="0" y2="20" stroke="#5d4037" stroke-width="2"/>
+                    <!-- מצלמה / סמארטפון -->
+                    <rect x="-22" y="-25" width="44" height="45" fill="#37474f" rx="4"/>
+                    <circle cx="0" cy="0" r="10" fill="#263238" stroke="#90caf9" stroke-width="2"/>
+                    <circle cx="0" cy="0" r="5" fill="#1e88e5"/>
+                    <text x="-30" y="40" font-size="11" fill="#333">סמארטפון/מצלמה</text>
+                    <text x="-25" y="52" font-size="9" fill="#666">(60fps רצוי)</text>
+                </g>
+
+                <!-- חץ ראייה / כיוון צילום -->
+                <line x1="105" y1="200" x2="330" y2="200" stroke="#90a4ae" stroke-width="1" stroke-dasharray="4,3" opacity="0.6"/>
+
+                <!-- אזור הזריקה - מסלול הכדור -->
+                <path d="M 380 320 Q 380 80 380 320" stroke="#ff9800" stroke-width="1.5" fill="none" stroke-dasharray="3,3" opacity="0.5"/>
+
+                <!-- מסלולים: מהירות עלייה ומהירות ירידה -->
+                <!-- כדור בשיא -->
+                <circle cx="380" cy="80" r="11" fill="#ffd54f" stroke="#e65100" stroke-width="1.5" opacity="0.4"/>
+                <!-- כדור באמצע (עלייה) -->
+                <circle cx="380" cy="180" r="11" fill="#ffd54f" stroke="#e65100" stroke-width="1.5" opacity="0.7"/>
+                <!-- כדור עם יד -->
+                <circle cx="380" cy="280" r="13" fill="#ff9800" stroke="#bf360c" stroke-width="2"/>
+
+                <!-- חיצים על מסלול הכדור -->
+                <line x1="395" y1="270" x2="395" y2="200" stroke="var(--secondary)" stroke-width="2" marker-end="url(#upArr)"/>
+                <text x="402" y="240" font-size="11" fill="var(--secondary)" font-weight="bold">עלייה</text>
+
+                <line x1="365" y1="200" x2="365" y2="270" stroke="#1976d2" stroke-width="2" marker-end="url(#downArr)"/>
+                <text x="335" y="245" font-size="11" fill="#1976d2" font-weight="bold">ירידה</text>
+
+                <!-- יד מטה -->
+                <text x="370" y="320" font-size="22">✋</text>
+
+                <!-- מוט כינון - מקל מטר ליד הזריקה -->
+                <rect x="445" y="80" width="6" height="240" fill="#fdd835" stroke="#f57f17" stroke-width="1.5"/>
+                <line x1="445" y1="80" x2="455" y2="80" stroke="#333" stroke-width="2"/>
+                <line x1="445" y1="320" x2="455" y2="320" stroke="#333" stroke-width="2"/>
+                <text x="460" y="200" font-size="11" fill="#bf360c" font-weight="bold">מוט כינון</text>
+                <text x="460" y="214" font-size="10" fill="#666">(אורך ידוע - למשל 1 מ')</text>
+                <text x="460" y="228" font-size="10" fill="#666">סמוך לכדור, באותו מישור</text>
+
+                <!-- הערות בתחתית -->
+                <text x="80" y="358" font-size="10" fill="#666">המצלמה ניצבת לכיוון התנועה (זווית 90°)</text>
+
+                <defs>
+                    <marker id="upArr" markerWidth="8" markerHeight="8" refX="4" refY="0" orient="auto">
+                        <path d="M0,7 L4,0 L8,7 z" fill="var(--secondary)"/>
+                    </marker>
+                    <marker id="downArr" markerWidth="8" markerHeight="8" refX="4" refY="7" orient="auto">
+                        <path d="M0,0 L4,7 L8,0 z" fill="#1976d2"/>
+                    </marker>
+                </defs>
+            </svg>
+        </div>
+
+        <div class="important">
+            <strong>📌 הציוד הנדרש:</strong>
+            <ul>
+                <li><strong>מצלמה או סמארטפון:</strong> כל מכשיר מודרני מתאים. רצוי קצב צילום של 60fps ומעלה - יותר פריימים, יותר נקודות מדידה.</li>
+                <li><strong>חצובה או משטח יציב למצלמה:</strong> תנועת המצלמה במהלך הצילום פוסלת את הניתוח.</li>
+                <li><strong>מוט כינון (Calibration Rod):</strong> אובייקט בעל אורך ידוע ומדויק - מקל מטר, סרגל ארוך, או מוט. ישמש להמרת פיקסלים למטרים בתוכנת Tracker.</li>
+                <li><strong>כדור:</strong> כדור פינג-פונג, כדור טניס, או <strong>כדור קלקר</strong> - האחרון נותן אות חיכוך חזק במיוחד (יחס \(f/mg\) של עשרות אחוזים) ולכן מומלץ לתלמידים שרוצים לראות את ההשפעה בולטת. נדרש משקל מדויק שלו (מאזניים).</li>
+                <li><strong>תוכנת Tracker:</strong> תוכנה חינמית להורדה מהאתר <em>physlets.org/tracker</em> - לסימון מיקום הכדור פריים-אחר-פריים.</li>
+                <li><strong>Excel או Google Sheets:</strong> לעיבוד נתוני המיקום, חישוב מהירויות, ויצירת גרף עם קווי מגמה.</li>
+            </ul>
+        </div>
+
+        <div class="warning">
+            <strong>⚠️ נקודות חיוניות בהכנת הצילום:</strong>
+            <ul>
+                <li><strong>המצלמה חייבת להיות ניצבת למישור הזריקה.</strong> אם הצילום באלכסון - תנועת הכדור על המסך לא משקפת נכונה את התנועה האמיתית במרחב.</li>
+                <li><strong>מוט הכינון חייב להיות באותו מישור (באותו עומק) של הזריקה.</strong> אם המוט קרוב יותר/רחוק יותר מהמצלמה ביחס למסלול הכדור, ההמרה לפיקסלים תהיה שגויה.</li>
+                <li><strong>רקע מנוגד וניגודיות טובה.</strong> כדור לבן על רקע כהה (או הפוך) מקל מאוד על הזיהוי בפריים. תאורה אחידה ובהירה תפחית את הטשטוש (motion blur).</li>
+                <li><strong>הזרוק את הכדור בקו אנכי.</strong> תזוזה אופקית קטנה היא בסדר - Tracker מסוגל למדוד את מיקום הכדור בכל פריים גם בקו לא אנכי.</li>
+                <li><strong>אורך הזריקה:</strong> רצוי שהכדור יעלה לכ-1-1.5 מטר. גובה זה נותן ~0.5-0.6 שניות לכל שלב, כלומר 30-40 פריימים ב-60fps - מספיק לרגרסיה איכותית.</li>
+            </ul>
+        </div>
+
+        <div class="example">
+            <strong>זיהוי המשתנים בניסוי:</strong>
+            <ul>
+                <li><strong>משתנה בלתי תלוי:</strong> הזמן \(t\) - נקבע על-ידי קצב הצילום (לדוגמה, ב-60fps כל פריים מייצג 1/60 שנייה).</li>
+                <li><strong>משתנה תלוי נמדד:</strong> מיקום הכדור \(y(t)\) בכל פריים. Tracker מודד בפיקסלים, ואז ממיר למטרים בעזרת מוט הכינון.</li>
+                <li><strong>גודל מחושב בעבודה:</strong> המהירות הרגעית \(v(t)\) - מחושבת ב-Excel מהפרשי המיקום (הפרש מרכזי).</li>
+                <li><strong>גדלים מחושבים מהגרף:</strong> תאוצת הכדור בעלייה ובירידה - כל אחת מהן השיפוע של קו המגמה במקטע הרלוונטי של גרף \(v(t)\).</li>
+                <li><strong>גודל נמדד בנפרד:</strong> מסת הכדור \(m\) (במאזניים).</li>
+                <li><strong>גדלים סופיים:</strong> תאוצת הכובד \(g\) וכוח החיכוך \(f\).</li>
+            </ul>
+        </div>
+
+        <!-- שאלות -->
+        <div class="quiz">
+            <p class="question">שאלה 1: מהו תפקידו של מוט הכינון (calibration rod) בניסוי? מדוע אין אפשרות לוותר עליו?</p>
+            <div class="option" onclick="checkAns(this, true, 'בדיוק! Tracker יכול למדוד מיקום רק בפיקסלים. כדי להמיר את המיקום לגדלים פיזיקליים (מטרים), נדרשת ידיעה של אובייקט בעל אורך ידוע באותו פריים - כך התוכנה יכולה לחשב כמה מטרים מייצג פיקסל אחד.', 'q3_1')">אורך ידוע בפריים מאפשר המרת פיקסלים למטרים.</div>
+            <div class="option" onclick="checkAns(this, false, 'לא נכון. Tracker עובד עם כל סוג צבע - אין דרישה לצבע מסוים.')">ניגודיות צבעונית להבדלת הכדור מהרקע בפריים.</div>
+            <div class="option" onclick="checkAns(this, false, 'לא. תאורת הצילום היא נושא נפרד מהכיול - אין צורך באובייקט מיוחד למטרה זו.')">מקור אור משני לתיקון חשיפת הצילום.</div>
+            <div class="feedback"></div>
+        </div>
+
+        <div class="quiz">
+            <p class="question">שאלה 2: מדוע חיוני שהמצלמה תהיה ניצבת למישור התנועה של הכדור?</p>
+            <div class="option" onclick="checkAns(this, false, 'לא בעיקר - איכות הצילום אכן משתפרת אבל זה לא הסיבה הפיזיקלית.')">לשיפור איכות התמונה ובהירות הכדור.</div>
+            <div class="option" onclick="checkAns(this, true, 'נכון! אם המצלמה מצולמת באלכסון, התנועה האמיתית באוויר (אנכית) משתקפת על המסך כתנועה דחוסה (foreshortened). המהירויות והתאוצות שניקבל מהניתוח לא יתאימו לערכים האמיתיים.', 'q3_2')">צילום באלכסון מעוות את התנועה האנכית האמיתית.</div>
+            <div class="option" onclick="checkAns(this, false, 'לא. הניסוי לא מסתמך על שום אלמנט סטריאוסקופי.')">לקבלת אפקט תלת-ממדי שיוצר תחושת עומק.</div>
+            <div class="feedback"></div>
+        </div>
+
+        <div class="quiz">
+            <p class="question">שאלה 3: מדוע נמדדת מסת הכדור בנפרד באמצעות מאזניים, ולא נגזרת מהצילום?</p>
+            <div class="option" onclick="checkAns(this, false, 'לא נכון - בנוסחה לחישוב g המסה אכן מתקזזת. אך בנוסחה לחישוב f היא נדרשת ככופל ישיר.')">המסה מתקזזת בכל הנוסחאות ולכן לא נדרשת.</div>
+            <div class="option" onclick="checkAns(this, true, 'מדויק! חישוב \\(g\\) לא דורש את המסה (היא מתקזזת בחיבור), אך חישוב \\(f = m(a_{\\text{מעלה}} - a_{\\text{מטה}})/2\\) דורש את \\(m\\) ככופל ישיר. בנוסף - אי-אפשר לגזור מסה מצילום בלבד.', 'q3_3')">נדרשת לחישוב f, ואי-אפשר לגזור מסה מצילום.</div>
+            <div class="option" onclick="checkAns(this, false, 'לא. Tracker מודד מיקום בלבד, לא משקל. אין לתוכנה גישה למסה.')">Tracker מבצע משקילה אוטומטית מנפח הכדור.</div>
+            <div class="feedback"></div>
+        </div>
+
+        <div class="complete-section" style="border-color: var(--accent); background: linear-gradient(135deg, #fff5e6 0%, #ffe0b3 100%); margin-top: 25px;">
+            <h3 style="margin-top:0; color:var(--accent);">📷 צילום מערכת הניסוי</h3>
+            <p>ניתן לצלם את מערכת הניסוי שהקמת (המצלמה, החצובה, אזור הזריקה, מוט הכינון) ולצרף את התמונות כאן. התמונות יופיעו בדו"ח תחת חלק תכנון הציוד.</p>
+            <input type="file" id="setupUpload" accept="image/*" multiple onchange="handleSetupUpload(event)" style="display:inline-block; padding:10px; background:white; border:2px dashed var(--accent); border-radius:8px; cursor:pointer; max-width:100%;">
+            <div id="setupGallery" style="display:flex; flex-wrap:wrap; gap:12px; justify-content:center; margin-top:18px;"></div>
+        </div>
+
+        <div class="tab-summary">
+            <label for="summary3">📝 סיכום הלשונית / תיאור הציוד והתכנון (טקסט חופשי):</label>
+            <textarea id="summary3" placeholder="פרט את הציוד שבחרת, אופן הצבת המצלמה ומוט הכינון, וסיבות לבחירות שעשית..."></textarea>
+        </div>
+
+        <div class="complete-section">
+            <p>ודא שזיהית את כל הציוד והמשתנים בדו"ח שלך.</p>
+            <button class="complete-btn" id="btn3" onclick="completeStage(3)">✓ סיימתי, הבנתי ורשמתי בדו"ח</button>
+            <div class="complete-msg" id="msg3">השלב הושלם בהצלחה! ניתן לעבור לשלב הבא 🎉</div>
+        </div>
+    </div>
+
+    <!-- ===== לשונית 4: ביצוע ואיסוף נתונים ===== -->
+    <div id="tab4" class="content">
+        <div class="theory">
+            <h2>שלב 4: ביצוע הניסוי ואיסוף נתונים</h2>
+            <p>זה השלב המעשי. נצלם בווידאו זריקה אחת של הכדור (זריקה אנכית מטה למעלה ובחזרה), נעקוב אחר מיקום הכדור בכל פריים באמצעות Tracker, נעבד את הנתונים ב-Excel ונחלץ שני ערכי תאוצה: \(a_{\text{מעלה}}\) ו-\(a_{\text{מטה}}\).</p>
+        </div>
+
+        <div class="sketch-container">
+            <h3>גרף מהירות-זמן צפוי (סכמטי)</h3>
+            <svg viewBox="0 0 600 320" xmlns="http://www.w3.org/2000/svg">
+                <!-- צירים -->
+                <line x1="50" y1="160" x2="570" y2="160" stroke="#333" stroke-width="2" marker-end="url(#axisArr)"/>
+                <line x1="60" y1="280" x2="60" y2="20" stroke="#333" stroke-width="2" marker-end="url(#axisArr)"/>
+                <text x="555" y="180" font-size="13" fill="#333">t (s)</text>
+                <text x="25" y="30" font-size="13" fill="#333">v (m/s)</text>
+                <text x="40" y="165" font-size="11" fill="#666">0</text>
+
+                <!-- נקודות נתונים - שלב עלייה (v חיובי, יורד) -->
+                <circle cx="85" cy="55" r="2.5" fill="#e65100"/>
+                <circle cx="105" cy="64" r="2.5" fill="#e65100"/>
+                <circle cx="125" cy="71" r="2.5" fill="#e65100"/>
+                <circle cx="145" cy="82" r="2.5" fill="#e65100"/>
+                <circle cx="165" cy="89" r="2.5" fill="#e65100"/>
+                <circle cx="185" cy="98" r="2.5" fill="#e65100"/>
+                <circle cx="205" cy="108" r="2.5" fill="#e65100"/>
+                <circle cx="225" cy="116" r="2.5" fill="#e65100"/>
+                <circle cx="245" cy="126" r="2.5" fill="#e65100"/>
+                <circle cx="265" cy="134" r="2.5" fill="#e65100"/>
+                <circle cx="285" cy="143" r="2.5" fill="#e65100"/>
+                <circle cx="305" cy="151" r="2.5" fill="#e65100"/>
+
+                <!-- שיא: v=0 -->
+                <circle cx="320" cy="160" r="4" fill="var(--success)" stroke="white" stroke-width="1.5"/>
+                <text x="305" y="185" font-size="10" fill="var(--success)" font-weight="bold">שיא: v=0</text>
+
+                <!-- נקודות נתונים - שלב ירידה (v שלילי, גדל בגודלו) -->
+                <circle cx="335" cy="168" r="2.5" fill="#1976d2"/>
+                <circle cx="355" cy="176" r="2.5" fill="#1976d2"/>
+                <circle cx="375" cy="182" r="2.5" fill="#1976d2"/>
+                <circle cx="395" cy="191" r="2.5" fill="#1976d2"/>
+                <circle cx="415" cy="199" r="2.5" fill="#1976d2"/>
+                <circle cx="435" cy="206" r="2.5" fill="#1976d2"/>
+                <circle cx="455" cy="214" r="2.5" fill="#1976d2"/>
+                <circle cx="475" cy="222" r="2.5" fill="#1976d2"/>
+                <circle cx="495" cy="231" r="2.5" fill="#1976d2"/>
+                <circle cx="515" cy="238" r="2.5" fill="#1976d2"/>
+                <circle cx="535" cy="245" r="2.5" fill="#1976d2"/>
+
+                <!-- קווי מגמה -->
+                <line x1="80" y1="50" x2="315" y2="159" stroke="var(--accent)" stroke-width="2.5" stroke-dasharray="6,4"/>
+                <line x1="325" y1="162" x2="540" y2="248" stroke="var(--secondary)" stroke-width="2.5" stroke-dasharray="6,4"/>
+
+                <!-- תוויות שיפועים -->
+                <rect x="100" y="35" width="155" height="22" fill="white" stroke="var(--accent)" rx="3"/>
+                <text x="178" y="50" font-size="11" fill="var(--accent)" font-weight="bold" text-anchor="middle">שיפוע = −a_מעלה (תלול)</text>
+
+                <rect x="395" y="220" width="155" height="22" fill="white" stroke="var(--secondary)" rx="3"/>
+                <text x="473" y="235" font-size="11" fill="var(--secondary)" font-weight="bold" text-anchor="middle">שיפוע = −a_מטה (מתון)</text>
+
+                <!-- חיצים מציינים את האזורים -->
+                <text x="100" y="290" font-size="11" fill="var(--accent)" font-weight="bold">⬆ עלייה</text>
+                <text x="430" y="290" font-size="11" fill="var(--secondary)" font-weight="bold">⬇ ירידה</text>
+                <line x1="80" y1="265" x2="305" y2="265" stroke="var(--accent)" stroke-width="2" marker-end="url(#arrR)"/>
+                <line x1="335" y1="265" x2="535" y2="265" stroke="var(--secondary)" stroke-width="2" marker-end="url(#arrB)"/>
+
+                <defs>
+                    <marker id="axisArr" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+                        <path d="M0,0 L0,6 L7,3 z" fill="#333"/>
+                    </marker>
+                    <marker id="arrR" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+                        <path d="M0,0 L0,6 L7,3 z" fill="var(--accent)"/>
+                    </marker>
+                    <marker id="arrB" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+                        <path d="M0,0 L0,6 L7,3 z" fill="var(--secondary)"/>
+                    </marker>
+                </defs>
+            </svg>
+            <p style="font-size:0.95em; color:#666; margin-top:10px;">בגרף הצפוי: שני קווי מגמה - אחד לשלב העלייה (כתום, תלול יותר כי \(a = g+f/m\)) ואחד לשלב הירידה (כחול, מתון יותר כי \(a = g-f/m\)). שני השיפועים שליליים, וגודלם נותן את התאוצות.</p>
+        </div>
+
+        <div class="important">
+            <strong>📌 שלבי הביצוע (3 שלבים מרכזיים):</strong>
+            <ol style="line-height:1.9;">
+                <li><strong>צילום הזריקה:</strong>
+                    <ul>
+                        <li>הצב את המצלמה על חצובה, ניצבת למישור הזריקה, בגובה אמצעי לאזור התנועה הצפוי.</li>
+                        <li>הצב את מוט הכינון אנכית בתוך הפריים, באותו עומק שבו תיזרק הכדור.</li>
+                        <li>שקול את הכדור במאזניים, רשום את המסה (בק"ג).</li>
+                        <li>הפעל הקלטה (העדף 60fps אם זמין). זרוק את הכדור אנכית כלפי מעלה לגובה של כ-1-1.5 מטר ותפוס אותו או הנח לו ליפול.</li>
+                        <li>הפסק הקלטה. ודא שהזריקה כולה (מהשחרור עד הירידה) נכללת בצילום.</li>
+                    </ul>
+                </li>
+                <li><strong>ניתוח ב-Tracker:</strong>
+                    <ul>
+                        <li>פתח את Tracker והעלה את קובץ הווידאו.</li>
+                        <li><strong>הגדר כיול אורך (Calibration Stick):</strong> סמן את שני קצוות מוט הכינון בפריים והזן את אורכו במטרים. כעת התוכנה יודעת להמיר פיקסלים למטרים.</li>
+                        <li>הגדר ציר קואורדינטות עם הציר \(y\) אנכי כלפי מעלה.</li>
+                        <li><strong>הוסף עקבות (Track):</strong> בחר "Track > New > Point Mass" וסמן את מרכז הכדור בכל פריים שבו הוא נראה. אפשר להשתמש ב-Autotracker אם רקע ניגודי.</li>
+                        <li>בלשונית הנתונים יופיעו זוגות \((t, y)\) - שמור / העתק אותם ל-Excel.</li>
+                    </ul>
+                </li>
+                <li><strong>עיבוד ב-Excel:</strong>
+                    <ul>
+                        <li>בעמודה A: זמן \(t_i\); בעמודה B: מיקום \(y_i\) (במטרים).</li>
+                        <li>בעמודה C: חישוב המהירות הרגעית בעזרת <strong>הפרש מרכזי</strong>:<br>
+                        $$v_i = \frac{y_{i+1} - y_{i-1}}{t_{i+1} - t_{i-1}}$$
+                        (אם הצילום ב-60fps, המכנה תמיד \(2/60 = 0.0333\) שניות.)</li>
+                        <li>צור גרף פיזור (Scatter) של \(v\) כפונקציה של \(t\).</li>
+                        <li>זהה ויזואלית את שלב העלייה (נקודות עם \(v > 0\), יורדות עם הזמן) ואת שלב הירידה (נקודות עם \(v < 0\), הולכות ונעשות שליליות יותר).</li>
+                        <li><strong>הוסף קו מגמה לכל מקטע בנפרד</strong> (Add Trendline > Linear > Display Equation). השיפוע של קו המגמה הוא תאוצת הכדור באותו שלב.</li>
+                        <li>השיפוע יהיה שלילי בשני המקרים - רשום את <strong>הגודל המוחלט</strong> בלבד כתאוצה.</li>
+                    </ul>
+                </li>
+            </ol>
+        </div>
+
+        <div class="example">
+            <strong>💡 טיפים לרגרסיה איכותית:</strong>
+            <ul>
+                <li>אל תכלול בכל קו מגמה את הנקודות הקרובות לשיא (v קרוב ל-0) - שם השגיאה היחסית במהירות גדולה במיוחד.</li>
+                <li>אל תכלול את הפריימים הראשונים שבהם היד עדיין נוגעת בכדור - הזריקה עדיין לא הסתיימה ויש כוח נוסף שלא רלוונטי.</li>
+                <li>שאף שיהיו לפחות 10-15 נקודות בכל קו מגמה.</li>
+                <li>ב-Excel: בדוק את ערך \(R^2\) של קו המגמה - ערך גבוה (> 0.98) מצביע על איכות טובה של הרגרסיה.</li>
+            </ul>
+        </div>
+
+        <h3 style="text-align:center; color:var(--primary); margin-top:30px;">מסת הכדור</h3>
+        <div class="mass-row">
+            <label for="mass">מסת הכדור m =</label>
+            <input type="number" step="0.0001" id="mass" placeholder="0.0027" oninput="checkDataComplete()">
+            <span style="font-weight:bold; color:var(--primary);">ק"ג</span>
+        </div>
+        <p style="text-align:center; color:#666; font-size:0.9em;">(ערך טיפוסי לכדור פינג-פונג: 2.5-2.7 גרם, כלומר 0.0025-0.0027 ק"ג)</p>
+
+        <h3 style="text-align:center; color:var(--primary); margin-top:30px;">טבלת הנתונים - תאוצות הכדור</h3>
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>תאוצה בעלייה<br><small>\(a_{\text{מעלה}}\) - גודל השיפוע של קו המגמה לשלב העלייה</small></th>
+                    <th>תאוצה בירידה<br><small>\(a_{\text{מטה}}\) - גודל השיפוע של קו המגמה לשלב הירידה</small></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><input type="number" step="0.01" id="aUp" placeholder="10.25" oninput="checkDataComplete()"></td>
+                    <td><input type="number" step="0.01" id="aDown" placeholder="9.40" oninput="checkDataComplete()"></td>
+                </tr>
+                <tr>
+                    <td colspan="2" style="font-size:0.9em; color:#666; padding:8px;">ערכים בגודל מוחלט (חיוביים), ביחידות m/s². צפוי: \(a_{\text{מעלה}} > a_{\text{מטה}}\).</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3 style="text-align:center; color:var(--primary); margin-top:30px;">צירוף צילומי גרפים</h3>
+        <div class="upload-area">
+            <p style="margin-top:0;">צרף צילומי מסך של גרף ה-\(v(t)\) מ-Excel (כולל קווי המגמה והשיפועים), צילום מסך מ-Tracker, או כל גרף רלוונטי אחר. הגרפים יצורפו לדו"ח ה-PDF.</p>
+            <input type="file" id="graphUpload" accept="image/*" multiple onchange="handleGraphUpload(event)">
+            <label for="graphUpload" class="upload-btn">📷 בחר תמונות לצירוף</label>
+            <div id="graphPreviews" class="graph-previews"></div>
+        </div>
+
+        <div id="dataPreview" style="display:none;" class="summary-box">
+            <h3 style="margin-top:0;">📊 סיכום ראשוני של הנתונים</h3>
+            <div id="dataPreviewContent"></div>
+        </div>
+
+        <!-- שאלות -->
+        <div class="quiz">
+            <p class="question">שאלה 1: מדוע משתמשים בהפרש מרכזי \(v_i = \dfrac{y_{i+1} - y_{i-1}}{t_{i+1} - t_{i-1}}\) ולא בהפרש קדמי \(v_i = \dfrac{y_{i+1} - y_i}{t_{i+1} - t_i}\)?</p>
+            <div class="option" onclick="checkAns(this, true, 'מדויק! הפרש מרכזי הוא קירוב מסדר שני (שגיאה פרופורציונלית ל-\\(dt^2\\)), לעומת הפרש קדמי שהוא קירוב מסדר ראשון (שגיאה פרופורציונלית ל-\\(dt\\)). בקצב צילום סופי, ההפרש המרכזי נותן מהירות מדויקת יותר.', 'q4_1')">קירוב מסדר שני בזמן - מדויק יותר מהפרש קדמי.</div>
+            <div class="option" onclick="checkAns(this, false, 'לא. שתי הנוסחאות עובדות באותו אופן עם זמני דגימה אחידים.')">ההפרש הקדמי דורש זמני דגימה לא-אחידים.</div>
+            <div class="option" onclick="checkAns(this, false, 'לא נכון - גם ההפרש המרכזי דורש שני שכנים. אין יתרון מצד דרישות התדירות.')">ההפרש הקדמי מצריך תדירות צילום גבוהה יותר.</div>
+            <div class="feedback"></div>
+        </div>
+
+        <div class="quiz">
+            <p class="question">שאלה 2: מדוע מתאימים שני קווי מגמה נפרדים (אחד לעלייה, אחד לירידה), ולא קו אחד לכל הגרף?</p>
+            <div class="option" onclick="checkAns(this, false, 'לא בעיקר - אקסל מסוגל להתאים קו רגרסיה על כל טווח. הסיבה האמיתית פיזיקלית.')">אקסל לא יודע להתאים רגרסיה על טווח גדול.</div>
+            <div class="option" onclick="checkAns(this, true, 'בדיוק! התאוצות בעלייה ובירידה <strong>שונות</strong> זו מזו בגלל כיוון החיכוך. קו מגמה אחד היה ממצע את שתי התאוצות ונותן \\(g\\), אך לא היה מאפשר לחלץ את כוח החיכוך \\(f\\). שני קווים נפרדים נותנים גם את \\(g\\) (דרך הממוצע) וגם את \\(f\\) (דרך ההפרש).', 'q4_2')">התאוצות שונות בעלייה וירידה - קו אחד יסתיר זאת.</div>
+            <div class="option" onclick="checkAns(this, false, 'לא נכון - תאוצת הכובד אכן קבועה. רק התאוצה הכוללת על הכדור משתנה בגלל החיכוך.')">תאוצת הכובד עצמה משתנה לאורך הזריקה האנכית.</div>
+            <div class="feedback"></div>
+        </div>
+
+        <div class="quiz">
+            <p class="question">שאלה 3: מדוע יש לא לכלול בקווי המגמה את הפריימים הקרובים מאוד לשיא (כשהמהירות קרובה לאפס)?</p>
+            <div class="option" onclick="checkAns(this, true, 'מצוין! כשהמהירות קטנה, ההפרש בין שתי קואורדינטות עוקבות במיקום הוא קטן מאוד - לפעמים בסדר גודל של דיוק הסימון שלנו. השגיאה היחסית של חישוב המהירות גדולה מאוד דווקא ליד השיא.', 'q4_3')">הפרש המיקום זעיר ולכן השגיאה היחסית במהירות גדולה.</div>
+            <div class="option" onclick="checkAns(this, false, 'לא. בשיא הכוחות עדיין פועלים בדיוק כפי שתיארנו - כובד וחיכוך פועלים תמיד.')">בשיא הכוחות מתאזנים ולא ניתן לחשב את התאוצה.</div>
+            <div class="option" onclick="checkAns(this, false, 'לא. Tracker בהחלט יכול לסמן גם את אזור השיא, פשוט הנתונים שם פחות אמינים.')">Tracker לא מסוגל לזהות את הכדור באזור השיא.</div>
+            <div class="feedback"></div>
+        </div>
+
+        <div class="tab-summary">
+            <label for="summary4">📝 סיכום הלשונית / תיאור הביצוע (טקסט חופשי):</label>
+            <textarea id="summary4" placeholder="תאר את ביצוע הניסוי, קשיים שהתעוררו, איך מדדת את התאוצות, ערכים שקיבלת בקווי המגמה..."></textarea>
+        </div>
+
+        <div class="complete-section">
+            <p id="completionInstr">יש למלא את כל 3 השדות (מסה + 2 תאוצות) לפני המעבר לשלב הבא.</p>
+            <button class="complete-btn" id="btn4" onclick="completeStage(4)">✓ סיימתי, הבנתי ורשמתי בדו"ח</button>
+            <div class="complete-msg" id="msg4">הנתונים נאספו בהצלחה! ניתן לעבור לניתוח 🎉</div>
+        </div>
+    </div>
+
+    <!-- ===== לשונית 5: ניתוח ותוצאות ===== -->
+    <div id="tab5" class="content">
+        <div class="theory">
+            <h2>שלב 5: ניתוח התוצאות וחישוב g ו-f</h2>
+            <p>כעת ניקח את שני ערכי התאוצה שמדדנו (\(a_{\text{מעלה}}\) ו-\(a_{\text{מטה}}\)) ונציב במשוואות שגזרנו בשלב 2 כדי לחלץ את תאוצת הכובד \(g\) וגודל כוח החיכוך \(f\).</p>
+        </div>
+
+        <div id="userDataDisplay" class="summary-box">
+            <h3 style="margin-top:0;">📊 הנתונים שאספת</h3>
+            <div id="userDataContent"></div>
+        </div>
+
+        <div class="important">
+            <strong>📌 שלבי החישוב (כסדר):</strong>
+            <ul>
+                <li>חשב את \(g_{\text{ניסויי}} = \dfrac{a_{\text{מעלה}} + a_{\text{מטה}}}{2}\) - תאוצת הכובד הנקייה מהשפעת חיכוך.</li>
+                <li>חשב את השגיאה היחסית מול הערך התיאורטי \(g_{\text{תיאורטי}} = 9.81 \, \text{m/s}^2\).</li>
+                <li>חשב את כוח החיכוך \(f = \dfrac{m(a_{\text{מעלה}} - a_{\text{מטה}})}{2}\) - על-ידי הצבת המסה שמדדת.</li>
+                <li>חשב את היחס \(f/mg\) - מודד כמה החיכוך משמעותי ביחס למשקל הכדור.</li>
+            </ul>
+        </div>
+
+        <div id="calculationResults" class="summary-box" style="background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%); border-color: var(--accent);">
+            <h3 style="margin-top:0;">🧮 תוצאות החישוב האוטומטי</h3>
+            <div id="calculationContent"></div>
+        </div>
+
+        <div class="formula">
+            המשוואות המרכזיות:<br>
+            \(g = \dfrac{a_{\text{מעלה}} + a_{\text{מטה}}}{2}\) &nbsp;&nbsp;|&nbsp;&nbsp; \(f = \dfrac{m(a_{\text{מעלה}} - a_{\text{מטה}})}{2}\)
+        </div>
+
+        <div class="example">
+            <strong>חישוב השגיאה היחסית:</strong>
+            <br>\(\text{שגיאה יחסית} = \dfrac{|g_{\text{ניסויי}} - g_{\text{תיאורטי}}|}{g_{\text{תיאורטי}}} \times 100\%\)
+            <br>שגיאה מתחת ל-3% נחשבת לתוצאה מצוינת בניסויי תלמידים.
+        </div>
+
+        <!-- שאלות -->
+        <div class="quiz">
+            <p class="question">שאלה 1: באיזה חלק של התנועה (כלפי מעלה/כלפי מטה) תאוצת הכדור גדולה יותר? האם זה מתיישב עם התיאוריה?</p>
+            <div class="option" onclick="checkAns(this, true, 'נכון! בעלייה הכובד והחיכוך פועלים יחד כלפי מטה: \\(a_{\\text{מעלה}} = g + f/m\\). בירידה הם מתנגדים: \\(a_{\\text{מטה}} = g - f/m\\). לכן \\(a_{\\text{מעלה}} > a_{\\text{מטה}}\\) - וההפרש מתאים לתיאוריה!', 'q5_1')">בעלייה - הכוחות מצטרפים. תואם לתיאוריה.</div>
+            <div class="option" onclick="checkAns(this, false, 'לא נכון - בירידה החיכוך מקזז חלק מהכובד והתאוצה דווקא קטנה.')">בירידה - מהירות גדלה לכן גם תאוצה גדלה.</div>
+            <div class="option" onclick="checkAns(this, false, 'לא. אם החיכוך אינו זניח - יש הבדל מובהק בין השלבים.')">שווה - תאוצת הכובד קבועה בלי תלות בכיוון.</div>
+            <div class="feedback"></div>
+        </div>
+
+        <div class="quiz">
+            <p class="question">שאלה 2: התקבל ערך \(g_{\text{ניסויי}} = 9.78\) m/s². מה המשמעות של ההפרש מול הערך התיאורטי 9.81?</p>
+            <div class="option" onclick="checkAns(this, false, 'לא. הניסוי הצליח - שגיאה של 0.3% היא מצוינת בכל קנה מידה.')">הניסוי נכשל בגלל סטייה לא מקובלת מהצפוי.</div>
+            <div class="option" onclick="checkAns(this, true, 'מצוין! שגיאה יחסית של 0.3% היא מצוינת בניסוי תלמידים. כפי שראינו, שיטת החיבור מבטלת את החיכוך - ולכן g יוצא מדויק במיוחד.', 'q5_2')">שגיאה של 0.3% - תוצאה מצוינת לניסוי תלמידים.</div>
+            <div class="option" onclick="checkAns(this, false, 'לא נכון - g משתנה בין מקומות אבל לא בסדר גודל זה. הסטייה גיאוגרפית טיפוסית היא 0.05%.')">ערך g באזורנו שונה במידה ניכרת מ-9.81.</div>
+            <div class="feedback"></div>
+        </div>
+
+        <div class="quiz">
+            <p class="question">שאלה 3: התקבל ערך כוח חיכוך \(f \approx 0.001\) ניוטון על כדור שמסתו 0.0027 ק"ג. האם תוצאה זו סבירה? (ציין יחס \(f/mg\))</p>
+            <div class="option" onclick="checkAns(this, true, 'נכון! \\(mg = 0.0027 \\cdot 9.81 \\approx 0.026\\) ניוטון. יחס החיכוך \\(f/mg \\approx 0.001/0.026 \\approx 4\\%\\). זה ערך סביר לחלוטין לכדור פינג-פונג במהירויות אופייניות בניסוי.', 'q5_3')">סבירה - f/mg ≈ 4% מתאים לכדור פינג-פונג.</div>
+            <div class="option" onclick="checkAns(this, false, 'לא. \\(f\\) הוא הרבה פחות ממשקל הכדור - היחס 4% הוא סביר. f לא חייב להיות פחות מ-mg.')">f חורג ממשקלו של הכדור ולכן לא יתכן פיזית.</div>
+            <div class="option" onclick="checkAns(this, false, 'לא נכון - f שונה מ-0 הוא תוצאה תקינה ומוכחת לכל כדור הנע באוויר.')">f צריך להיות אפס - לא ייתכן חיכוך באוויר.</div>
+            <div class="feedback"></div>
+        </div>
+
+        <div class="tab-summary">
+            <label for="summary5">📝 סיכום הלשונית / ניתוח התוצאות (טקסט חופשי):</label>
+            <textarea id="summary5" placeholder="פירוש החישובים: ערך g שקיבלת, השגיאה היחסית, כוח החיכוך והיחס למשקל הכדור. האם התוצאות תואמות את הציפיות?..."></textarea>
+        </div>
+
+        <div class="complete-section">
+            <p>רשום את ערך g, השגיאה היחסית, וכוח החיכוך בדו"ח שלך.</p>
+            <button class="complete-btn" id="btn5" onclick="completeStage(5)">✓ סיימתי, הבנתי ורשמתי בדו"ח</button>
+            <div class="complete-msg" id="msg5">השלב הושלם בהצלחה! נמשיך לדיון 🎉</div>
+        </div>
+    </div>
+
+    <!-- ===== לשונית 6: שגיאות ומסקנות ===== -->
+    <div id="tab6" class="content">
+        <div class="theory">
+            <h2>שלב 6: דיון בשגיאות מדידה ומסקנות</h2>
+            <p>השלב האחרון - בחינת מקורות הסטייה מהתוצאה התיאורטית, וסיכום ממצאי הניסוי כולו.</p>
+        </div>
+
+        <div id="finalSummary" class="summary-box">
+            <h3 style="margin-top:0;">📈 סיכום התוצאות שלך</h3>
+            <div id="finalSummaryContent"></div>
+        </div>
+
+        <div class="important">
+            <strong>📌 גורמי שגיאה אפשריים בניסוי - יש לדון בהם בדו"ח:</strong>
+            <ul>
+                <li><strong>תלות חיכוך האוויר במהירות:</strong> בניתוח הנחנו ש-\(f\) קבוע. במציאות \(f \propto v^2\) (כוח דראג). לכן ההנחה ש-\(f\) זהה בעלייה ובירידה תקפה רק בקירוב, ומדויקת יותר באזורי הגרף עם מהירויות דומות.</li>
+                <li><strong>דיוק סימון הכדור ב-Tracker:</strong> סימון מרכז הכדור בכל פריים מתבצע ידנית או אוטומטית, בדיוק של ±1-2 פיקסלים. בפריים טשטוש (motion blur) הדיוק יורד.</li>
+                <li><strong>שגיאת כיול אורך:</strong> סימון קצוות מוט הכינון נעשה בדיוק של פיקסלים בודדים. אם המוט באורך 1 מטר ובפריים הוא 500 פיקסלים, שגיאה של 2 פיקסלים = 0.4% בכל מדידת מיקום, מה שיכול להצטבר.</li>
+                <li><strong>בעיית עומק (פרלקס):</strong> אם מוט הכינון אינו באותו עומק של הכדור, ההמרה פיקסל→מטר תהיה שגויה. כדור קרוב יותר למצלמה ייראה גדול יותר וזז יותר פיקסלים ממה שהוא באמת.</li>
+                <li><strong>קצב הצילום הסופי:</strong> ב-30fps המרווח בין פריימים הוא 33 מילישניות, וב-60fps - 17 מילישניות. קצב צילום נמוך מקטין את מספר הנקודות בכל קו מגמה ומעלה את אי-ודאות השיפוע.</li>
+                <li><strong>בחירת תחום קו המגמה:</strong> אם כוללים נקודות קרובות מדי לשיא (מהירות נמוכה - שגיאה יחסית גדולה) או נקודות מהפריימים הראשונים (היד עוד לא ניתקה מהכדור) - השיפוע מתקבל לא מייצג.</li>
+                <li><strong>סיבוב הכדור:</strong> אם הכדור מסתובב בעת התנועה, כוח החיכוך מושפע מעט (אפקט מגנוס). השפעה זו קטנה בזריקה אנכית כמעט-טהורה.</li>
+                <li><strong>שגיאת מסה:</strong> דיוק שקילת הכדור (לרוב ±0.1 גרם, כלומר ~4% מהמסה הכוללת) משפיע ישירות על חישוב \(f\) (אך לא על \(g\)).</li>
+            </ul>
+        </div>
+
+        <div class="example">
+            <strong>סוגי שגיאות:</strong>
+            <ul>
+                <li><strong>שגיאות מערכתיות:</strong> תלות \(f\) במהירות, פרלקס בעומק שונה למוט הכינון, סיבוב הכדור - תורמות לסטייה עקבית בכיוון אחד.</li>
+                <li><strong>שגיאות אקראיות:</strong> דיוק סימון פיקסל, רעידות זעירות במצלמה, מטשטוש פריימים - אלו לרוב מקזזות זו את זו במידת מה ברגרסיה לינארית על נקודות רבות.</li>
+            </ul>
+        </div>
+
+        <div class="example" style="background:#e8f5e9; border-color: var(--success);">
+            <strong>💡 הערה חשובה לדו"ח:</strong> שיטת מדידת \(g\) דרך זריקה אנכית עם ניתוח עלייה-ירידה היא יוצאת דופן ביעילותה: היא <strong>מבטלת מתמטית</strong> את הגורם המרכזי לשגיאה (חיכוך האוויר), ולכן בדרך כלל מקבלים ערך \(g\) קרוב מאוד לתיאורטי. בשיטת הווידאו יש יתרון נוסף: כל תהליך המדידה גלוי ובר-בדיקה - ניתן לחזור לסרטון ולסמן מחדש פריים מסוים, או לבדוק שוב את הכיול.
+        </div>
+
+        <div class="warning">
+            <strong>📝 חובה לכלול בדו"ח:</strong>
+            <ul>
+                <li>השוואה של ערך g הניסויי לערך התיאורטי (9.81 m/s²) וחישוב שגיאה יחסית.</li>
+                <li>ערך כוח החיכוך \(f\) שקיבלת, יחד עם השוואה למשקל הכדור (יחס \(f/mg\)).</li>
+                <li>פירוט של 3 לפחות מקורות שגיאה אפשריים והשפעתם על התוצאה.</li>
+                <li>האם התוצאות שקיבלת מצדיקות הזנחת החיכוך, או שהוא מובהק?</li>
+                <li>הצעות לשיפור הניסוי - איך אפשר להקטין את השגיאה? (למשל: קצב צילום גבוה יותר, רקע מנוגד יותר, כיול ארוך יותר וכו')</li>
+                <li>מסקנה ברורה: האם הניסוי אישש את ערך g התיאורטי? האם הצליח למדוד את החיכוך?</li>
+            </ul>
+        </div>
+
+        <!-- שאלות -->
+        <div class="quiz">
+            <p class="question">שאלה 1: מהי ההנחה המרכזית הניצבת בבסיס שיטת המדידה (חיבור-וחיסור משוואות)?</p>
+            <div class="option" onclick="checkAns(this, true, 'מדויק! גזירת הנוסחאות נשענת על כך שאפשר לרשום את שתי המשוואות עם אותו \\(f\\). אם החיכוך שונה בעלייה ובירידה, החיבור לא יבטל אותו במלואו וההפרש לא ייתן \\(f\\) &quot;אמיתי&quot; יחיד.', 'q6_1')">ש-f זהה בעלייה ובירידה (מהירויות דומות).</div>
+            <div class="option" onclick="checkAns(this, false, 'לא נכון - מסת הכדור משפיעה על f אבל לא על הקזזת החיכוך. למעשה דווקא בכדור קל החיכוך בולט.')">שהכדור כבד מספיק להזניח את השפעת החיכוך.</div>
+            <div class="option" onclick="checkAns(this, false, 'לא. אופן השחרור (יד או מכשיר) לא משפיע על תאוצת הכדור אחרי שעזב את היד.')">שהזריקה מתבצעת בכוח התחלתי מדויק וקבוע.</div>
+            <div class="feedback"></div>
+        </div>
+
+        <div class="quiz">
+            <p class="question">שאלה 2: בהשוואה לניסוי נפילה חופשית "רגיל" (רק שלב הירידה), מה היתרון של ניתוח זריקה שלמה (עלייה + ירידה) למדידת g?</p>
+            <div class="option" onclick="checkAns(this, true, 'נכון! בנפילה חופשית רגילה, החיכוך מקטין את התאוצה מ-g וקשה לדעת בכמה. בשיטת הזריקה השלמה, ממוצע התאוצות בעלייה ובירידה מבטל את החיכוך לחלוטין - כך שלא מקבלים g קטן מהאמיתי.', 'q6_2')">החיכוך מבוטל מתמטית ולכן g יוצא מדויק יותר.</div>
+            <div class="option" onclick="checkAns(this, false, 'לא נכון - דרך הזריקה השלמה ארוכה יותר, לא קצרה. הזמן אינו יתרון.')">הוא מסתיים מהר יותר ומחייב פחות זמן מעבדה.</div>
+            <div class="option" onclick="checkAns(this, false, 'לא. הניסוי דורש את אותו ציוד בסיסי - מצלמה, חצובה ומוט כינון.')">הוא דורש פחות ציוד ויותר נגיש לכיתה.</div>
+            <div class="feedback"></div>
+        </div>
+
+        <div class="quiz">
+            <p class="question">שאלה 3: מהי המסקנה העיקרית הצפויה מהניסוי אם הוא בוצע כראוי?</p>
+            <div class="option" onclick="checkAns(this, false, 'לא נכון - הניסוי דווקא מאשש את הפיזיקה הקלאסית, כולל ההשפעה הצפויה של החיכוך.')">חוקי ניוטון אינם תקפים לכדור הנע באוויר.</div>
+            <div class="option" onclick="checkAns(this, true, 'מצוין! זוהי בדיוק המטרה הכפולה של הניסוי - לאשש את ערך g, וגם להראות שכוח החיכוך מובהק (\\(f \\neq 0\\)) אך קטן יחסית למשקל הכדור.', 'q6_3')">הניסוי מאשש את g ומספק מדידה של החיכוך.</div>
+            <div class="option" onclick="checkAns(this, false, 'לא. הניסוי לא בוחן את חוק שימור התנע - הוא מודד תאוצה לאורך זמן.')">הניסוי מאשש את חוק שימור התנע בזריקה.</div>
+            <div class="feedback"></div>
+        </div>
+
+        <div class="tab-summary" style="min-height:160px;">
+            <label for="summary6">📝 סיכום הלשונית / דיון, מסקנות והצעות לשיפור (טקסט חופשי):</label>
+            <textarea id="summary6" style="min-height:160px;" placeholder="דון במקורות השגיאה, סיכום ממצאי הניסוי, האם השיטה עבדה כצפוי, ומה היית עושה אחרת בפעם הבאה..."></textarea>
+        </div>
+
+        <div class="complete-section" style="border-color: var(--success);">
+            <h3 style="margin-top:0; color:var(--success);">📄 קובץ דו"ח מלא (Word / docx)</h3>
+            <p>הדו"ח יכלול: תקציר של כל לשונית, השאלות והתשובות שבחרת, הטקסט החופשי שכתבת בכל לשונית, טבלת הנתונים, החישובים, ותמונות שצירפת. הקובץ ניתן לעריכה ב-Word, Google Docs ו-LibreOffice.</p>
+            <div class="student-info">
+                <div><label>שם התלמיד/ה:</label>
+                     <input type="text" id="studentName" placeholder="שם מלא"></div>
+                <div><label>כיתה:</label>
+                     <input type="text" id="studentClass" placeholder="לדוגמה: י'3"></div>
+                <div><label>תאריך:</label>
+                     <input type="date" id="reportDate"></div>
+            </div>
+            <button class="complete-btn" onclick="downloadDocxReport()">⬇️ הורד דו"ח Word (.docx)</button>
+            <p id="summaryFileMsg" style="display:none; margin-top:14px; color:var(--success); font-weight:bold; font-size:1.05em;"></p>
+        </div>
+
+        <div class="complete-section">
+            <p>סיכום הניסוי, השוואה לערך התיאורטי, דיון בשגיאות והצעות לשיפור - הכל בדו"ח שלך.</p>
+            <button class="complete-btn" id="btn6" onclick="completeStage(6)">✓ סיימתי, הבנתי ורשמתי בדו"ח</button>
+            <div class="complete-msg" id="msg6">🎓 ברכות! השלמת בהצלחה את כל שלבי תדריך המעבדה! 🎉</div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const totalStages = 6;
+    const completedStages = new Set([1]);
+
+    function openTab(evt, tabName) {
+        const contents = document.getElementsByClassName("content");
+        for (let i = 0; i < contents.length; i++) contents[i].classList.remove('active');
+
+        const tabs = document.getElementsByClassName("tab");
+        for (let i = 0; i < tabs.length; i++) tabs[i].classList.remove('active');
+
+        document.getElementById(tabName).classList.add('active');
+        evt.currentTarget.classList.add('active');
+
+        if (tabName === 'tab5') {
+            displayUserData('userDataContent');
+            displayCalculations();
+        }
+        if (tabName === 'tab6') displayFinalSummary();
+
+        if (window.MathJax) MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
+    }
+
+    function checkAns(el, isCorrect, message, qid) {
+        const questionContainer = el.closest('.quiz');
+        const options = questionContainer.getElementsByClassName('option');
+        const feedback = questionContainer.querySelector('.feedback');
+
+        for (let opt of options) opt.className = 'option';
+        feedback.style.display = 'block';
+        feedback.innerText = message;
+
+        if (isCorrect) {
+            el.className = 'option correct';
+            feedback.style.backgroundColor = '#d4edda';
+            feedback.style.color = '#155724';
+            feedback.style.border = '1px solid #c3e6cb';
+        } else {
+            el.className = 'option wrong';
+            feedback.style.backgroundColor = '#f8d7da';
+            feedback.style.color = '#721c24';
+            feedback.style.border = '1px solid #f5c6cb';
+        }
+
+        if (qid) {
+            if (!window.userAnswers) window.userAnswers = {};
+            const qText = questionContainer.querySelector('.question').innerText.trim();
+            window.userAnswers[qid] = {
+                question: qText,
+                chosen: el.innerText.trim(),
+                isCorrect: isCorrect
+            };
+        }
+
+        if (window.MathJax) MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
+    }
+
+    function completeStage(stage) {
+        completedStages.add(stage);
+        const tabEl = document.querySelector(`.tab[data-tab="tab${stage}"]`);
+        tabEl.classList.add('completed');
+
+        const btn = document.getElementById(`btn${stage}`);
+        btn.disabled = true;
+        btn.style.background = 'var(--locked)';
+        btn.innerText = '✓ הושלם';
+
+        document.getElementById(`msg${stage}`).style.display = 'block';
+
+        updateProgress();
+    }
+
+    function updateProgress() {
+        const percent = (completedStages.size / totalStages) * 100;
+        document.getElementById('progressFill').style.width = percent + '%';
+    }
+
+    function getCollectedData() {
+        const m = document.getElementById('mass').value;
+        const aUp = document.getElementById('aUp').value;
+        const aDown = document.getElementById('aDown').value;
+        if (m === '' || aUp === '' || aDown === '') return null;
+        return {
+            m: parseFloat(m),
+            aUp: parseFloat(aUp),
+            aDown: parseFloat(aDown)
+        };
+    }
+
+    function checkDataComplete() {
+        const fields = ['mass', 'aUp', 'aDown'];
+        let filled = 0;
+        for (let f of fields) if (document.getElementById(f).value !== '') filled++;
+
+        const btn = document.getElementById('btn4');
+        const instr = document.getElementById('completionInstr');
+        if (filled === 3) {
+            btn.disabled = false;
+            instr.innerText = '✓ כל הנתונים הוזנו - ניתן לסיים את השלב.';
+            instr.style.color = 'var(--success)';
+            showDataPreview();
+        } else {
+            btn.disabled = true;
+            instr.innerText = `יש למלא את כל 3 השדות (${filled}/3 הושלמו).`;
+            instr.style.color = '';
+            document.getElementById('dataPreview').style.display = 'none';
+        }
+    }
+
+    function showDataPreview() {
+        const data = getCollectedData();
+        if (!data) return;
+        const previewBox = document.getElementById('dataPreview');
+        const content = document.getElementById('dataPreviewContent');
+
+        const gExp = (data.aUp + data.aDown) / 2;
+
+        let html = '<div class="summary-row"><span class="summary-label">מסת הכדור:</span><span class="summary-value">' + (data.m * 1000).toFixed(2) + ' גרם</span></div>';
+        html += '<div class="summary-row"><span class="summary-label">תאוצה כלפי מעלה:</span><span class="summary-value">' + data.aUp.toFixed(2) + ' m/s²</span></div>';
+        html += '<div class="summary-row"><span class="summary-label">תאוצה כלפי מטה:</span><span class="summary-value">' + data.aDown.toFixed(2) + ' m/s²</span></div>';
+        html += '<div class="summary-row"><span class="summary-label">תצוגה מקדימה של g:</span><span class="summary-value">' + gExp.toFixed(2) + ' m/s²</span></div>';
+        html += '<div style="margin-top:10px; font-size:0.9em; color:#666; text-align:center;">חישוב מלא של g, השגיאה והחיכוך - בשלב הבא.</div>';
+
+        content.innerHTML = html;
+        previewBox.style.display = 'block';
+    }
+
+    function displayUserData(elementId) {
+        const data = getCollectedData();
+        const content = document.getElementById(elementId);
+        if (!data) {
+            content.innerHTML = '<p style="color:#999;">לא הוזנו נתונים בשלב הביצוע.</p>';
+            return;
+        }
+        let html = '<div class="summary-row"><span class="summary-label">מסת הכדור m:</span><span class="summary-value">' + data.m.toFixed(4) + ' ק"ג (' + (data.m*1000).toFixed(2) + ' גרם)</span></div>';
+        html += '<div class="summary-row"><span class="summary-label">תאוצה בעלייה \u202Aa\u202C מעלה:</span><span class="summary-value">' + data.aUp.toFixed(2) + ' m/s²</span></div>';
+        html += '<div class="summary-row"><span class="summary-label">תאוצה בירידה \u202Aa\u202C מטה:</span><span class="summary-value">' + data.aDown.toFixed(2) + ' m/s²</span></div>';
+        content.innerHTML = html;
+    }
+
+    function displayCalculations() {
+        const data = getCollectedData();
+        const content = document.getElementById('calculationContent');
+        if (!data) {
+            content.innerHTML = '<p style="color:#999;">לא הוזנו נתונים.</p>';
+            return;
+        }
+
+        const gExp = (data.aUp + data.aDown) / 2;
+        const gTheoretical = 9.81;
+        const errorPercent = Math.abs(gExp - gTheoretical) / gTheoretical * 100;
+        const fForce = data.m * (data.aUp - data.aDown) / 2;
+        const weight = data.m * gTheoretical;
+        const fOverMg = fForce / weight * 100;
+
+        let html = '<div class="summary-row"><span class="summary-label">\u202Aa\u202C מעלה (מהשיפוע בעלייה):</span><span class="summary-value">' + data.aUp.toFixed(3) + ' m/s²</span></div>';
+        html += '<div class="summary-row"><span class="summary-label">\u202Aa\u202C מטה (מהשיפוע בירידה):</span><span class="summary-value">' + data.aDown.toFixed(3) + ' m/s²</span></div>';
+        html += '<div class="summary-row"><span class="summary-label">g ניסויי = (a_מעלה + a_מטה)/2:</span><span class="summary-value">' + gExp.toFixed(3) + ' m/s²</span></div>';
+        html += '<div class="summary-row"><span class="summary-label">g תיאורטי:</span><span class="summary-value">9.810 m/s²</span></div>';
+        html += '<div class="summary-row"><span class="summary-label">שגיאה יחסית של g:</span><span class="summary-value">' + errorPercent.toFixed(2) + '%</span></div>';
+        html += '<div class="summary-row"><span class="summary-label">כוח חיכוך f = m(a_מעלה - a_מטה)/2:</span><span class="summary-value">' + (fForce*1000).toFixed(3) + ' מ"נ (' + fForce.toExponential(3) + ' N)</span></div>';
+        html += '<div class="summary-row"><span class="summary-label">משקל הכדור mg:</span><span class="summary-value">' + (weight*1000).toFixed(3) + ' מ"נ</span></div>';
+        html += '<div class="summary-row"><span class="summary-label">יחס f/mg:</span><span class="summary-value">' + fOverMg.toFixed(2) + '%</span></div>';
+
+        let interp = '';
+        if (fOverMg < 0) interp = '⚠️ קיבלת חיכוך שלילי - סימן שתאוצת המטה גדולה מתאוצת המעלה. בדוק שלא בלבלת בין הערכים בטבלה.';
+        else if (fOverMg < 1) interp = '🤔 חיכוך זניח (פחות מ-1% ממשקל הכדור). אופייני לכדורים צפופים, או שהשגיאה האקראית הסתירה את החיכוך.';
+        else if (fOverMg < 10) interp = '✓ חיכוך קטן (1-10% ממשקל הכדור) - תוצאה אופיינית לכדור פינג-פונג, טניס וכדורים דחוסים דומים.';
+        else if (fOverMg < 50) interp = '✓ חיכוך משמעותי (10-50% ממשקל הכדור) - אופייני לכדור קלקר, ספוג או כדור עם שטח פנים גדול ביחס למשקלו. דוגמה יפה להשפעת חיכוך אוויר על גוף קל!';
+        else if (fOverMg < 100) interp = '✓ חיכוך גדול מאוד (50-100% ממשקל הכדור) - הכדור קרוב למהירות הסופית (terminal velocity). אופייני לכדור פלסטיק חלול גדול או בלון מנופח חלקית.';
+        else interp = '⚠️ חיכוך גדול ממשקל הכדור (מעל 100%) - תוצאה לא פיזיקלית בזריקה אנכית. בדוק שוב את הנתונים שהזנת.';
+
+        html += '<div style="margin-top:15px; padding:12px; background:white; border-radius:5px; font-weight:bold; text-align:center;">' + interp + '</div>';
+
+        content.innerHTML = html;
+    }
+
+    function displayFinalSummary() {
+        const data = getCollectedData();
+        const content = document.getElementById('finalSummaryContent');
+        if (!data) {
+            content.innerHTML = '<p style="color:#999;">לא הוזנו נתונים.</p>';
+            return;
+        }
+
+        const gExp = (data.aUp + data.aDown) / 2;
+        const errorPercent = Math.abs(gExp - 9.81) / 9.81 * 100;
+        const fForce = data.m * (data.aUp - data.aDown) / 2;
+
+        let conclusion = '';
+        if (errorPercent < 1) conclusion = '🎯 מצוין! דיוק יוצא דופן - הניסוי אישש את ערך g באופן מובהק.';
+        else if (errorPercent < 3) conclusion = '✅ תוצאה מצוינת - בתחום הסביר לניסוי תלמידים.';
+        else if (errorPercent < 7) conclusion = '👍 תוצאה טובה - יש לדון במקורות השגיאה בדו"ח.';
+        else conclusion = '⚠️ הסטייה גדולה - בדוק שוב את הנתונים והדיון בשגיאות.';
+
+        let html = '<div class="summary-row"><span class="summary-label">ערך g שהתקבל:</span><span class="summary-value">' + gExp.toFixed(3) + ' m/s²</span></div>';
+        html += '<div class="summary-row"><span class="summary-label">ערך g תיאורטי:</span><span class="summary-value">9.810 m/s²</span></div>';
+        html += '<div class="summary-row"><span class="summary-label">שגיאה יחסית:</span><span class="summary-value">' + errorPercent.toFixed(2) + '%</span></div>';
+        html += '<div class="summary-row"><span class="summary-label">כוח חיכוך f:</span><span class="summary-value">' + (fForce*1000).toFixed(3) + ' מ"נ</span></div>';
+        html += '<div style="margin-top:15px; padding:12px; background:white; border-radius:5px; font-weight:bold; text-align:center;">' + conclusion + '</div>';
+
+        content.innerHTML = html;
+    }
+
+    updateProgress();
+
+    // ============================================================
+    // אנימציית הכדור המנתר - לשונית 1
+    // ============================================================
+    const ballAnim = {
+        y: 50,                  // מיקום במישור SVG (גדל כלפי מטה)
+        vy: 0,                  // מהירות ב-px/s (חיובית = מטה)
+        g: 600,                 // תאוצת כובד ב-px/s² (ערך ויזואלי נעים)
+        frictionCoef: 0.45,     // מקדם חיכוך פרופורציונלי למהירות
+        restitution: 0.78,      // מקדם השבה (אחוז אנרגיה שנשמר בכל ניתור)
+        radius: 16,
+        groundY: 350,
+        topY: 50,
+        cx: 200,
+        running: true,
+        lastTime: 0,
+        atRest: false
+    };
+
+    function animateBall(time) {
+        if (!ballAnim.lastTime) ballAnim.lastTime = time;
+        const dt = Math.min((time - ballAnim.lastTime) / 1000, 0.033);
+        ballAnim.lastTime = time;
+
+        const ball = document.getElementById('bouncingBall');
+        if (ball && ballAnim.running) {
+            // כוח חיכוך הפוך בכיוון למהירות
+            const fricAccel = -ballAnim.frictionCoef * ballAnim.vy;
+            // תאוצה כוללת = כובד + חיכוך
+            ballAnim.vy += (ballAnim.g + fricAccel) * dt;
+            ballAnim.y += ballAnim.vy * dt;
+
+            // התנגשות בקרקע
+            const ballBottom = ballAnim.y + ballAnim.radius;
+            if (ballBottom >= ballAnim.groundY) {
+                ballAnim.y = ballAnim.groundY - ballAnim.radius;
+                ballAnim.vy = -Math.abs(ballAnim.vy) * ballAnim.restitution;
+                if (Math.abs(ballAnim.vy) < 80) {
+                    ballAnim.vy = 0;
+                    ballAnim.running = false;
+                    ballAnim.atRest = true;
+                    setTimeout(restartBouncingBall, 1800);
+                }
+            }
+        }
+
+        if (ball) updateBallVisuals();
+        requestAnimationFrame(animateBall);
+    }
+
+    function updateBallVisuals() {
+        const cx = ballAnim.cx;
+        const cy = ballAnim.y;
+        const v = ballAnim.vy;
+        const speed = Math.abs(v);
+
+        // הכדור והבליטה
+        const ball = document.getElementById('bouncingBall');
+        ball.setAttribute('cx', cx);
+        ball.setAttribute('cy', cy);
+        const hl = document.getElementById('ballHighlight');
+        hl.setAttribute('cx', cx - 6);
+        hl.setAttribute('cy', cy - 6);
+
+        // צל - מתכווץ ומתבהר ככל שהכדור גבוה
+        const heightAboveGround = ballAnim.groundY - cy - ballAnim.radius;
+        const maxHeight = ballAnim.groundY - ballAnim.topY - ballAnim.radius;
+        const heightRatio = Math.max(0, Math.min(1, heightAboveGround / maxHeight));
+        const shadow = document.getElementById('ballShadow');
+        shadow.setAttribute('cx', cx);
+        shadow.setAttribute('rx', 18 - heightRatio * 8);
+        shadow.setAttribute('opacity', 0.4 - heightRatio * 0.25);
+
+        // כוח הכובד - תמיד מטה, באורך קבוע
+        const gravLen = 45;
+        const gravLine = document.getElementById('gravLine');
+        gravLine.setAttribute('x1', cx);
+        gravLine.setAttribute('y1', cy + 2);
+        gravLine.setAttribute('x2', cx);
+        gravLine.setAttribute('y2', cy + gravLen);
+        const gravLabel = document.getElementById('gravLabel');
+        gravLabel.setAttribute('x', cx + 6);
+        gravLabel.setAttribute('y', cy + 30);
+
+        // חיכוך - הפוך בכיוון למהירות, אורך פרופורציונלי למהירות
+        const fricLen = Math.min(45, speed * 0.06);
+        const fricDir = v > 0 ? -1 : 1; // חיכוך הפוך לכיוון התנועה
+        const fricVisible = speed > 30 && !ballAnim.atRest;
+        const fricLine = document.getElementById('fricLine');
+        fricLine.setAttribute('x1', cx + 22);
+        fricLine.setAttribute('y1', cy);
+        fricLine.setAttribute('x2', cx + 22);
+        fricLine.setAttribute('y2', cy + fricDir * fricLen);
+        fricLine.setAttribute('opacity', fricVisible ? 0.85 : 0.15);
+        const fricLabel = document.getElementById('fricLabel');
+        fricLabel.setAttribute('x', cx + 28);
+        fricLabel.setAttribute('y', cy + fricDir * (fricLen * 0.5));
+        fricLabel.setAttribute('opacity', fricVisible ? 1 : 0.15);
+
+        // מהירות - בכיוון התנועה
+        const velLen = Math.min(50, speed * 0.06);
+        const velDir = v > 0 ? 1 : -1;
+        const velVisible = speed > 30 && !ballAnim.atRest;
+        const velLine = document.getElementById('velLine');
+        velLine.setAttribute('x1', cx - 28);
+        velLine.setAttribute('y1', cy);
+        velLine.setAttribute('x2', cx - 28);
+        velLine.setAttribute('y2', cy + velDir * velLen);
+        velLine.setAttribute('opacity', velVisible ? 0.85 : 0.15);
+        const velLabel = document.getElementById('velLabel');
+        velLabel.setAttribute('x', cx - 48);
+        velLabel.setAttribute('y', cy + velDir * (velLen * 0.5));
+        velLabel.setAttribute('opacity', velVisible ? 1 : 0.15);
+    }
+
+    function restartBouncingBall() {
+        ballAnim.y = ballAnim.topY;
+        ballAnim.vy = 0;
+        ballAnim.running = true;
+        ballAnim.atRest = false;
+        ballAnim.lastTime = 0;
+    }
+
+    requestAnimationFrame(animateBall);
+    // ============================================================
+    // סוף אנימציית כדור מנתר
+    // ============================================================
+
+    // ============================================================
+    // העלאת תמונות (סטאפ + גרפים)
+    // ============================================================
+    let uploadedGraphs = [];
+    let setupImages = [];
+
+    function handleGraphUpload(event) {
+        const files = event.target.files;
+        for (let file of files) {
+            if (!file.type.startsWith('image/')) continue;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                uploadedGraphs.push({ name: file.name, dataUrl: e.target.result });
+                renderGraphPreviews();
+            };
+            reader.readAsDataURL(file);
+        }
+        event.target.value = '';
+    }
+
+    function renderGraphPreviews() {
+        const el = document.getElementById('graphPreviews');
+        if (!el) return;
+        if (uploadedGraphs.length === 0) {
+            el.innerHTML = '<p style="color:#999; font-size:0.9em;">טרם צורפו גרפים.</p>';
+            return;
+        }
+        let html = '';
+        uploadedGraphs.forEach((g, idx) => {
+            html += '<div class="graph-thumb">'
+                + '<img src="' + g.dataUrl + '" alt="גרף">'
+                + '<div class="thumb-name">' + g.name + '</div>'
+                + '<button onclick="removeGraph(' + idx + ')">✕ הסר</button>'
+                + '</div>';
+        });
+        el.innerHTML = html;
+    }
+
+    function removeGraph(idx) {
+        uploadedGraphs.splice(idx, 1);
+        renderGraphPreviews();
+    }
+
+    function handleSetupUpload(event) {
+        const files = event.target.files;
+        for (let file of files) {
+            if (!file.type.startsWith('image/')) continue;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                setupImages.push({ name: file.name, dataUrl: e.target.result });
+                renderSetupGallery();
+            };
+            reader.readAsDataURL(file);
+        }
+        event.target.value = '';
+    }
+
+    function renderSetupGallery() {
+        const el = document.getElementById('setupGallery');
+        if (!el) return;
+        if (setupImages.length === 0) {
+            el.innerHTML = '<p style="color:#999; font-size:0.9em;">טרם צורפו תמונות מערכת.</p>';
+            return;
+        }
+        let html = '';
+        setupImages.forEach((g, idx) => {
+            html += '<div class="graph-thumb">'
+                + '<img src="' + g.dataUrl + '" alt="מערכת">'
+                + '<div class="thumb-name">' + g.name + '</div>'
+                + '<button onclick="removeSetupImage(' + idx + ')">✕ הסר</button>'
+                + '</div>';
+        });
+        el.innerHTML = html;
+    }
+
+    function removeSetupImage(idx) {
+        setupImages.splice(idx, 1);
+        renderSetupGallery();
+    }
+
+    // ============================================================
+    // עוזרים גנריים ליצירת docx
+    // ============================================================
+    function getDocx() {
+        if (!window.docx) {
+            alert('ספריית docx עוד לא נטענה במלואה. רענן את הדף ונסה שוב.');
+            return null;
+        }
+        return window.docx;
+    }
+
+    function escapeText(s) {
+        if (s === null || s === undefined) return '';
+        return String(s);
+    }
+
+    function P(text, opts) {
+        opts = opts || {};
+        const d = window.docx;
+        return new d.Paragraph({
+            alignment: opts.alignment || d.AlignmentType.RIGHT,
+            bidirectional: true,
+            spacing: opts.spacing || { after: 120 },
+            children: [new d.TextRun({
+                text: escapeText(text),
+                bold: opts.bold || false,
+                italic: opts.italic || false,
+                size: opts.size || 22,
+                font: 'Arial',
+                color: opts.color
+            })]
+        });
+    }
+
+    function P_mixed(parts, opts) {
+        opts = opts || {};
+        const d = window.docx;
+        return new d.Paragraph({
+            alignment: opts.alignment || d.AlignmentType.RIGHT,
+            bidirectional: true,
+            spacing: opts.spacing || { after: 120 },
+            children: parts.map(p => new d.TextRun({
+                text: escapeText(p.text),
+                bold: p.bold || false,
+                italic: p.italic || false,
+                size: p.size || 22,
+                font: 'Arial',
+                color: p.color
+            }))
+        });
+    }
+
+    function H1(text) {
+        const d = window.docx;
+        return new d.Paragraph({
+            alignment: d.AlignmentType.CENTER,
+            bidirectional: true,
+            spacing: { before: 200, after: 240 },
+            children: [new d.TextRun({ text: escapeText(text), bold: true, size: 36, font: 'Arial', color: '1e3a5f' })]
+        });
+    }
+
+    function H2(text) {
+        const d = window.docx;
+        return new d.Paragraph({
+            alignment: d.AlignmentType.RIGHT,
+            bidirectional: true,
+            spacing: { before: 280, after: 140 },
+            border: { bottom: { color: '2980b9', size: 8, style: d.BorderStyle.SINGLE, space: 4 } },
+            children: [new d.TextRun({ text: escapeText(text), bold: true, size: 28, font: 'Arial', color: '2980b9' })]
+        });
+    }
+
+    function H3(text) {
+        const d = window.docx;
+        return new d.Paragraph({
+            alignment: d.AlignmentType.RIGHT,
+            bidirectional: true,
+            spacing: { before: 180, after: 100 },
+            children: [new d.TextRun({ text: escapeText(text), bold: true, size: 24, font: 'Arial', color: '1e3a5f' })]
+        });
+    }
+
+    function bullet(text) {
+        const d = window.docx;
+        return new d.Paragraph({
+            alignment: d.AlignmentType.RIGHT,
+            bidirectional: true,
+            spacing: { after: 80 },
+            indent: { right: 280 },
+            children: [new d.TextRun({ text: '• ' + escapeText(text), size: 22, font: 'Arial' })]
+        });
+    }
+
+    function formula(text) {
+        const d = window.docx;
+        return new d.Paragraph({
+            alignment: d.AlignmentType.CENTER,
+            bidirectional: false,
+            spacing: { before: 120, after: 120 },
+            shading: { type: d.ShadingType.CLEAR, fill: 'f5f5f5' },
+            border: {
+                top: { color: 'cccccc', size: 4, style: d.BorderStyle.SINGLE, space: 2 },
+                bottom: { color: 'cccccc', size: 4, style: d.BorderStyle.SINGLE, space: 2 },
+                left: { color: 'cccccc', size: 4, style: d.BorderStyle.SINGLE, space: 2 },
+                right: { color: 'cccccc', size: 4, style: d.BorderStyle.SINGLE, space: 2 }
+            },
+            children: [new d.TextRun({ text: escapeText(text), bold: true, size: 24, font: 'Arial' })]
+        });
+    }
+
+    function tcell(text, opts) {
+        opts = opts || {};
+        const d = window.docx;
+        return new d.TableCell({
+            width: opts.width ? { size: opts.width, type: d.WidthType.DXA } : undefined,
+            shading: opts.header ? { type: d.ShadingType.CLEAR, fill: 'e3f2fd' } : undefined,
+            children: [new d.Paragraph({
+                alignment: opts.alignment || d.AlignmentType.CENTER,
+                bidirectional: true,
+                children: [new d.TextRun({
+                    text: escapeText(text),
+                    bold: opts.header || opts.bold || false,
+                    size: 22,
+                    font: 'Arial'
+                })]
+            })]
+        });
+    }
+
+    function buildTable(headers, rows, colWidths) {
+        const d = window.docx;
+        const headerRow = new d.TableRow({
+            tableHeader: true,
+            children: headers.map((h, i) => tcell(h, { header: true, width: colWidths ? colWidths[i] : undefined }))
+        });
+        const dataRows = rows.map(r => new d.TableRow({
+            children: r.map((c, i) => tcell(c, { width: colWidths ? colWidths[i] : undefined }))
+        }));
+        return new d.Table({
+            rows: [headerRow, ...dataRows],
+            width: { size: 100, type: d.WidthType.PERCENTAGE }
+        });
+    }
+
+    function dataUrlToBytes(dataUrl) {
+        const base64 = dataUrl.split(',')[1];
+        const binary = atob(base64);
+        const bytes = new Uint8Array(binary.length);
+        for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+        return bytes;
+    }
+
+    function getImageType(dataUrl) {
+        const m = dataUrl.match(/^data:image\/(\w+);/);
+        let t = m ? m[1].toLowerCase() : 'png';
+        if (t === 'jpeg') t = 'jpg';
+        return t;
+    }
+
+    function getImageDims(dataUrl) {
+        return new Promise(resolve => {
+            const img = new Image();
+            img.onload = () => resolve({ width: img.naturalWidth, height: img.naturalHeight });
+            img.onerror = () => resolve({ width: 400, height: 300 });
+            img.src = dataUrl;
+        });
+    }
+
+    async function buildImageParagraph(img) {
+        const d = window.docx;
+        const bytes = dataUrlToBytes(img.dataUrl);
+        const type = getImageType(img.dataUrl);
+        const dims = await getImageDims(img.dataUrl);
+        const maxW = 480;
+        let w = dims.width, h = dims.height;
+        if (w > maxW) { h = h * (maxW / w); w = maxW; }
+        return new d.Paragraph({
+            alignment: d.AlignmentType.CENTER,
+            spacing: { before: 100, after: 80 },
+            children: [
+                new d.ImageRun({
+                    data: bytes,
+                    transformation: { width: Math.round(w), height: Math.round(h) },
+                    type: type
+                })
+            ]
+        });
+    }
+
+    // ============================================================
+    // בונים גנריים: תשובות התלמיד, סיכום חופשי, תמונות
+    // ============================================================
+    function buildAnswersChildren(qids) {
+        const out = [H3('שאלות הבנה - תשובות התלמיד')];
+        const answers = window.userAnswers || {};
+        let answered = 0;
+        qids.forEach(qid => {
+            const a = answers[qid];
+            if (!a) {
+                out.push(P_mixed([
+                    { text: '— ', color: '999999' },
+                    { text: 'שאלה ' + qid + ': לא נענתה.', italic: true, color: '999999' }
+                ]));
+                return;
+            }
+            answered++;
+            const mark = a.isCorrect ? '✓' : '✗';
+            const color = a.isCorrect ? '2e7d32' : 'c62828';
+            out.push(P_mixed([
+                { text: 'שאלה: ', bold: true },
+                { text: a.question }
+            ], { spacing: { after: 60 } }));
+            out.push(P_mixed([
+                { text: mark + ' התשובה שנבחרה: ', bold: true, color: color },
+                { text: a.chosen, color: color }
+            ], { spacing: { after: 160 } }));
+        });
+        if (answered === 0) {
+            return [H3('שאלות הבנה'), P('התלמיד לא ענה על שאלות בשלב זה.', { italic: true, color: '999999' })];
+        }
+        return out;
+    }
+
+    function buildUserSummaryChildren(summaryId) {
+        const el = document.getElementById(summaryId);
+        const text = el ? el.value.trim() : '';
+        if (!text) return [
+            H3('סיכום חופשי של הלשונית'),
+            P('(התלמיד לא רשם סיכום חופשי בלשונית זו.)', { italic: true, color: '999999' })
+        ];
+        const out = [H3('סיכום חופשי של הלשונית')];
+        text.split('\n').forEach(line => {
+            out.push(P(line.trim() || ' '));
+        });
+        return out;
+    }
+
+    async function buildSetupImagesChildren() {
+        if (setupImages.length === 0) {
+            return [
+                H3('צילומי מערכת הניסוי'),
+                P('(לא צורפו תמונות של מערכת הניסוי.)', { italic: true, color: '999999' })
+            ];
+        }
+        const out = [H3('צילומי מערכת הניסוי')];
+        for (let i = 0; i < setupImages.length; i++) {
+            out.push(await buildImageParagraph(setupImages[i]));
+            out.push(P('תמונה ' + (i+1) + ': ' + setupImages[i].name, { italic: true, color: '666666', alignment: window.docx.AlignmentType.CENTER, size: 18 }));
+        }
+        return out;
+    }
+
+    async function buildGraphsChildren() {
+        if (uploadedGraphs.length === 0) {
+            return [
+                H3('גרפים מצורפים'),
+                P('(לא צורפו גרפים.)', { italic: true, color: '999999' })
+            ];
+        }
+        const out = [H3('גרפים מצורפים')];
+        for (let i = 0; i < uploadedGraphs.length; i++) {
+            out.push(await buildImageParagraph(uploadedGraphs[i]));
+            out.push(P('גרף ' + (i+1) + ': ' + uploadedGraphs[i].name, { italic: true, color: '666666', alignment: window.docx.AlignmentType.CENTER, size: 18 }));
+        }
+        return out;
+    }
+
+    // ============================================================
+    // תוכן ספציפי לכל לשונית
+    // ============================================================
+    function buildTab1Content() {
+        return [
+            H2('1. רקע תיאורטי'),
+            P('בנפילה חופשית "טהורה" - תנועה תחת השפעת כוח הכובד בלבד - תאוצת הגוף קבועה ושווה ל-g ≈ 9.81 m/s², ללא תלות במסה. אך במציאות, האוויר מפעיל על הכדור כוח חיכוך שמתנגד תמיד לכיוון התנועה.'),
+            P('בניסוי זה נשתמש בעובדה זו כדי למדוד גם את g וגם את כוח החיכוך, באמצעות מדידה נפרדת של תאוצת הכדור בעלייה ובירידה. הפרש התאוצות נובע ישירות מהיפוך כיוון כוח החיכוך.'),
+            H3('הנחות יסוד'),
+            bullet('כוח חיכוך האוויר תמיד מתנגד לכיוון מהירות הכדור.'),
+            bullet('בקירוב טוב, גודל כוח החיכוך בעלייה ובירידה דומה (המהירויות באותה גובה דומות).'),
+            bullet('הכובד פועל תמיד כלפי מטה ושווה בגודלו ל-mg.')
+        ];
+    }
+
+    function buildTab2Content() {
+        return [
+            H2('2. ניתוח הכוחות וגזירת הנוסחאות'),
+            P('נסמן את כיוון מטה כחיובי. נכתוב את משוואת ניוטון השנייה לכדור בשני השלבים:'),
+            H3('בעלייה (הכדור נע כלפי מעלה)'),
+            P('המהירות כלפי מעלה ⟸ החיכוך פועל כלפי מטה, מצטרף לכובד:'),
+            formula('m · a(מעלה) = mg + f      ⟹      a(מעלה) = g + f/m'),
+            H3('בירידה (הכדור נע כלפי מטה)'),
+            P('המהירות כלפי מטה ⟸ החיכוך פועל כלפי מעלה, מקטין את הכוח השקול:'),
+            formula('m · a(מטה) = mg − f      ⟹      a(מטה) = g − f/m'),
+            H3('חיבור וחיסור המשוואות'),
+            P('חיבור שתי המשוואות מבטל את החיכוך:'),
+            formula('a(מעלה) + a(מטה) = 2g      ⟹      g = (a(מעלה) + a(מטה)) / 2'),
+            P('חיסור שתי המשוואות מבטל את הכובד ומאפשר חישוב החיכוך:'),
+            formula('a(מעלה) − a(מטה) = 2f/m      ⟹      f = m · (a(מעלה) − a(מטה)) / 2')
+        ];
+    }
+
+    function buildTab3Content() {
+        return [
+            H2('3. תכנון הניסוי וציוד'),
+            P('בשיטה זו נצלם בווידאו זריקה אנכית של כדור, ננתח את התנועה פריים-אחר-פריים בתוכנת Tracker, ונעבד את הנתונים ב-Excel.'),
+            H3('ציוד נדרש'),
+            bullet('מצלמה או סמארטפון (רצוי 60fps ומעלה).'),
+            bullet('חצובה או משטח יציב למצלמה.'),
+            bullet('מוט כינון - אובייקט בעל אורך ידוע ומדויק (מקל מטר, סרגל ארוך).'),
+            bullet('כדור - פינג-פונג, טניס, או קלקר (קלקר נותן אות חיכוך חזק במיוחד).'),
+            bullet('תוכנת Tracker (חינמית מ-physlets.org/tracker).'),
+            bullet('Excel או Google Sheets לעיבוד נתונים.'),
+            H3('נקודות חיוניות בהכנת הצילום'),
+            bullet('המצלמה חייבת להיות ניצבת למישור הזריקה (אחרת התנועה מעוותת).'),
+            bullet('מוט הכינון חייב להיות באותו עומק של הזריקה (אחרת ההמרה לפיקסלים שגויה).'),
+            bullet('רקע מנוגד וניגודיות טובה כדי לזהות בקלות את הכדור בכל פריים.'),
+            bullet('זרוק את הכדור בקו אנכי, לגובה של ~1-1.5 מטר.'),
+            H3('זיהוי המשתנים'),
+            bullet('משתנה בלתי תלוי: הזמן t (לפי קצב הצילום).'),
+            bullet('משתנה תלוי נמדד: מיקום הכדור y(t).'),
+            bullet('גודל מחושב: המהירות הרגעית v(t) - לפי הפרש מרכזי.'),
+            bullet('גדלים מהגרף: תאוצה בעלייה ובירידה - שיפועי קווי המגמה.'),
+            bullet('גודל נמדד בנפרד: מסת הכדור (במאזניים).')
+        ];
+    }
+
+    function buildTab4Content() {
+        return [
+            H2('4. ביצוע הניסוי ואיסוף נתונים'),
+            P('שלבי הביצוע:'),
+            H3('א. צילום הזריקה'),
+            bullet('הצב את המצלמה על חצובה ניצבת למישור הזריקה.'),
+            bullet('הצב את מוט הכינון אנכית בתוך הפריים, באותו עומק של הזריקה.'),
+            bullet('שקול את הכדור ורשום את המסה.'),
+            bullet('הפעל הקלטה (60fps רצוי) וזרוק את הכדור אנכית לגובה כ-1-1.5 מטר.'),
+            H3('ב. ניתוח ב-Tracker'),
+            bullet('פתח את הווידאו ב-Tracker.'),
+            bullet('הגדר כיול אורך על-ידי סימון מוט הכינון (Calibration Stick).'),
+            bullet('סמן את מרכז הכדור בכל פריים (ידנית או באמצעות Autotracker).'),
+            bullet('שמור/העתק את נתוני (t, y) ל-Excel.'),
+            H3('ג. עיבוד ב-Excel'),
+            bullet('בעמודה A: זמן. בעמודה B: מיקום אנכי במטרים.'),
+            bullet('בעמודה C: מהירות רגעית לפי הפרש מרכזי: v_i = (y_{i+1} − y_{i-1}) / (t_{i+1} − t_{i-1}).'),
+            bullet('צור גרף פיזור של v כפונקציה של t.'),
+            bullet('הוסף קו מגמה נפרד לשלב העלייה ולשלב הירידה - השיפועים נותנים את התאוצות.'),
+            bullet('רשום את גודל השיפועים (חיוביים) כתאוצות.')
+        ];
+    }
+
+    function buildDataChildren() {
+        const data = getCollectedData();
+        const out = [H3('הנתונים שנמדדו')];
+        if (!data) {
+            out.push(P('התלמיד טרם הזין נתונים בלשונית הביצוע.', { italic: true, color: '999999' }));
+            return out;
+        }
+        out.push(buildTable(
+            ['גודל פיזיקלי', 'ערך מדוד'],
+            [
+                ['מסת הכדור m', data.m.toFixed(4) + ' ק"ג (' + (data.m*1000).toFixed(2) + ' גרם)'],
+                ['תאוצה בעלייה a(מעלה)', data.aUp.toFixed(3) + ' m/s²'],
+                ['תאוצה בירידה a(מטה)', data.aDown.toFixed(3) + ' m/s²']
+            ],
+            [4500, 4500]
+        ));
+        out.push(P(''));
+        return out;
+    }
+
+    function buildTab5Content() {
+        return [
+            H2('5. ניתוח התוצאות וחישוב g ו-f'),
+            P('כעת ניקח את שני ערכי התאוצה שמדדנו ונציב במשוואות:'),
+            formula('g = (a(מעלה) + a(מטה)) / 2'),
+            formula('f = m · (a(מעלה) − a(מטה)) / 2')
+        ];
+    }
+
+    function buildCalculationsChildren() {
+        const data = getCollectedData();
+        const out = [H3('תוצאות החישוב')];
+        if (!data) {
+            out.push(P('לא ניתן לחשב - חסרים נתונים בלשונית הביצוע.', { italic: true, color: '999999' }));
+            return out;
+        }
+        const gExp = (data.aUp + data.aDown) / 2;
+        const gTheo = 9.81;
+        const errPct = Math.abs(gExp - gTheo) / gTheo * 100;
+        const fForce = data.m * (data.aUp - data.aDown) / 2;
+        const weight = data.m * gTheo;
+        const fOverMg = fForce / weight * 100;
+
+        out.push(buildTable(
+            ['גודל', 'נוסחה', 'תוצאה'],
+            [
+                ['תאוצת הכובד g (ניסויי)', '(a(מעלה) + a(מטה)) / 2', gExp.toFixed(3) + ' m/s²'],
+                ['ערך תיאורטי', '—', '9.810 m/s²'],
+                ['שגיאה יחסית', '|g(ניסויי) − g(תיאורטי)| / g(תיאורטי)', errPct.toFixed(2) + '%'],
+                ['כוח חיכוך f', 'm · (a(מעלה) − a(מטה)) / 2', (fForce*1000).toFixed(3) + ' מ"נ'],
+                ['משקל הכדור mg', 'm · g', (weight*1000).toFixed(3) + ' מ"נ'],
+                ['יחס f / mg', '—', fOverMg.toFixed(2) + '%']
+            ],
+            [2800, 3400, 2800]
+        ));
+        out.push(P(''));
+
+        let interp;
+        if (fOverMg < 0) interp = 'התקבל חיכוך שלילי - יש לבדוק שהערכים בעלייה ובירידה לא הוחלפו.';
+        else if (fOverMg < 1) interp = 'חיכוך זניח (פחות מ-1% ממשקל הכדור) - אופייני לכדורים צפופים.';
+        else if (fOverMg < 10) interp = 'חיכוך קטן (1-10%) - אופייני לכדור פינג-פונג או טניס.';
+        else if (fOverMg < 50) interp = 'חיכוך משמעותי (10-50%) - אופייני לכדור קלקר או ספוג.';
+        else if (fOverMg < 100) interp = 'חיכוך גדול מאוד (50-100%) - הכדור קרוב למהירות סופית.';
+        else interp = 'חיכוך גדול ממשקל הכדור (>100%) - מומלץ לבדוק את הנתונים.';
+
+        out.push(P_mixed([
+            { text: 'פירוש: ', bold: true },
+            { text: interp }
+        ]));
+        return out;
+    }
+
+    function buildTab6Content() {
+        return [
+            H2('6. דיון בשגיאות ומסקנות'),
+            H3('גורמי שגיאה אפשריים'),
+            bullet('תלות חיכוך האוויר במהירות (במציאות f ∝ v² ולא קבוע).'),
+            bullet('דיוק סימון מרכז הכדור ב-Tracker (טשטוש בפריימים מהירים).'),
+            bullet('שגיאת כיול אורך (סימון קצוות מוט הכינון).'),
+            bullet('בעיית פרלקס - מוט הכינון לא באותו עומק של הכדור.'),
+            bullet('קצב צילום סופי - יותר פריימים = רגרסיה איכותית יותר.'),
+            bullet('בחירת תחום קווי המגמה (לא לכלול את אזור השיא ולא את הפריימים הראשונים).'),
+            H3('יתרון השיטה'),
+            P('מדידת g באמצעות זריקה אנכית עם ניתוח עלייה-ירידה מבטלת מתמטית את השפעת חיכוך האוויר על ערך g. לכן בדרך כלל מתקבל ערך g קרוב לערך התיאורטי גם בנוכחות חיכוך.')
+        ];
+    }
+
+    // ============================================================
+    // הפקת הדו"ח
+    // ============================================================
+    async function downloadDocxReport() {
+        const d = getDocx();
+        if (!d) return;
+
+        const studentName = (document.getElementById('studentName').value || '').trim() || '________________';
+        const studentClass = (document.getElementById('studentClass').value || '').trim() || '____________';
+        const dateVal = document.getElementById('reportDate').value;
+        let reportDateStr;
+        if (dateVal) {
+            const parts = dateVal.split('-');
+            reportDateStr = parts[2] + '/' + parts[1] + '/' + parts[0];
+        } else {
+            reportDateStr = new Date().toLocaleDateString('he-IL');
+        }
+
+        const msgEl = document.getElementById('summaryFileMsg');
+        if (msgEl) {
+            msgEl.style.display = 'block';
+            msgEl.style.color = 'var(--secondary)';
+            msgEl.innerText = '⏳ מכין את הדו"ח...';
+        }
+
+        try {
+            const children = [];
+
+            children.push(H1('דו"ח מעבדה: מדידת תאוצת הכובד וכוח חיכוך האוויר'));
+
+            children.push(buildTable(
+                ['שם התלמיד/ה', 'כיתה', 'תאריך'],
+                [[studentName, studentClass, reportDateStr]],
+                [3500, 2000, 2500]
+            ));
+            children.push(P(''));
+
+            children.push(P_mixed([
+                { text: 'מטרת הניסוי: ', bold: true },
+                { text: 'מדידת תאוצת הנפילה החופשית g וחקר השפעת חיכוך האוויר על תנועת כדור, באמצעות ניתוח וידאו של זריקה אנכית בתוכנת Tracker ועיבוד ב-Excel.' }
+            ], { spacing: { after: 200 } }));
+
+            // Tab 1
+            buildTab1Content().forEach(c => children.push(c));
+            buildAnswersChildren(['q1_1','q1_2','q1_3']).forEach(c => children.push(c));
+            buildUserSummaryChildren('summary1').forEach(c => children.push(c));
+
+            // Tab 2
+            buildTab2Content().forEach(c => children.push(c));
+            buildAnswersChildren(['q2_1','q2_2','q2_3']).forEach(c => children.push(c));
+            buildUserSummaryChildren('summary2').forEach(c => children.push(c));
+
+            // Tab 3 + setup images
+            buildTab3Content().forEach(c => children.push(c));
+            const setupChildren = await buildSetupImagesChildren();
+            setupChildren.forEach(c => children.push(c));
+            buildAnswersChildren(['q3_1','q3_2','q3_3']).forEach(c => children.push(c));
+            buildUserSummaryChildren('summary3').forEach(c => children.push(c));
+
+            // Tab 4 + data
+            buildTab4Content().forEach(c => children.push(c));
+            buildDataChildren().forEach(c => children.push(c));
+            buildAnswersChildren(['q4_1','q4_2','q4_3']).forEach(c => children.push(c));
+            buildUserSummaryChildren('summary4').forEach(c => children.push(c));
+
+            // Tab 5 + calculations + graphs
+            buildTab5Content().forEach(c => children.push(c));
+            buildCalculationsChildren().forEach(c => children.push(c));
+            const graphChildren = await buildGraphsChildren();
+            graphChildren.forEach(c => children.push(c));
+            buildAnswersChildren(['q5_1','q5_2','q5_3']).forEach(c => children.push(c));
+            buildUserSummaryChildren('summary5').forEach(c => children.push(c));
+
+            // Tab 6
+            buildTab6Content().forEach(c => children.push(c));
+            buildAnswersChildren(['q6_1','q6_2','q6_3']).forEach(c => children.push(c));
+            buildUserSummaryChildren('summary6').forEach(c => children.push(c));
+
+            const doc = new d.Document({
+                styles: {
+                    default: {
+                        document: { run: { font: 'Arial', size: 22 } }
+                    }
+                },
+                sections: [{
+                    properties: {
+                        page: {
+                            margin: { top: 1080, right: 1080, bottom: 1080, left: 1080 }
+                        }
+                    },
+                    children: children
+                }]
+            });
+
+            const blob = await d.Packer.toBlob(doc);
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            const safeName = studentName.replace(/[^\w\u0590-\u05FF\-]/g, '_').substring(0, 40);
+            a.download = 'דוח_מעבדה_' + safeName + '.docx';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            if (msgEl) {
+                msgEl.style.color = 'var(--success)';
+                msgEl.innerText = '✓ הדו"ח הופק בהצלחה! בדוק את תיקיית ההורדות.';
+            }
+        } catch (err) {
+            console.error(err);
+            if (msgEl) {
+                msgEl.style.color = 'var(--error)';
+                msgEl.innerText = '✗ שגיאה ביצירת הדו"ח: ' + err.message;
+            }
+            alert('שגיאה ביצירת הדו"ח: ' + err.message);
+        }
+    }
+
+    // אתחול תאריך ותצוגת תמונות
+    document.addEventListener('DOMContentLoaded', function() {
+        const dateField = document.getElementById('reportDate');
+        if (dateField) {
+            const t = new Date();
+            dateField.value = t.getFullYear() + '-'
+                + String(t.getMonth()+1).padStart(2,'0') + '-'
+                + String(t.getDate()).padStart(2,'0');
+        }
+        renderGraphPreviews();
+        renderSetupGallery();
+    });
+    // ============================================================
+    // סוף בלוק docx
+    // ============================================================
+</script>
+
+</body>
+</html>

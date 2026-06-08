@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>טיימר</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:system-ui,sans-serif;background:#f3ede1;color:#211d18;
+    min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;padding:24px}
+  .back{position:fixed;top:18px;right:18px;text-decoration:none;color:#8a3d1d;font-weight:600}
+  h1{font-size:1.5rem}
+  #disp{font-size:5rem;font-variant-numeric:tabular-nums;font-weight:700;direction:ltr;letter-spacing:.02em}
+  .inputs{display:flex;gap:8px;align-items:center}
+  input{width:80px;font-size:1.4rem;text-align:center;padding:10px;border:1.5px solid #d9cdb6;border-radius:10px;background:#fbf7ee}
+  .btns{display:flex;gap:12px}
+  button{border:none;border-radius:12px;padding:14px 28px;font-size:1.05rem;cursor:pointer;font-weight:600;transition:.15s}
+  button:hover{transform:translateY(-2px)}
+  .start{background:#b5532a;color:#fff}.reset{background:#ece3d2}
+  .done{color:#b5532a;animation:flash .6s infinite}
+  @keyframes flash{50%{opacity:.3}}
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">→ חזרה לאינדקס</a>
+<h1>טיימר</h1>
+<div id="disp">00:00</div>
+<div class="inputs">
+  <input id="min" type="number" min="0" max="99" value="1"> :
+  <input id="sec" type="number" min="0" max="59" value="0">
+</div>
+<div class="btns">
+  <button class="start" id="startBtn" onclick="toggle()">התחל</button>
+  <button class="reset" onclick="reset()">איפוס</button>
+</div>
+<script>
+  let total=0,left=0,iv=null,running=false;
+  const disp=document.getElementById('disp'),btn=document.getElementById('startBtn');
+  function fmt(t){const m=Math.floor(t/60),s=t%60;return String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');}
+  function reset(){clearInterval(iv);running=false;disp.classList.remove('done');
+    total=(+document.getElementById('min').value||0)*60+(+document.getElementById('sec').value||0);
+    left=total;disp.textContent=fmt(left);btn.textContent='התחל';}
+  function toggle(){
+    if(running){clearInterval(iv);running=false;btn.textContent='המשך';return;}
+    if(left<=0)reset();if(left<=0)return;
+    running=true;btn.textContent='השהה';
+    iv=setInterval(()=>{left--;disp.textContent=fmt(left);
+      if(left<=0){clearInterval(iv);running=false;disp.classList.add('done');btn.textContent='התחל';
+        try{new AudioContext();}catch{}alert('הזמן נגמר!');}},1000);
+  }
+  reset();
+</script>
+</body>
+</html>

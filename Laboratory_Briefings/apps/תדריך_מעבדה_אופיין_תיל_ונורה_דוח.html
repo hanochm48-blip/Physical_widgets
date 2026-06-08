@@ -1,0 +1,2455 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>מעבדת פיזיקה - אופיין תיל מתכתי ונורת להט</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML" async></script>
+    <script src="https://unpkg.com/docx@8.5.0/build/index.umd.js"></script>
+    <style>
+        :root {
+            --primary: #1e3a5f;
+            --secondary: #2980b9;
+            --accent: #e67e22;
+            --success: #27ae60;
+            --error: #e74c3c;
+            --locked: #95a5a6;
+            --bg: #f4f7f6;
+        }
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background-color: var(--bg);
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        .container {
+            max-width: 1050px;
+            margin: auto;
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: var(--primary);
+            border-bottom: 3px solid var(--secondary);
+            padding-bottom: 12px;
+            font-size: 1.8em;
+        }
+        h2 { color: var(--primary); margin-top: 0; }
+        h3 { color: var(--secondary); }
+
+        /* ניווט */
+        .tabs {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+            background: #eee;
+            border-radius: 10px;
+            padding: 5px;
+            margin-bottom: 25px;
+        }
+        .tab {
+            flex: 1;
+            min-width: 120px;
+            padding: 10px;
+            text-align: center;
+            cursor: pointer;
+            font-weight: bold;
+            border-radius: 8px;
+            transition: 0.3s;
+            margin: 2px;
+            font-size: 0.85em;
+            position: relative;
+        }
+        .tab:hover:not(.locked) { background: #ddd; }
+        .tab.active { background: var(--secondary); color: white; }
+        .tab.locked {
+            color: var(--locked);
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+        .tab.completed::after {
+            content: "✓";
+            position: absolute;
+            top: 2px;
+            left: 5px;
+            color: var(--success);
+            font-weight: bold;
+        }
+        .tab.locked::after {
+            content: "🔒";
+            position: absolute;
+            top: 2px;
+            left: 5px;
+            font-size: 0.8em;
+        }
+
+        /* תוכן */
+        .content {
+            display: none;
+            border-right: 5px solid var(--secondary);
+            padding-right: 20px;
+            animation: fadeIn 0.4s;
+        }
+        .content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .theory { margin-bottom: 20px; font-size: 1.1em; line-height: 1.7; }
+        .example {
+            background: #fff9c4;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #fbc02d;
+            margin: 15px 0;
+        }
+        .important {
+            background: #e8f5e9;
+            border-right: 5px solid var(--success);
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+        .warning {
+            background: #ffebee;
+            border-right: 5px solid var(--error);
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+        .formula {
+            background: #f0f4f8;
+            border: 1px dashed var(--secondary);
+            padding: 15px;
+            text-align: center;
+            font-size: 1.2em;
+            margin: 15px 0;
+            border-radius: 8px;
+        }
+
+        /* שאלות */
+        .quiz {
+            background: #e3f2fd;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            border-right: 4px solid var(--secondary);
+        }
+        .question {
+            font-weight: bold;
+            font-size: 1.05em;
+            margin-bottom: 15px;
+            color: var(--primary);
+        }
+        .option {
+            background: white;
+            border: 2px solid var(--secondary);
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: 0.2s;
+            font-weight: 500;
+        }
+        .option:hover { background: #bbdefb; }
+        .option.correct { background: #c8e6c9; border-color: var(--success); }
+        .option.wrong { background: #ffcdd2; border-color: var(--error); }
+        .feedback {
+            font-weight: bold;
+            margin-top: 10px;
+            display: none;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        /* סקיצות */
+        .sketch-container {
+            text-align: center;
+            margin: 25px 0;
+            background: #fff;
+            padding: 25px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+        }
+        svg { max-width: 100%; height: auto; }
+
+        /* טבלת נתונים */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        .data-table th {
+            background: var(--primary);
+            color: white;
+            padding: 12px;
+            font-size: 1.05em;
+        }
+        .data-table td {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            text-align: center;
+        }
+        .data-table input {
+            width: 90%;
+            padding: 8px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            text-align: center;
+            font-size: 1em;
+            transition: 0.2s;
+        }
+        .data-table input:focus {
+            outline: none;
+            border-color: var(--secondary);
+            background: #f0f8ff;
+        }
+        .data-table .computed {
+            color: var(--accent);
+            font-weight: bold;
+        }
+
+        /* כפתור סיום שלב */
+        .complete-section {
+            margin-top: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, #ecf0f1 0%, #d5dbdb 100%);
+            border-radius: 10px;
+            text-align: center;
+            border: 2px dashed var(--secondary);
+        }
+        .complete-btn {
+            background: var(--success);
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            font-size: 1.05em;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.3s;
+            box-shadow: 0 3px 8px rgba(39, 174, 96, 0.3);
+        }
+        .complete-btn:hover {
+            background: #229954;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 12px rgba(39, 174, 96, 0.4);
+        }
+        .complete-btn:disabled {
+            background: var(--locked);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        .complete-msg {
+            display: none;
+            margin-top: 15px;
+            color: var(--success);
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+
+        /* סיכום נתונים */
+        .summary-box {
+            background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+            padding: 25px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border: 2px solid var(--success);
+        }
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(0,0,0,0.08);
+            font-size: 1.05em;
+        }
+        .summary-row:last-child { border-bottom: none; }
+        .summary-label { font-weight: bold; color: var(--primary); }
+        .summary-value { color: var(--accent); font-weight: bold; }
+
+        /* פרוגרס בר */
+        .progress-bar {
+            background: #ddd;
+            height: 8px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            background: linear-gradient(90deg, var(--secondary), var(--success));
+            height: 100%;
+            width: 0%;
+            transition: width 0.5s;
+        }
+
+        ul { line-height: 1.8; }
+
+        .single-input {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 20px 0;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        .single-input label { font-weight: bold; color: var(--primary); }
+        .single-input input {
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            text-align: center;
+            font-size: 1em;
+            width: 150px;
+        }
+        .single-input input:focus {
+            outline: none;
+            border-color: var(--secondary);
+        }
+
+        /* סיכום חופשי בכל לשונית */
+        .tab-summary {
+            background: #f0f4f8;
+            border: 2px dashed var(--secondary);
+            border-radius: 10px;
+            padding: 18px 20px;
+            margin: 25px 0 15px 0;
+        }
+        .tab-summary > label {
+            display: block;
+            font-weight: bold;
+            color: var(--primary);
+            margin-bottom: 10px;
+            font-size: 1.05em;
+        }
+        .tab-summary textarea {
+            width: 100%;
+            min-height: 110px;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 1em;
+            line-height: 1.6;
+            resize: vertical;
+            box-sizing: border-box;
+            direction: rtl;
+            background: white;
+        }
+        .tab-summary textarea:focus {
+            outline: none;
+            border-color: var(--secondary);
+            box-shadow: 0 0 0 3px rgba(41, 128, 185, 0.15);
+        }
+
+        /* פרטי תלמיד */
+        .student-info {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+            margin: 20px 0 15px 0;
+        }
+        .student-info > div {
+            display: flex;
+            flex-direction: column;
+            text-align: right;
+        }
+        .student-info label {
+            font-weight: bold;
+            color: var(--primary);
+            margin-bottom: 5px;
+            font-size: 0.95em;
+        }
+        .student-info input {
+            padding: 9px 12px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 1em;
+            min-width: 170px;
+            background: white;
+            text-align: right;
+        }
+        .student-info input:focus {
+            outline: none;
+            border-color: var(--secondary);
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>תדריך מעבדה: אופיין תיל מתכתי ונורת להט</h1>
+    <p style="text-align:center; color:#666; font-style:italic;">מטרת הניסוי: בדיקת חוק אוהם, השוואה בין מוליך אוהמי ללא-אוהמי, וחישוב ההתנגדות הסגולית של חוט ניקל-כרום</p>
+
+    <div class="progress-bar">
+        <div class="progress-fill" id="progressFill"></div>
+    </div>
+
+    <div class="tabs">
+        <div class="tab active" data-tab="tab1" onclick="openTab(event, 'tab1')">1. רקע תיאורטי</div>
+        <div class="tab" data-tab="tab2" onclick="openTab(event, 'tab2')">2. המעגל והציוד</div>
+        <div class="tab" data-tab="tab3" onclick="openTab(event, 'tab3')">3. שלב א'.1 - תיל מתכתי</div>
+        <div class="tab" data-tab="tab4" onclick="openTab(event, 'tab4')">4. שלב א'.2 - נורת להט</div>
+        <div class="tab" data-tab="tab5" onclick="openTab(event, 'tab5')">5. שלב ב' - אורכים</div>
+        <div class="tab" data-tab="tab6" onclick="openTab(event, 'tab6')">6. התנגדות סגולית</div>
+        <div class="tab" data-tab="tab7" onclick="openTab(event, 'tab7')">7. שגיאות ומסקנות</div>
+    </div>
+
+    <!-- ===== לשונית 1: רקע תיאורטי ===== -->
+    <div id="tab1" class="content active">
+        <div class="theory">
+            <h2>שלב 1: רקע תיאורטי - חוק אוהם והתנגדות מוליכים</h2>
+            <p>בניסוי זה נחקור את הקשר בין המתח על רכיב חשמלי לבין הזרם הזורם בו. קשר זה - הנקרא <strong>אופיין הרכיב</strong> - מתאר את ההתנהגות החשמלית של הרכיב.</p>
+        </div>
+
+        <div class="formula">
+            <strong>חוק אוהם:</strong> \(\quad V = I \cdot R \quad\) או \(\quad I = \dfrac{V}{R}\)
+        </div>
+
+        <p>ההתנגדות \(R\) היא תכונה של המוליך, התלויה במידותיו ובחומר ממנו עשוי:</p>
+
+        <div class="formula">
+            \(R = \rho \cdot \dfrac{l}{A}\)
+            <br>
+            <span style="font-size:0.9em; color:#666;">
+                \(l\) - אורך התיל; \(A\) - שטח החתך; \(\rho\) (רוֹ) - ההתנגדות הסגולית של החומר
+            </span>
+        </div>
+
+        <div class="important">
+            <strong>📌 עקרונות מנחים:</strong>
+            <ul>
+                <li><strong>מוליך אוהמי:</strong> מוליך שעבורו היחס \(V/I\) קבוע בכל זרם. הגרף של V כפונקציה של I הוא <strong>קו ישר העובר דרך הראשית</strong>. הדוגמה הקלאסית: תיל מתכתי בטמפרטורה קבועה.</li>
+                <li><strong>מוליך לא-אוהמי:</strong> מוליך שעבורו היחס \(V/I\) משתנה. הגרף של V מול I אינו ליניארי. דוגמאות: נורת להט, דיודה.</li>
+                <li><strong>תלות ההתנגדות במידות:</strong> ההתנגדות גדלה ככל שהתיל ארוך יותר, וקטנה ככל ששטח החתך גדול יותר. כלומר \(R\) ביחס ישר ל-\(l\) וביחס הפוך ל-\(A\).</li>
+                <li><strong>ההתנגדות הסגולית \(\rho\):</strong> תכונה של החומר עצמו (כמו צפיפות), שאינה תלויה במידות הספציפיות של התיל. יחידותיה: \([\Omega \cdot m]\) (אום-מטר).</li>
+            </ul>
+        </div>
+
+        <!-- שאלות -->
+        <div class="quiz">
+            <p class="question">שאלה 1: על פי חוק אוהם, אם נכפיל את המתח על מוליך אוהמי פי 3, מה יקרה לזרם?</p>
+            <div class="option" onclick="checkAns(this, false, 'לא נכון. במוליך אוהמי הזרם פרופורציוני למתח, כך שאם המתח גדל - גם הזרם גדל.')">הזרם יקטן פי 3.</div>
+            <div class="option" onclick="checkAns(this, true, 'נכון! לפי \\(I = V/R\\), כאשר R קבוע, הזרם פרופורציוני ישר למתח. הכפלת המתח פי 3 גוררת הכפלת הזרם פי 3.', 'q1_1')">הזרם יגדל פי 3.</div>
+            <div class="option" onclick="checkAns(this, false, 'לא נכון. הזרם תלוי במתח באופן ליניארי, לא ריבועי.')">הזרם יגדל פי 9.</div>
+            <div class="feedback"></div>
+        </div>
+
+        <div class="quiz">
+            <p class="question">שאלה 2: אם ניקח שני חוטים מאותו חומר ובאותו קוטר, אך אורך החוט השני כפול מהראשון - מה יחס ההתנגדויות?</p>
+            <div class="option" onclick="checkAns(this, true, 'מצוין! לפי \\(R = \\rho l / A\\), כאשר \\(\\rho\\) ו-\\(A\\) קבועים - ההתנגדות פרופורציונית לאורך. אורך כפול = התנגדות כפולה.', 'q1_2')">ההתנגדות של החוט השני גדולה פי 2.</div>
+            <div class="option" onclick="checkAns(this, false, 'לא. הקשר בין R ל-l הוא ליניארי, לא ריבועי.')">ההתנגדות של החוט השני גדולה פי 4.</div>
+            <div class="option" onclick="checkAns(this, false, 'לא. ההתנגדות תלויה באורך באופן ישר - חוט ארוך יותר נותן התנגדות גדולה יותר.')">ההתנגדות זהה בשני החוטים.</div>
+            <div class="feedback"></div>
+        </div>
+
+        <div class="quiz">
+            <p class="question">שאלה 3: מהו סימן ההיכר של מוליך אוהמי בגרף V מול I?</p>
+            <div class="option" onclick="checkAns(this, false, 'לא. עקומה אקספוננציאלית מאפיינת רכיבים לא-אוהמיים כמו דיודה.')">עקומה אקספוננציאלית.</div>
+            <div class="option" onclick="checkAns(this, true, 'נכון! במוליך אוהמי \\(V = I \\cdot R\\), כלומר \\(V\\) פרופורציוני ישר ל-\\(I\\) - זהו קו ישר שעובר דרך הראשית.', 'q1_3')">קו ישר העובר דרך ראשית הצירים.</div>
+            <div class="option" onclick="checkAns(this, false, 'לא. במוליך אוהמי הקשר בין V ו-I הוא ליניארי, לא ריבועי.')">פרבולה.</div>
+            <div class="feedback"></div>
+        </div>
+
+        <div class="tab-summary">
+            <label for="summary1">📝 סיכום הלשונית / נוסחאות עיקריות (טקסט חופשי):</label>
+            <textarea id="summary1" placeholder="רשום כאן את הנוסחאות העיקריות שלמדת (חוק אוהם, הקשר בין R לאורך וקוטר), הגדרות מרכזיות, וכל הערה שעולה לך מהקריאה."></textarea>
+        </div>
+
+        <!-- כפתור סיום -->
+        <div class="complete-section">
+            <p>לאחר קריאת הרקע ומענה על השאלות, רשום בדו"ח את הנוסחאות העיקריות וההגדרות.</p>
+            <button class="complete-btn" id="btn1" onclick="completeStage(1)">✓ סיימתי, הבנתי ורשמתי בדו"ח</button>
+            <div class="complete-msg" id="msg1">השלב הושלם בהצלחה! ניתן לעבור לשלב הבא 🎉</div>
+        </div>
+    </div>
+
+    <!-- ===== לשונית 2: המעגל והציוד ===== -->
+    <div id="tab2" class="content">
+        <div class="theory">
+            <h2>שלב 2: הכרת המעגל והציוד</h2>
+            <p>נכיר את הציוד ונבין את עקרונות החיבור: כיצד מודדים מתח וזרם, ולשם מה משמש הנגד המשתנה.</p>
+        </div>
+
+        <div class="important" style="background: linear-gradient(135deg,#e8f5e9 0%,#c8e6c9 100%); border-color: var(--success);">
+            <strong style="color: var(--success);">🔬 בחר את סוג התיל שבניסוי שלך:</strong>
+            <p style="margin: 8px 0 12px 0;">בחר מהרשימה את החומר ממנו עשוי תיל ההתנגדות שבסרגל שלך. ערך זה ישמש להשוואה בין ה-\(\rho\) הניסויי לתיאורטי בשלב 6.</p>
+            <select id="metalType" onchange="onMetalChange()"
+                    style="width: 100%; max-width: 420px; padding: 10px 14px; font-size: 1.05em;
+                           font-family: inherit; border: 2px solid var(--success); border-radius: 8px;
+                           background: white; cursor: pointer; direction: rtl;">
+                <option value="nichrome">ניקל-כרום (Nichrome 80/20) — ρ ≈ 1.10 × 10⁻⁶ Ω·m</option>
+                <option value="copper">נחושת אדומה (Red Copper) — ρ ≈ 1.68 × 10⁻⁸ Ω·m</option>
+                <option value="stainless">פלדת אל-חלד (Stainless Steel 304) — ρ ≈ 7.2 × 10⁻⁷ Ω·m</option>
+            </select>
+            <p id="metalChoiceMsg" style="margin-top: 10px; color: var(--success); font-size: 0.95em;">
+                נבחר: <b>ניקל-כרום</b> · ערך תיאורטי: <b>1.10 × 10⁻⁶ Ω·m</b>
+            </p>
+        </div>
+
+        <div class="sketch-container">
+            <h3>תרשים המעגל</h3>
+            <svg viewBox="0 0 700 380" xmlns="http://www.w3.org/2000/svg">
+                <!-- ========================
+                     תרשים המעגל - מבנה:
+                     [סוללה] → [נגד משתנה] → [חיישן זרם A] → [סרגל התנגדות]
+                     חיישן מתח V מחובר במקביל ישירות להדקי סרגל ההתנגדות
+                     ======================== -->
+
+                <!-- סוללה (פינה שמאלית-תחתונה) -->
+                <g transform="translate(80, 280)">
+                    <line x1="-15" y1="-25" x2="15" y2="-25" stroke="#333" stroke-width="3"/>
+                    <line x1="-10" y1="-15" x2="10" y2="-15" stroke="#333" stroke-width="2"/>
+                    <line x1="-15" y1="-5" x2="15" y2="-5" stroke="#333" stroke-width="3"/>
+                    <line x1="-10" y1="5" x2="10" y2="5" stroke="#333" stroke-width="2"/>
+                    <text x="-35" y="-22" font-size="16" font-weight="bold" fill="var(--error)">+</text>
+                    <text x="-30" y="9" font-size="16" font-weight="bold" fill="#333">−</text>
+                    <text x="-30" y="35" font-size="13" fill="#333">סוללה</text>
+                </g>
+
+                <!-- חוט: סוללה -> שמאלה -> מעלה -> ראוסטט -->
+                <line x1="80" y1="255" x2="80" y2="80" stroke="#333" stroke-width="2"/>
+                <line x1="80" y1="80" x2="180" y2="80" stroke="#333" stroke-width="2"/>
+
+                <!-- נגד משתנה (ראוסטט) -->
+                <g transform="translate(220, 80)">
+                    <rect x="-40" y="-15" width="80" height="30" fill="#ffeaa7" stroke="#333" stroke-width="2"/>
+                    <line x1="-30" y1="-30" x2="30" y2="5" stroke="var(--error)" stroke-width="2.5"/>
+                    <polygon points="30,5 22,3 28,-4" fill="var(--error)"/>
+                    <text x="0" y="-25" font-size="12" fill="#333" text-anchor="middle" font-weight="bold">נגד משתנה</text>
+                </g>
+
+                <!-- חוט: ראוסטט -> חיישן זרם -->
+                <line x1="260" y1="80" x2="340" y2="80" stroke="#333" stroke-width="2"/>
+
+                <!-- חיישן זרם (אמפרמטר) -->
+                <g transform="translate(370, 80)">
+                    <circle cx="0" cy="0" r="25" fill="#fff3cd" stroke="var(--accent)" stroke-width="2.5"/>
+                    <text x="0" y="6" font-size="20" font-weight="bold" fill="var(--accent)" text-anchor="middle">A</text>
+                    <text x="0" y="-38" font-size="12" fill="#333" text-anchor="middle" font-weight="bold">חיישן זרם</text>
+                </g>
+
+                <!-- חוט: חיישן זרם -> הדק שמאלי של סרגל ההתנגדות -->
+                <line x1="395" y1="80" x2="500" y2="80" stroke="#333" stroke-width="2"/>
+
+                <!-- ========== סרגל התנגדות אופקי ========== -->
+                <!-- תיל בין שני הדקים -->
+                <g transform="translate(500, 80)">
+                    <!-- מסגרת סרגל העץ -->
+                    <rect x="0" y="-8" width="160" height="16" fill="#deb887" stroke="#8b6914" stroke-width="1.5" rx="2"/>
+                    <!-- התיל עצמו -->
+                    <line x1="5" y1="0" x2="155" y2="0" stroke="#888" stroke-width="2"/>
+                    <!-- הדק ימני (נקודת A) -->
+                    <circle cx="5" cy="0" r="4" fill="#333"/>
+                    <!-- הדק שמאלי (נקודת B) -->
+                    <circle cx="155" cy="0" r="4" fill="#333"/>
+                    <!-- כיתוב -->
+                    <text x="80" y="-15" font-size="12" fill="#333" text-anchor="middle" font-weight="bold">סרגל התנגדות (תיל ניקל-כרום)</text>
+                    <text x="80" y="28" font-size="11" fill="#666" text-anchor="middle">קוטר: 0.25 מ"מ; אורך: 50 ס"מ</text>
+                </g>
+
+                <!-- ========== חיישן מתח V במקביל - הדקיו ישירות על הדקי הסרגל ========== -->
+                <!-- חוט מהדק ימני של הסרגל -> מטה -> שמאלה -> חיישן מתח -->
+                <line x1="505" y1="0" x2="505" y2="190" stroke="var(--success)" stroke-width="2" stroke-dasharray="0"/>
+                <line x1="505" y1="190" x2="585" y2="190" stroke="var(--success)" stroke-width="2"/>
+
+                <!-- חיישן מתח -->
+                <g transform="translate(610, 190)">
+                    <circle cx="0" cy="0" r="25" fill="#d4edda" stroke="var(--success)" stroke-width="2.5"/>
+                    <text x="0" y="6" font-size="20" font-weight="bold" fill="var(--success)" text-anchor="middle">V</text>
+                    <text x="0" y="40" font-size="12" fill="#333" text-anchor="middle" font-weight="bold">חיישן מתח</text>
+                    <text x="0" y="55" font-size="10" fill="#666" text-anchor="middle">(במקביל - על הדקי הסרגל)</text>
+                </g>
+
+                <!-- חוט מחיישן מתח -> שמאלה -> מעלה -> הדק שמאלי של הסרגל -->
+                <line x1="635" y1="190" x2="655" y2="190" stroke="var(--success)" stroke-width="2"/>
+                <line x1="655" y1="190" x2="655" y2="0" stroke="var(--success)" stroke-width="2"/>
+
+                <!-- חוט חזור: הדק שמאלי של סרגל ההתנגדות -> מטה -> שמאלה -> חזור לסוללה -->
+                <line x1="660" y1="80" x2="660" y2="320" stroke="#333" stroke-width="2"/>
+                <line x1="660" y1="320" x2="80" y2="320" stroke="#333" stroke-width="2"/>
+                <line x1="80" y1="320" x2="80" y2="305" stroke="#333" stroke-width="2"/>
+
+                <!-- כותרת תחתונה -->
+                <text x="350" y="365" font-size="13" fill="#333" text-anchor="middle" font-style="italic">חיישן הזרם בטור במעגל; חיישן המתח (ירוק) מחובר ישירות להדקי סרגל ההתנגדות</text>
+            </svg>
+        </div>
+
+        <div class="important">
+            <strong>📌 רשימת הציוד:</strong>
+            <ul>
+                <li><strong>סרגל התנגדות:</strong> תיל ניקל-כרום (קוטר 0.25 מ"מ - הערך רשום על הסרגל) באורך 50 ס"מ, מתוח על סרגל עץ.</li>
+                <li><strong>נורת להט:</strong> נורה לזרם נמוך (לדוגמה 12V).</li>
+                <li><strong>נגד משתנה (ראוסטט):</strong> לשליטה בזרם.</li>
+                <li><strong>סוללה ומחזיק סוללות.</strong></li>
+                <li><strong>חיישן זרם</strong> (תחום ±2.5A) - לחיבור בטור.</li>
+                <li><strong>חיישן מתח</strong> (תחום ±2.5V או ±25V) - לחיבור במקביל לרכיב הנמדד.</li>
+                <li><strong>תילים, תנינים</strong> ומחבר MultiLogPRO/TriLink למחשב.</li>
+            </ul>
+        </div>
+
+        <div class="example">
+            <strong>עקרונות חיבור החיישנים:</strong>
+            <ul>
+                <li><strong>חיישן הזרם בטור:</strong> כל הזרם זורם דרכו, ולכן הוא מודד את הזרם המדויק במעגל.</li>
+                <li><strong>חיישן המתח במקביל:</strong> שני קצותיו מחוברים לקצוות הרכיב, ולכן הוא מודד את הפרש הפוטנציאלים על הרכיב עצמו.</li>
+                <li><strong>קוטביות נכונה:</strong> התיל האדום של החיישן הוא הקוטב החיובי, השחור הוא השלילי. חיבור הפוך יביא לקריאה שלילית.</li>
+            </ul>
+        </div>
+
+        <div class="warning">
+            <strong>⚠️ זהירות לפני ההפעלה:</strong>
+            <ul>
+                <li>התחל תמיד עם הראוסטט במצב של התנגדות מירבית (זרם מינימלי) - הגנה על המעגל מזרם פתאומי גבוה.</li>
+                <li>אל תמדוד זרמים מעל 2.5A - מעבר לטווח החיישן.</li>
+                <li>בין מדידה למדידה רצוי לפתוח את המעגל למניעת חימום מצטבר.</li>
+            </ul>
+        </div>
+
+        <!-- שאלות -->
+        <div class="quiz">
+            <p class="question">שאלה 1: מדוע חיישן המתח מחובר במקביל לרכיב הנמדד, ולא בטור?</p>
+            <div class="option" onclick="checkAns(this, true, 'נכון! מתח הוא הפרש פוטנציאלים בין שתי נקודות. כדי למדוד את ההפרש על פני הרכיב - יש לחבר חיישן בין שני קצותיו, כלומר במקביל. בנוסף, התנגדות חיישן המתח גבוהה מאוד, כך שהוא לא משפיע על הזרם במעגל.', 'q2_1')">כדי למדוד את הפרש הפוטנציאלים בין שני קצוות הרכיב; חיבור בטור היה משבש את המעגל.</div>
+            <div class="option" onclick="checkAns(this, false, 'טעות. דווקא חיישן הזרם נמצא בטור.')">חיבור בטור הוא הנכון - אנחנו במקרה מחברים במקביל.</div>
+            <div class="option" onclick="checkAns(this, false, 'לא נכון. גודל הסוללה לא קובע איך לחבר את החיישנים.')">בגלל גודל הסוללה.</div>
+            <div class="feedback"></div>
+        </div>
+
+        <div class="quiz">
+            <p class="question">שאלה 2: מה תפקידו של הנגד המשתנה (ראוסטט) בניסוי?</p>
+            <div class="option" onclick="checkAns(this, false, 'לא נכון. החיישנים פועלים באופן עצמאי ולא תלויים בנגד המשתנה.')">להפעיל את החיישנים.</div>
+            <div class="option" onclick="checkAns(this, true, 'מצוין! על-ידי הזזת הגררה של הראוסטט אנו משנים את ההתנגדות במעגל, וכך משנים את הזרם והמתח על הרכיב הנמדד. כך נקבל זוגות (V, I) שונים לבניית האופיין.', 'q2_2')">לשלוט בזרם הזורם במעגל ולקבל מספר זוגות מתח-זרם שונים לבניית הגרף.</div>
+            <div class="option" onclick="checkAns(this, false, 'לא. הראוסטט אינו מודד דבר - הוא רק נגד שניתן לשנות את ערכו.')">למדוד את הזרם המדויק.</div>
+            <div class="feedback"></div>
+        </div>
+
+        <div class="quiz">
+            <p class="question">שאלה 3: מדוע מומלץ להתחיל את הניסוי עם הראוסטט במצב של התנגדות מירבית?</p>
+            <div class="option" onclick="checkAns(this, true, 'נכון! התנגדות גבוהה במעגל = זרם נמוך. כך אנו נמנעים מקפיצת זרם פתאומית שעלולה לחרוג מטווח החיישן ולפגוע ברכיבים.', 'q2_3')">כדי שהזרם ההתחלתי יהיה נמוך, ולמנוע פגיעה בחיישנים או חריגה מטווח המדידה (2.5A).</div>
+            <div class="option" onclick="checkAns(this, false, 'לא. הסוללה לא תרוקן בלי קשר להתנגדות ההתחלתית.')">כדי שהסוללה לא תתרוקן.</div>
+            <div class="option" onclick="checkAns(this, false, 'לא נכון. סדר ההפעלה של חיישנים אינו תלוי בהתנגדות הראוסטט.')">כי אחרת החיישנים לא יידלקו.</div>
+            <div class="feedback"></div>
+        </div>
+
+        <div class="complete-section" style="border-color: var(--accent); background: linear-gradient(135deg, #fff5e6 0%, #ffe0b3 100%); margin-top: 25px;">
+            <h3 style="margin-top:0; color:var(--accent);">📷 צילום מערכת הניסוי</h3>
+            <p>ניתן לצלם את מערכת הניסוי שהקמת ולצרף את התמונות כאן. התמונות יופיעו בדו"ח תחת חלק תכנון הציוד.</p>
+            <input type="file" id="setupUpload" accept="image/*" multiple onchange="handleSetupUpload(event)"
+                   style="display:inline-block; padding:10px; background:white; border:2px dashed var(--accent); border-radius:8px; cursor:pointer; max-width:100%;">
+            <div id="setupGallery" style="display:flex; flex-wrap:wrap; gap:12px; justify-content:center; margin-top:18px;"></div>
+        </div>
+
+        <div class="tab-summary">
+            <label for="summary2">📝 סיכום הלשונית / תפקיד הציוד (טקסט חופשי):</label>
+            <textarea id="summary2" placeholder="תאר במילים שלך את אופן חיבור החיישנים, את תפקיד הראוסטט, ואת הסיבות לבחירת מצב התנגדות מירבי בתחילת המדידה."></textarea>
+        </div>
+
+        <div class="complete-section">
+            <p>סרטט בדו"ח את תרשים המעגל וזהה את הציוד.</p>
+            <button class="complete-btn" id="btn2" onclick="completeStage(2)">✓ סיימתי, הבנתי ורשמתי בדו"ח</button>
+            <div class="complete-msg" id="msg2">השלב הושלם בהצלחה! ניתן לעבור לשלב הבא 🎉</div>
+        </div>
+    </div>
+
+    <!-- ===== לשונית 3: שלב א'.1 - אופיין תיל מתכתי ===== -->
+    <div id="tab3" class="content">
+        <div class="theory">
+            <h2>שלב א'.1: אופיין תיל מתכתי - בדיקת חוק אוהם</h2>
+            <p>בשלב זה נמדוד את ההתנגדות של תיל ניקל-כרום באורך 50 ס"מ. נשנה את הזרם ע"י הראוסטט, ובכל ערך נרשום את המתח והזרם המתאימים. אם התיל אוהמי - הגרף של V מול I יהיה קו ישר.</p>
+        </div>
+
+        <div class="important">
+            <strong>📌 הוראות ביצוע:</strong>
+            <ul>
+                <li>וודא שאורך התיל הפעיל בסרגל ההתנגדות הוא 50 ס"מ (סרגל מלא).</li>
+                <li>הצב את הראוסטט במצב של מתח נמוך, והפעל את החיישנים.</li>
+                <li>בצע 7 מדידות: בכל פעם הזז את גררת הראוסטט בהדרגה והגדל את הזרם, וקרא את המתח (V) והזרם (I) המתאימים.</li>
+                <li>שים לב לא לחרוג מ-2.5A.</li>
+                <li>הזן את הזוגות (V, I) בטבלה למטה.</li>
+            </ul>
+        </div>
+
+        <h3 style="text-align:center;">טבלת מדידות - תיל באורך 50 ס"מ</h3>
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>מדידה #</th>
+                    <th>זרם I (אמפר)</th>
+                    <th>מתח V (וולט)</th>
+                    <th>R = V/I (אום)</th>
+                </tr>
+            </thead>
+            <tbody id="wireTableBody">
+                <tr>
+                    <td>1</td>
+                    <td><input type="number" step="0.001" id="I3_1" placeholder="0.05" oninput="checkWireData()"></td>
+                    <td><input type="number" step="0.001" id="V3_1" placeholder="0.50" oninput="checkWireData()"></td>
+                    <td class="computed" id="R3_1">-</td>
+                </tr>
+                <tr>
+                    <td>2</td>
+                    <td><input type="number" step="0.001" id="I3_2" placeholder="0.10" oninput="checkWireData()"></td>
+                    <td><input type="number" step="0.001" id="V3_2" placeholder="1.00" oninput="checkWireData()"></td>
+                    <td class="computed" id="R3_2">-</td>
+                </tr>
+                <tr>
+                    <td>3</td>
+                    <td><input type="number" step="0.001" id="I3_3" placeholder="0.15" oninput="checkWireData()"></td>
+                    <td><input type="number" step="0.001" id="V3_3" placeholder="1.55" oninput="checkWireData()"></td>
+                    <td class="computed" id="R3_3">-</td>
+                </tr>
+                <tr>
+                    <td>4</td>
+                    <td><input type="number" step="0.001" id="I3_4" placeholder="0.20" oninput="checkWireData()"></td>
+                    <td><input type="number" step="0.001" id="V3_4" placeholder="2.10" oninput="checkWireData()"></td>
+                    <td class="computed" id="R3_4">-</td>
+                </tr>
+                <tr>
+                    <td>5</td>
+                    <td><input type="number" step="0.001" id="I3_5" placeholder="0.25" oninput="checkWireData()"></td>
+                    <td><input type="number" step="0.001" id="V3_5" placeholder="2.62" oninput="checkWireData()"></td>
+                    <td class="computed" id="R3_5">-</td>
+                </tr>
+                <tr>
+                    <td>6</td>
+                    <td><input type="number" step="0.001" id="I3_6" placeholder="0.30" oninput="checkWireData()"></td>
+                    <td><input type="number" step="0.001" id="V3_6" placeholder="3.15" oninput="checkWireData()"></td>
+                    <td class="computed" id="R3_6">-</td>
+                </tr>
+                <tr>
+                    <td>7</td>
+                    <td><input type="number" step="0.001" id="I3_7" placeholder="0.35" oninput="checkWireData()"></td>
+                    <td><input type="number" step="0.001" id="V3_7" placeholder="3.67" oninput="checkWireData()"></td>
+                    <td class="computed" id="R3_7">-</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div id="wirePreview" style="display:none;" class="summary-box">
+            <h3 style="margin-top:0;">📊 ניתוח מקדים של הנתונים</h3>
+            <div id="wirePreviewContent"></div>
+        </div>
+
+        <div class="example">
+            <strong>הערה לדו"ח:</strong> בנה גרף של V (ציר Y) כפונקציה של I (ציר X) ב-Excel. אם התיל אוהמי, הגרף יהיה ישר העובר דרך הראשית. <strong>שיפוע הגרף = ההתנגדות R של התיל</strong>.
+        </div>
+
+        <!-- שאלות -->
+        <div class="quiz">
+            <p class="question">שאלה 1: בגרף של V מול I, מה מייצג השיפוע?</p>
+            <div class="option" onclick="checkAns(this, false, 'לא. הזרם הוא הציר האופקי, לא משהו שהשיפוע מתאר.')">את הזרם.</div>
+            <div class="option" onclick="checkAns(this, true, 'נכון! לפי \\(V = I \\cdot R\\), השיפוע של V מול I הוא R - ההתנגדות של התיל.', 'q3_1')">את ההתנגדות R של התיל.</div>
+            <div class="option" onclick="checkAns(this, false, 'לא. בגרף לפי חוק אוהם הקבוע אינו ההתנגדות הסגולית - מקדם זה מופיע רק בנוסחת \\(R = \\rho l/A\\).')">את ההתנגדות הסגולית \(\rho\) של החומר.</div>
+            <div class="feedback"></div>
+        </div>
+
+        <div class="quiz">
+            <p class="question">שאלה 2: מדוע מצפים שהקו עובר דרך ראשית הצירים (V=0, I=0)?</p>
+            <div class="option" onclick="checkAns(this, true, 'מדויק! לפי \\(V = I \\cdot R\\), כאשר \\(I = 0\\) גם \\(V = 0\\). זה לוגי - אין מתח על תיל ללא זרם.', 'q3_2')">כי כשהזרם אפס, גם המתח על התיל אפס.</div>
+            <div class="option" onclick="checkAns(this, false, 'לא. בגרף ליניארי החיתוך נקבע על-ידי המשוואה הפיזיקלית, לא על-ידי החיישן.')">כי הוולטמטר אינו יכול למדוד מתח שלילי.</div>
+            <div class="option" onclick="checkAns(this, false, 'לא נכון - אכן צפוי שהקו יעבור דרך הראשית, ואין כאן ממוצע אקראי.')">זה רק במקרה - תלוי בממוצע המדידות.</div>
+            <div class="feedback"></div>
+        </div>
+
+        <div class="quiz">
+            <p class="question">שאלה 3: בעמודה השמאלית בטבלה אנו מחשבים \(R = V/I\) עבור כל מדידה. מה צפוי לקרות לערכי R בין המדידות?</p>
+            <div class="option" onclick="checkAns(this, false, 'לא נכון. אם R היה משתנה - התיל לא היה אוהמי.')">R צריך לגדול עם הזרם.</div>
+            <div class="option" onclick="checkAns(this, true, 'מצוין! זוהי בדיוק התכונה המגדירה מוליך אוהמי - היחס \\(V/I\\) קבוע, גם אם המתח והזרם משתנים. סטיות קטנות נובעות משגיאות מדידה.', 'q3_3')">R צריך להיות קבוע (בקירוב) בכל המדידות, כי התיל אוהמי.</div>
+            <div class="option" onclick="checkAns(this, false, 'לא. במוליך אוהמי R קבוע - שמירה על קבוע זה היא בעצם החוק.')">R צריך לקטון עם הזרם.</div>
+            <div class="feedback"></div>
+        </div>
+
+        <div class="tab-summary">
+            <label for="summary3">📝 סיכום הלשונית / ניתוח האופיין (טקסט חופשי):</label>
+            <textarea id="summary3" placeholder="תאר את הקשר V-I שמצאת, האם הגרף ליניארי, ערך ההתנגדות שחישבת, ומסקנתך על השאלה האם התיל אוהמי."></textarea>
+        </div>
+
+        <div class="complete-section">
+            <p id="wireInstr">יש למלא את כל 7 שורות הטבלה לפני המעבר לשלב הבא.</p>
+            <button class="complete-btn" id="btn3" onclick="completeStage(3)" disabled>✓ סיימתי, הבנתי ורשמתי בדו"ח</button>
+            <div class="complete-msg" id="msg3">הנתונים נאספו בהצלחה! ניתן לעבור לאופיין הנורה 🎉</div>
+        </div>
+    </div>
+
+    <!-- ===== לשונית 4: שלב א'.2 - נורת להט ===== -->
+    <div id="tab4" class="content">
+        <div class="theory">
+            <h2>שלב א'.2: אופיין נורת להט - מוליך לא-אוהמי</h2>
+            <p>החלף את התיל בנורת להט. בנורה זורם זרם דרך חוט להט (טונגסטן), וכאשר הוא מתחמם הוא מאיר. נמדוד את האופיין שלה ונשווה לזה של התיל.</p>
+        </div>
+
+        <div class="sketch-container">
+            <h3>אופיין טיפוסי של נורת להט (איור סכמטי)</h3>
+            <svg viewBox="0 0 500 320" xmlns="http://www.w3.org/2000/svg">
+                <!-- צירים -->
+                <line x1="60" y1="280" x2="460" y2="280" stroke="#333" stroke-width="2" marker-end="url(#arrowEnd)"/>
+                <line x1="60" y1="280" x2="60" y2="40" stroke="#333" stroke-width="2" marker-end="url(#arrowEnd)"/>
+                <text x="465" y="285" font-size="14" fill="#333">I</text>
+                <text x="50" y="35" font-size="14" fill="#333">V</text>
+                <text x="50" y="295" font-size="14" fill="#333">0</text>
+
+                <!-- עקומה לא-לינארית של נורה -->
+                <path d="M 60,280 Q 100,200 180,150 Q 260,110 340,90 Q 400,75 450,65"
+                      fill="none" stroke="var(--error)" stroke-width="3"/>
+
+                <!-- קו ישר השוואתי (תיל אוהמי) -->
+                <line x1="60" y1="280" x2="450" y2="100" stroke="var(--secondary)" stroke-width="2" stroke-dasharray="6,4"/>
+
+                <!-- מקרא -->
+                <line x1="280" y1="40" x2="320" y2="40" stroke="var(--error)" stroke-width="3"/>
+                <text x="325" y="44" font-size="12" fill="#333">נורת להט (לא-אוהמי)</text>
+                <line x1="280" y1="60" x2="320" y2="60" stroke="var(--secondary)" stroke-width="2" stroke-dasharray="6,4"/>
+                <text x="325" y="64" font-size="12" fill="#333">תיל מתכתי (אוהמי)</text>
+
+                <!-- חיצים -->
+                <defs>
+                    <marker id="arrowEnd" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+                        <path d="M0,0 L0,6 L9,3 z" fill="#333"/>
+                    </marker>
+                </defs>
+
+                <text x="250" y="305" font-size="12" fill="#666" text-anchor="middle">בזרמים נמוכים החוט קר - שיפוע נמוך (R קטן). בזרמים גבוהים החוט מתחמם - שיפוע גדל (R גדל).</text>
+            </svg>
+        </div>
+
+        <div class="important">
+            <strong>📌 עקרון מנחה - המנגנון הפיזיקלי:</strong>
+            <ul>
+                <li><strong>חוט הלהט עשוי טונגסטן.</strong> כשעובר זרם, החוט מתחמם.</li>
+                <li><strong>התנגדות מתכת תלויה בטמפרטורה:</strong> ככל שהמתכת חמה יותר, כך ההתנגדות גדלה.</li>
+                <li><strong>בזרם נמוך:</strong> הנורה קרה יחסית - ההתנגדות נמוכה - השיפוע בגרף V-I נמוך.</li>
+                <li><strong>בזרם גבוה:</strong> הנורה מתחממת מאוד (לפעמים מעל 2000°C) - ההתנגדות גדלה משמעותית - השיפוע גדל.</li>
+                <li><strong>תוצאה:</strong> הגרף של V מול I אינו ישר אלא עקומה - הנורה <strong>אינה אוהמית</strong>.</li>
+            </ul>
+        </div>
+
+        <div class="warning">
+            <strong>⚠️ הערה חשובה לאופיין הנורה:</strong> במדידה אוטומטית בעזרת מחולל אותות (מתח סינוסי), הגרף של V-I עלול להיראות כמו <em>לולאה</em> ולא כקו אחד. הסיבה: לחוט הלהט יש "אינרציה תרמית" - הוא לא מתקרר ומתחמם מיד, ולכן ההתנגדות בעת עליית המתח שונה מההתנגדות בעת ירידתו.
+        </div>
+
+        <h3 style="text-align:center;">טבלת מדידות - אופיין הנורה</h3>
+        <p style="text-align:center; color:#666; font-style:italic;">בחר 5 נקודות מייצגות לאורך טווח המתח של הנורה. שים לב כיצד R = V/I משתנה!</p>
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>מדידה #</th>
+                    <th>זרם I (אמפר)</th>
+                    <th>מתח V (וולט)</th>
+                    <th>R = V/I (אום)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>1 (זרם נמוך)</td>
+                    <td><input type="number" step="0.001" id="I4_1" placeholder="0.05" oninput="checkBulbData()"></td>
+                    <td><input type="number" step="0.001" id="V4_1" placeholder="0.20" oninput="checkBulbData()"></td>
+                    <td class="computed" id="R4_1">-</td>
+                </tr>
+                <tr>
+                    <td>2</td>
+                    <td><input type="number" step="0.001" id="I4_2" placeholder="0.10" oninput="checkBulbData()"></td>
+                    <td><input type="number" step="0.001" id="V4_2" placeholder="0.55" oninput="checkBulbData()"></td>
+                    <td class="computed" id="R4_2">-</td>
+                </tr>
+                <tr>
+                    <td>3</td>
+                    <td><input type="number" step="0.001" id="I4_3" placeholder="0.15" oninput="checkBulbData()"></td>
+                    <td><input type="number" step="0.001" id="V4_3" placeholder="1.10" oninput="checkBulbData()"></td>
+                    <td class="computed" id="R4_3">-</td>
+                </tr>
+                <tr>
+                    <td>4</td>
+                    <td><input type="number" step="0.001" id="I4_4" placeholder="0.20" oninput="checkBulbData()"></td>
+                    <td><input type="number" step="0.001" id="V4_4" placeholder="1.85" oninput="checkBulbData()"></td>
+                    <td class="computed" id="R4_4">-</td>
+                </tr>
+                <tr>
+                    <td>5 (זרם גבוה)</td>
+                    <td><input type="number" step="0.001" id="I4_5" placeholder="0.25" oninput="checkBulbData()"></td>
+                    <td><input type="number" step="0.001" id="V4_5" placeholder="2.80" oninput="checkBulbData()"></td>
+                    <td class="computed" id="R4_5">-</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div id="bulbPreview" style="display:none;" class="summary-box">
+            <h3 style="margin-top:0;">📊 ניתוח: כיצד R משתנה בנורה?</h3>
+            <div id="bulbPreviewContent"></div>
+        </div>
+
+        <!-- שאלות -->
+        <div class="quiz">
+            <p class="question">שאלה 1: מה הסיבה הפיזיקלית לכך שאופיין הנורה אינו ישר?</p>
+            <div class="option" onclick="checkAns(this, true, 'בדיוק! ההתנגדות של מתכת תלויה בטמפרטורה. כשהזרם גדל, החוט מתחמם, הטמפרטורה עולה והתנגדותו גדלה. הקשר V-I חדל להיות ליניארי.', 'q4_1')">ההתנגדות של חוט הלהט תלויה בטמפרטורה - כשעובר זרם גדול, החוט מתחמם והתנגדותו גדלה.</div>
+            <div class="option" onclick="checkAns(this, false, 'לא. הסוללה במצב תקין מספקת מתח קבוע - השינוי בגרף נובע מהנורה עצמה.')">הסוללה לא מספיק חזקה.</div>
+            <div class="option" onclick="checkAns(this, false, 'לא נכון. החיישנים מודדים נכון; הלא-לינאריות היא תכונה אמיתית של הנורה.')">החיישנים אינם מדויקים מספיק.</div>
+            <div class="feedback"></div>
+        </div>
+
+        <div class="quiz">
+            <p class="question">שאלה 2: בנורת להט, האם ניתן להגדיר ערך אחד של "ההתנגדות של הנורה"?</p>
+            <div class="option" onclick="checkAns(this, false, 'לא. אם הגרף לא ישר, R משתנה. ערך מסוים תקף רק לנקודת עבודה ספציפית.')">כן - השיפוע של גרף V-I נותן ערך אחד.</div>
+            <div class="option" onclick="checkAns(this, true, 'נכון! ההתנגדות של הנורה לא קבועה - היא תלויה בנקודת העבודה (כלומר בזרם, או למעשה בטמפרטורת חוט הלהט). יש לדבר על ההתנגדות בזרם נתון או בטמפרטורה נתונה.', 'q4_2')">לא - ההתנגדות תלויה בנקודת העבודה (טמפרטורת החוט). כל זרם נותן ערך R שונה.</div>
+            <div class="option" onclick="checkAns(this, false, 'לא. ההתנגדות של נורה כן ניתנת למדידה, רק שהיא לא קבועה.')">אי אפשר למדוד התנגדות של נורה כלל.</div>
+            <div class="feedback"></div>
+        </div>
+
+        <div class="quiz">
+            <p class="question">שאלה 3: באופיין שמתקבל ממחולל אותות, נראית "לולאה" סביב המקור. מה ההסבר?</p>
+            <div class="option" onclick="checkAns(this, false, 'לא. החיישנים מסונכרנים היטב; הלולאה היא תופעה פיזיקלית אמיתית.')">תקלה במכשיר המדידה.</div>
+            <div class="option" onclick="checkAns(this, true, 'מדויק! החוט לא מתחמם או מתקרר באופן מיידי - קיימת השהיה תרמית. בעת עליית המתח, החוט עדיין מתחמם, ובעת ירידת המתח, הוא עדיין שומר חום זמן מה. לכן ההתנגדות שונה בכל כיוון, ומקבלים לולאה.', 'q4_3')">השהיה תרמית - החוט לא מתחמם או מתקרר מיידית, ולכן ההתנגדות שונה בעת עליית המתח לעומת ירידתו.</div>
+            <div class="option" onclick="checkAns(this, false, 'לא. הסוללה הוחלפה למחולל אותות - אין סוללה בשלב זה.')">הסוללה התרוקנה.</div>
+            <div class="feedback"></div>
+        </div>
+
+        <div class="tab-summary">
+            <label for="summary4">📝 סיכום הלשונית / השוואה לתיל (טקסט חופשי):</label>
+            <textarea id="summary4" placeholder="תאר את צורת האופיין של הנורה, השווה אותו לאופיין התיל, והסבר מדוע הנורה אינה מוליך אוהמי."></textarea>
+        </div>
+
+        <div class="complete-section">
+            <p id="bulbInstr">יש למלא את כל 5 שורות הטבלה לפני המעבר לשלב הבא.</p>
+            <button class="complete-btn" id="btn4" onclick="completeStage(4)" disabled>✓ סיימתי, הבנתי ורשמתי בדו"ח</button>
+            <div class="complete-msg" id="msg4">השלב הושלם! ממשיכים לחלק השני של הניסוי 🎉</div>
+        </div>
+    </div>
+
+    <!-- ===== לשונית 5: שלב ב' - מדידות באורכים שונים ===== -->
+    <div id="tab5" class="content">
+        <div class="theory">
+            <h2>שלב ב': מדידת ההתנגדות לאורכים שונים</h2>
+            <p>בחלק זה נמדוד את ההתנגדות של התיל באורכים פעילים שונים, ונאפיין את ההתנגדות הסגולית. <strong>בכל אורך נסתפק במדידה יחידה של V ו-I</strong> ונחשב R = V/I, במקום סדרת מדידות כמו בשלב א'.1.</p>
+        </div>
+
+        <div class="formula">
+            \(R = \rho \cdot \dfrac{l}{A}\)
+            <br><span style="font-size:0.9em; color:#666;">צפוי קשר ליניארי בין R ל-l, עם שיפוע \(\rho/A\) וחיתוך 0</span>
+        </div>
+
+        <div class="important">
+            <strong>📌 הוראות ביצוע:</strong>
+            <ul>
+                <li>השתמש במצבט תנין כדי "לתפוס" קטע מסוים מהתיל - בכל פעם באורך שונה.</li>
+                <li>לכל אורך פעיל - בצע <strong>מדידה יחידה</strong> של זרם (I) ומתח (V), והזן בטבלה.</li>
+                <li>ההתנגדות תחושב אוטומטית: R = V/I.</li>
+                <li>חזור על המדידה עבור 7 אורכים: 50, 45, 40, 35, 30, 25, 20 ס"מ.</li>
+                <li>הערך שתקבל ל-50 ס"מ צריך להיות קרוב להתנגדות שמדדת בשלב 3 (שיטת השיפוע).</li>
+            </ul>
+        </div>
+
+        <div class="warning">
+            <strong>⚠️ נקודה חשובה לדו"ח:</strong> בעת שינוי אורך הקטע (הזזת מצבט התנין של חיישן המתח), <strong>הזרם הנמדד לא ישתנה!</strong> זאת מאחר שחיישן המתח אינו חלק ממעגל הזרם הראשי. <em>בדו"ח: הסבר מדוע הזזת מצבט התנין של חיישן המתח אינה משפיעה על הזרם.</em>
+        </div>
+
+        <h3 style="text-align:center;">טבלת מדידות - מדידה יחידה לכל אורך</h3>
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>אורך l (ס"מ)</th>
+                    <th>אורך l (מטר)</th>
+                    <th>זרם I (אמפר)</th>
+                    <th>מתח V (וולט)</th>
+                    <th>R = V/I (אום)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>50</td>
+                    <td class="computed">0.50</td>
+                    <td><input type="number" step="0.001" id="I5_50" placeholder="0.20" oninput="checkLengthData()"></td>
+                    <td><input type="number" step="0.001" id="V5_50" placeholder="2.20" oninput="checkLengthData()"></td>
+                    <td class="computed" id="R5_50">-</td>
+                </tr>
+                <tr>
+                    <td>45</td>
+                    <td class="computed">0.45</td>
+                    <td><input type="number" step="0.001" id="I5_45" placeholder="0.20" oninput="checkLengthData()"></td>
+                    <td><input type="number" step="0.001" id="V5_45" placeholder="1.98" oninput="checkLengthData()"></td>
+                    <td class="computed" id="R5_45">-</td>
+                </tr>
+                <tr>
+                    <td>40</td>
+                    <td class="computed">0.40</td>
+                    <td><input type="number" step="0.001" id="I5_40" placeholder="0.20" oninput="checkLengthData()"></td>
+                    <td><input type="number" step="0.001" id="V5_40" placeholder="1.76" oninput="checkLengthData()"></td>
+                    <td class="computed" id="R5_40">-</td>
+                </tr>
+                <tr>
+                    <td>35</td>
+                    <td class="computed">0.35</td>
+                    <td><input type="number" step="0.001" id="I5_35" placeholder="0.20" oninput="checkLengthData()"></td>
+                    <td><input type="number" step="0.001" id="V5_35" placeholder="1.54" oninput="checkLengthData()"></td>
+                    <td class="computed" id="R5_35">-</td>
+                </tr>
+                <tr>
+                    <td>30</td>
+                    <td class="computed">0.30</td>
+                    <td><input type="number" step="0.001" id="I5_30" placeholder="0.20" oninput="checkLengthData()"></td>
+                    <td><input type="number" step="0.001" id="V5_30" placeholder="1.32" oninput="checkLengthData()"></td>
+                    <td class="computed" id="R5_30">-</td>
+                </tr>
+                <tr>
+                    <td>25</td>
+                    <td class="computed">0.25</td>
+                    <td><input type="number" step="0.001" id="I5_25" placeholder="0.20" oninput="checkLengthData()"></td>
+                    <td><input type="number" step="0.001" id="V5_25" placeholder="1.10" oninput="checkLengthData()"></td>
+                    <td class="computed" id="R5_25">-</td>
+                </tr>
+                <tr>
+                    <td>20</td>
+                    <td class="computed">0.20</td>
+                    <td><input type="number" step="0.001" id="I5_20" placeholder="0.20" oninput="checkLengthData()"></td>
+                    <td><input type="number" step="0.001" id="V5_20" placeholder="0.88" oninput="checkLengthData()"></td>
+                    <td class="computed" id="R5_20">-</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div id="lengthPreview" style="display:none;" class="summary-box">
+            <h3 style="margin-top:0;">📊 ניתוח מקדים - גרף R(l)</h3>
+            <div id="lengthPreviewContent"></div>
+        </div>
+
+        <div class="example">
+            <strong>הערה לדו"ח:</strong> בנה גרף של R (ציר Y) כפונקציה של l (ציר X) ב-Excel. הוסף קו רגרסיה ליניארי. שיפוע הקו הוא \(\rho/A\) - ובאמצעותו נחלץ בלשונית הבאה את ההתנגדות הסגולית של החומר.
+        </div>
+
+        <!-- שאלות -->
+        <div class="quiz">
+            <p class="question">שאלה 1: מדוע הזרם הנמדד לא משתנה כאשר מזיזים את מצבט התנין של חיישן המתח לאורך התיל?</p>
+            <div class="option" onclick="checkAns(this, true, 'מצוין! זוהי הסיבה העיקרית - התנגדות חיישן המתח גבוהה מאוד (לרוב מאות מגה-אום ויותר). לכן הזרם הזורם דרכו זניח בהשוואה לזרם הראשי במעגל, וההתנגדות הכוללת של המעגל למעשה לא משתנה כשמזיזים את המצבט.', 'q5_1')">התנגדות חיישן המתח גבוהה מאוד, ולכן הוא כמעט אינו מושך זרם. ההתנגדות הכוללת במעגל לא משתנה כשמזיזים את המצבט, ולכן הזרם קבוע.</div>
+            <div class="option" onclick="checkAns(this, false, 'לא נכון. מד הזרם פועל באופן עצמאי ומודד את כל הזרם הזורם, ללא קשר למיקום מד המתח.')">מד הזרם מתעלם מקריאות חיישן המתח.</div>
+            <div class="option" onclick="checkAns(this, false, 'לא. דווקא חוק אוהם תקף - הזרם נקבע על ידי המתח של הסוללה וההתנגדות הכוללת של המעגל.')">חוק אוהם לא תקף בקטעים חלקיים של תיל.</div>
+            <div class="feedback"></div>
+        </div>
+
+        <div class="quiz">
+            <p class="question">שאלה 2: למה בכל אורך מספיקה לנו מדידה יחידה של V ו-I (במקום סדרת מדידות כמו בשלב א'.1)?</p>
+            <div class="option" onclick="checkAns(this, true, 'נכון! בשלב א\' אישרנו שהתיל אוהמי, ולכן R קבוע ולא תלוי בנקודת העבודה. כעת אנחנו רק רוצים את הערך של R בכל אורך, ומדידה יחידה מספיקה. בנוסף, נקבל מספר נקודות בגרף R(l) שיפצו על האי-דיוק של מדידה יחידה.', 'q5_2')">כי כבר אישרנו בשלב א\' שהתיל אוהמי, ולכן R קבוע. מדידה יחידה מספיקה לקבלת R, ויש לנו 7 נקודות בגרף R(l) להעצמת הסטטיסטיקה.</div>
+            <div class="option" onclick="checkAns(this, false, 'לא. מדידה יחידה דווקא פחות מדויקת - אבל היא מספיקה כי יש לנו הרבה נקודות בגרף R(l).')">כי מדידה יחידה תמיד מדויקת יותר מסדרת מדידות.</div>
+            <div class="option" onclick="checkAns(this, false, 'לא. החיישנים פועלים באותו אופן בכל מצב.')">כי החיישנים לא יכולים לבצע יותר ממדידה אחת בכל אורך.</div>
+            <div class="feedback"></div>
+        </div>
+
+        <div class="quiz">
+            <p class="question">שאלה 3: בגרף של R כפונקציה של l, מה תהיה צורת הקו הצפוי?</p>
+            <div class="option" onclick="checkAns(this, false, 'לא. עקומה אקספוננציאלית מתאימה לקשרים אחרים, לא לקשר ליניארי בין R ל-l.')">עקומה אקספוננציאלית.</div>
+            <div class="option" onclick="checkAns(this, true, 'מצוין! לפי \\(R = (\\rho/A) \\cdot l\\) זוהי משוואה ליניארית מהצורה \\(y = m \\cdot x\\) - קו ישר העובר דרך הראשית.', 'q5_3')">קו ישר העובר דרך ראשית הצירים.</div>
+            <div class="option" onclick="checkAns(this, false, 'לא. הקשר הוא ליניארי, לא ריבועי.')">פרבולה.</div>
+            <div class="feedback"></div>
+        </div>
+
+        <div class="tab-summary">
+            <label for="summary5">📝 סיכום הלשונית / ניתוח R(l) (טקסט חופשי):</label>
+            <textarea id="summary5" placeholder="תאר את הקשר שמצאת בין R לאורך התיל, ערך השיפוע מהרגרסיה הליניארית, והאם הזרם נשאר קבוע לאורך המדידות."></textarea>
+        </div>
+
+        <div class="complete-section">
+            <p id="lengthInstr">יש למלא את כל 7 שורות הטבלה (זרם ומתח לכל אורך) לפני המעבר לשלב הבא.</p>
+            <button class="complete-btn" id="btn5" onclick="completeStage(5)" disabled>✓ סיימתי, הבנתי ורשמתי בדו"ח</button>
+            <div class="complete-msg" id="msg5">הנתונים נאספו! עכשיו נחשב את ההתנגדות הסגולית 🎉</div>
+        </div>
+    </div>
+
+    <!-- ===== לשונית 6: חישוב ההתנגדות הסגולית ===== -->
+    <div id="tab6" class="content">
+        <div class="theory">
+            <h2>שלב 6: חישוב ההתנגדות הסגולית של החומר</h2>
+            <p>כעת ננתח את המדידה שביצענו בשלב ב' ונחלץ את \(\rho\) (ההתנגדות הסגולית) של תיל הניקל-כרום.</p>
+        </div>
+
+        <div id="lengthDataDisplay" class="summary-box">
+            <h3 style="margin-top:0;">📊 הנתונים שאספת בשלב ב'</h3>
+            <div id="lengthDataContent"></div>
+        </div>
+
+        <div class="formula">
+            מנוסחת ההתנגדות: \(\quad R = \dfrac{\rho}{A} \cdot l\)
+            <br>שיפוע הגרף R(l) הוא: \(\quad m = \dfrac{\rho}{A}\)
+            <br>ולכן: \(\quad \rho = m \cdot A\)
+        </div>
+
+        <div class="important">
+            <strong>📌 הוראות החישוב:</strong>
+            <ul>
+                <li><strong>קוטר התיל:</strong> הערך רשום על סרגל ההתנגדות (טיפוסי: 0.25 מ"מ). הזן אותו למטה.</li>
+                <li><strong>חשב את שטח חתך התיל:</strong> \(A = \pi (d/2)^2\). חישוב זה יבוצע אוטומטית.</li>
+                <li><strong>חשב את ההתנגדות הסגולית:</strong> \(\rho = m \cdot A\), כאשר m הוא שיפוע הגרף R(l) שחישבת בשלב הקודם.</li>
+                <li><strong>השווה</strong> לערך הטיפוסי של ניקל-כרום: \(\rho_{\text{ניקל-כרום}} \approx 1.10 \times 10^{-6} \, \Omega \cdot m\).</li>
+            </ul>
+        </div>
+
+        <h3 style="text-align:center;">קלט: קוטר התיל</h3>
+        <div class="single-input">
+            <label for="diameter">קוטר התיל d (במ"מ):</label>
+            <input type="number" step="0.001" id="diameter" placeholder="0.25" oninput="calculateResistivity()">
+        </div>
+
+        <div id="resistivityResult" style="display:none;" class="summary-box">
+            <h3 style="margin-top:0;">🔬 תוצאות החישוב</h3>
+            <div id="resistivityContent"></div>
+        </div>
+
+        <!-- שאלות -->
+        <div class="quiz">
+            <p class="question">שאלה 1: למה ההתנגדות הסגולית \(\rho\) נחשבת ל"תכונה של החומר" ולא "תכונה של תיל ספציפי"?</p>
+            <div class="option" onclick="checkAns(this, true, 'מדויק! \\(\\rho\\) תלויה רק בסוג החומר (ניקל-כרום, נחושת, וכו\') ובטמפרטורה. כל תיל מאותו חומר ובאותה טמפרטורה יראה את אותו \\(\\rho\\), בלי תלות בצורה או במידות.', 'q6_1')">כי \(\rho\) תלויה רק בסוג החומר ובטמפרטורה - לא במידות הספציפיות של התיל. כל תיל מאותו חומר ייתן אותו \(\rho\).</div>
+            <div class="option" onclick="checkAns(this, false, 'לא נכון. \\(\\rho\\) דווקא לא משתנה עם המידות - זוהי כל הנקודה.')">כי היא משתנה כל הזמן עם המידות של התיל.</div>
+            <div class="option" onclick="checkAns(this, false, 'לא. הקשר הוא: כל חומר נותן \\(\\rho\\) קבוע משלו. אין ערך אחיד של \\(\\rho\\) לכל המתכות.')">כי לכל המתכות אותה \(\rho\).</div>
+            <div class="feedback"></div>
+        </div>
+
+        <div class="quiz">
+            <p class="question">שאלה 2: אם נחליף את התיל לחומר עם \(\rho\) נמוך פי 2 (אך באותן מידות), מה תהיה ההתנגדות?</p>
+            <div class="option" onclick="checkAns(this, false, 'לא. R פרופורציוני ל-\\(\\rho\\), אז הקטנת \\(\\rho\\) פי 2 גוררת הקטנת R פי 2 - לא הגדלה.')">תגדל פי 2.</div>
+            <div class="option" onclick="checkAns(this, true, 'נכון! \\(R = \\rho l/A\\). כש-\\(\\rho\\) קטן פי 2 ושאר הגורמים קבועים - גם R קטן פי 2.', 'q6_2')">תקטן פי 2.</div>
+            <div class="option" onclick="checkAns(this, false, 'לא. \\(\\rho\\) משפיעה ישירות על R.')">תישאר זהה.</div>
+            <div class="feedback"></div>
+        </div>
+
+        <div class="quiz">
+            <p class="question">שאלה 3: מדוע חשוב שקוטר התיל יהיה ידוע בדיוק רב?</p>
+            <div class="option" onclick="checkAns(this, true, 'מצוין! \\(A = \\pi (d/2)^2\\) - שטח החתך פרופורציוני לריבוע הקוטר. שגיאה של 5% בקוטר תגרום לשגיאה של ~10% ב-A, ואותה שגיאה תופיע ב-\\(\\rho\\). לכן הדיוק במדידת d קריטי.', 'q6_3')">כי שטח החתך פרופורציוני לריבוע הקוטר, ולכן שגיאה קטנה ב-d מתעצמת בחישוב של A ושל \(\rho\).</div>
+            <div class="option" onclick="checkAns(this, false, 'לא נכון. הסיבה היא ההגברה של השגיאה בריבוע - לא קושי בראייה.')">בלי דיוק אי אפשר לראות את התיל.</div>
+            <div class="option" onclick="checkAns(this, false, 'לא. אורך התיל הוא משתנה אחר; כאן השאלה על קוטר.')">כי הקוטר משפיע על אורך התיל.</div>
+            <div class="feedback"></div>
+        </div>
+
+        <!-- ===== העלאת צילומי גרפים ===== -->
+        <div class="complete-section" style="border-color: var(--accent); background: linear-gradient(135deg,#fff3e0 0%,#ffe0b2 100%); margin-top: 25px;">
+            <h3 style="margin-top:0; color:var(--accent);">📷 צילומי הגרפים שהכנת</h3>
+            <p>הוסף כאן צילומי מסך של הגרפים שבנית (למשל ב-Excel): גרף V(I) של התיל, גרף V(I) של הנורה, וגרף R(l) עם קו הרגרסיה. ניתן לבחור כמה תמונות יחד. הגרפים יצורפו לדו"ח הסופי.</p>
+            <input type="file" id="graphUpload" accept="image/*" multiple onchange="handleGraphUpload(event)"
+                   style="display:inline-block; padding:10px; background:white; border:2px dashed var(--accent); border-radius:8px; cursor:pointer; max-width:100%;">
+            <div id="graphGallery" style="display:flex; flex-wrap:wrap; gap:12px; justify-content:center; margin-top:18px;"></div>
+        </div>
+
+        <div class="tab-summary">
+            <label for="summary6">📝 סיכום הלשונית / חישוב ρ והשוואה לתיאוריה (טקסט חופשי):</label>
+            <textarea id="summary6" placeholder="פרט את שלבי חישוב ההתנגדות הסגולית, את הערך שקיבלת, ואת השוואתו לערך התיאורטי של ניקל-כרום."></textarea>
+        </div>
+
+        <div class="complete-section">
+            <p id="resistivityInstr">יש להזין את קוטר התיל כדי לחשב את ההתנגדות הסגולית.</p>
+            <button class="complete-btn" id="btn6" onclick="completeStage(6)" disabled>✓ סיימתי, הבנתי ורשמתי בדו"ח</button>
+            <div class="complete-msg" id="msg6">החישוב הושלם! ממשיכים לדיון בשגיאות 🎉</div>
+        </div>
+    </div>
+
+    <!-- ===== לשונית 7: שגיאות ומסקנות ===== -->
+    <div id="tab7" class="content">
+        <div class="theory">
+            <h2>שלב 7: דיון בשגיאות ומסקנות</h2>
+            <p>כעת נדון בגורמי השגיאה השונים בניסוי, ונסכם את הממצאים.</p>
+        </div>
+
+        <div id="finalSummaryBox" class="summary-box">
+            <h3 style="margin-top:0;">📈 סיכום תוצאות הניסוי</h3>
+            <div id="finalSummaryContent"></div>
+        </div>
+
+        <div class="important">
+            <strong>📌 גורמי שגיאה אפשריים בניסוי - יש לדון בהם בדו"ח:</strong>
+            <ul>
+                <li><strong>חימום התיל בעת המדידה:</strong> תיל ניקל-כרום, כמו כל מתכת, משנה את התנגדותו עם הטמפרטורה. זרמים חזקים מחממים את התיל ומעלים את התנגדותו - מה שיוצר סטייה מהקשר הליניארי הצפוי בחוק אוהם.</li>
+                <li><strong>שגיאה בערך קוטר התיל:</strong> זוהי אחת השגיאות הקריטיות. שטח החתך \(A = \pi(d/2)^2\) פרופורציוני לריבוע הקוטר - ולכן שגיאה קטנה ב-d מתעצמת ב-\(\rho\). הקוטר רשום על הסרגל, אבל הוא ערך נומינלי שעלול להיות מעט שונה מהמציאות.</li>
+                <li><strong>דיוק מדידת אורך הקטע הנמדד:</strong> מיקום מצבט התנין על הסרגל אינו תמיד מדויק לחלוטין. שגיאה במ"מ עלולה להיות משמעותית.</li>
+                <li><strong>שגיאות אקראיות בחיישנים:</strong> רעש בקריאת המתח והזרם, במיוחד בערכים נמוכים.</li>
+                <li><strong>השפעת חיישן המתח:</strong> אמנם התנגדותו גבוהה מאוד, אך לא אינסופית - חלק זעיר מהזרם זורם דרכו, מה שעלול להטות מעט את הקריאה (השפעה זניחה אך קיימת).</li>
+                <li><strong>אחידות התיל:</strong> ההנחה היא שהתיל אחיד לכל אורכו (אותו קוטר ואותו חומר). חוסר אחידות מקומי יוסיף שגיאה לחישוב ההתנגדות הסגולית.</li>
+            </ul>
+        </div>
+
+        <div class="example">
+            <strong>סוגי שגיאות:</strong>
+            <ul>
+                <li><strong>שגיאות מערכתיות:</strong> התנגדות החוטים והמגעים, חימום התיל, השפעת חיישן המתח - תמיד באותו כיוון.</li>
+                <li><strong>שגיאות אקראיות:</strong> רעש בחיישנים, חוסר דיוק זעיר במיקום התנין - מתקזזות יחסית עם מספר רב של מדידות.</li>
+            </ul>
+        </div>
+
+        <div class="warning">
+            <strong>📝 חובה לכלול בדו"ח:</strong>
+            <ul>
+                <li>השוואה בין ההתנגדות שהתקבלה במדידה הידנית (שלב א'.1) לזו שמתקבלת מהשיפוע בשלב ב' עבור l=50 ס"מ.</li>
+                <li>גרף R כפונקציה של l (בנוי ב-Excel) עם קו רגרסיה ליניארית.</li>
+                <li>השוואה של \(\rho\) הניסויי לערך התיאורטי של ניקל-כרום (\(\sim 1.10 \times 10^{-6} \, \Omega \cdot m\)) - חישוב שגיאה יחסית.</li>
+                <li><strong>הסבר: מדוע הזזת מצבט התנין של חיישן המתח לאורך התיל אינה משנה את הזרם הנמדד?</strong></li>
+                <li>הסבר ההבדל הפיזיקלי בין אופיין התיל (ישר) לאופיין הנורה (עקומה).</li>
+                <li>פירוט של 3 לפחות מקורות שגיאה והערכת השפעתם.</li>
+                <li>מסקנה ברורה: האם הניסוי אישש את חוק אוהם ואת הקשר \(R = \rho l / A\)?</li>
+            </ul>
+        </div>
+
+        <!-- שאלות -->
+        <div class="quiz">
+            <p class="question">שאלה 1: כיצד תשפיע התנגדות החוטים והמגעים על ערך \(\rho\) שיתקבל בניסוי?</p>
+            <div class="option" onclick="checkAns(this, false, 'לא נכון. התנגדות החוטים מתווספת ל-R הנמדד, ולכן הערך שיתקבל לא יוקטן.')">ערך \(\rho\) הניסויי יהיה קטן מהערך האמיתי.</div>
+            <div class="option" onclick="checkAns(this, true, 'מדויק! התנגדות החוטים תוסיף קבוע (התנגדות בסיס) ל-R בכל אורך. אם זוהי תוספת קבועה, השיפוע של R(l) לא יושפע, אבל החיתוך עם ציר Y יוסט כלפי מעלה. אם השפעה זו מצטרפת לאי-לינאריות בערכי R הקצרים - השיפוע יוטה כלפי מעלה ו-\\(\\rho\\) יצא קצת גדול מהאמיתי.', 'q7_1')">ערך \(\rho\) ייטה להיות גדול מהאמיתי, מאחר שמודדים התנגדות נוספת מעבר לתיל.</div>
+            <div class="option" onclick="checkAns(this, false, 'לא נכון - תוספת התנגדות בהחלט משפיעה, אם כי בעוצמה משתנה.')">לא תהיה לכך כל השפעה.</div>
+            <div class="feedback"></div>
+        </div>
+
+        <div class="quiz">
+            <p class="question">שאלה 2: מהי הדרך הטובה ביותר להקטין את ההשפעה של חימום התיל על תוצאות המדידה?</p>
+            <div class="option" onclick="checkAns(this, true, 'נכון! זרמים נמוכים = פחות חימום. בנוסף, בין מדידות יש לאפשר לתיל להתקרר. כך מבטיחים שהתיל נשאר בטמפרטורה דומה בכל המדידות.', 'q7_2')">לעבוד בזרמים נמוכים יחסית, ולאפשר לתיל להתקרר בין מדידות.</div>
+            <div class="option" onclick="checkAns(this, false, 'לא. דווקא להפך - זרמים גבוהים יחממו את התיל יותר.')">לעבוד בזרמים גבוהים כדי לקבל קריאה ברורה.</div>
+            <div class="option" onclick="checkAns(this, false, 'לא. גודל הסוללה לא משפיע בהכרח על חימום התיל.')">להחליף לסוללה גדולה יותר.</div>
+            <div class="feedback"></div>
+        </div>
+
+        <div class="quiz">
+            <p class="question">שאלה 3: מהי המסקנה העיקרית הצפויה מהניסוי כולו?</p>
+            <div class="option" onclick="checkAns(this, false, 'לא. הניסוי דווקא תומך בחוק אוהם עבור מתכות בתנאים סבירים.')">חוק אוהם לא תקף עבור מתכות.</div>
+            <div class="option" onclick="checkAns(this, true, 'מצוין! זו בדיוק המסקנה - הניסוי מאשש את חוק אוהם עבור התיל המתכתי, מראה שנורת הלהט אינה אוהמית (בגלל החימום), ומאמת שהתנגדות תיל פרופורציונית לאורכו (\\(R = \\rho l / A\\)).', 'q7_3')">חוק אוהם מתקיים עבור תיל מתכתי, נורת הלהט אינה אוהמית, וההתנגדות פרופורציונית לאורך התיל.</div>
+            <div class="option" onclick="checkAns(this, false, 'לא נכון. הניסוי בדיוק מאשש שיש קשר ליניארי בין R לאורך.')">אין קשר בין אורך התיל להתנגדותו.</div>
+            <div class="feedback"></div>
+        </div>
+
+        <div class="tab-summary">
+            <label for="summary7">📝 סיכום הלשונית / דיון בשגיאות ומסקנות (טקסט חופשי):</label>
+            <textarea id="summary7" placeholder="פרט את גורמי השגיאה המרכזיים בניסוי, את ההצעות שלך לשיפור, ואת המסקנות הסופיות לגבי חוק אוהם והקשר R = ρl/A." style="min-height:160px;"></textarea>
+        </div>
+
+        <div class="complete-section">
+            <p>סיכום הניסוי, השוואה לערכים תיאורטיים, דיון בשגיאות והצעות לשיפור - הכל בדו"ח שלך.</p>
+            <button class="complete-btn" id="btn7" onclick="completeStage(7)">✓ סיימתי, הבנתי ורשמתי בדו"ח</button>
+            <div class="complete-msg" id="msg7">🎓 ברכות! השלמת בהצלחה את כל שלבי תדריך המעבדה! 🎉</div>
+        </div>
+
+        <!-- ===== הורדת דו"ח מלא (docx) ===== -->
+        <div class="complete-section" style="border-color: var(--success);">
+            <h3 style="margin-top:0; color:var(--success);">📄 קובץ דו"ח מלא (Word / docx)</h3>
+            <p>הדו"ח יכלול: תקציר של כל לשונית, השאלות והתשובות שבחרת, הטקסט החופשי שכתבת בכל לשונית, טבלת הנתונים, החישובים, ותמונות שצירפת. הקובץ ניתן לעריכה ב-Word, Google Docs ו-LibreOffice.</p>
+            <div class="student-info">
+                <div><label>שם התלמיד/ה:</label>
+                     <input type="text" id="studentName" placeholder="שם מלא"></div>
+                <div><label>כיתה:</label>
+                     <input type="text" id="studentClass" placeholder="לדוגמה: י'3"></div>
+                <div><label>תאריך:</label>
+                     <input type="date" id="reportDate"></div>
+            </div>
+            <button class="complete-btn" onclick="downloadDocxReport()">⬇️ הורד דו"ח Word (.docx)</button>
+            <p id="summaryFileMsg" style="display:none; margin-top:14px; color:var(--success); font-weight:bold; font-size:1.05em;"></p>
+        </div>
+    </div>
+</div>
+
+<script>
+    const totalStages = 7;
+
+    /* ===== רשימת המתכות עם ערכי ρ תיאורטיים (Ω·m, ב-20°C) ===== */
+    window.METALS = {
+        nichrome:  { name: 'ניקל-כרום (Nichrome 80/20)',     shortName: 'ניקל-כרום',
+                     rho: 1.10e-6,  rhoText: '1.10 × 10⁻⁶' },
+        copper:    { name: 'נחושת אדומה (Red Copper)',        shortName: 'נחושת אדומה',
+                     rho: 1.68e-8,  rhoText: '1.68 × 10⁻⁸'  },
+        stainless: { name: 'פלדת אל-חלד (Stainless Steel 304)', shortName: 'פלדת אל-חלד',
+                     rho: 7.2e-7,   rhoText: '7.2 × 10⁻⁷'   }
+    };
+    window.selectedMetalKey = 'nichrome';
+    function getSelectedMetal() {
+        return window.METALS[window.selectedMetalKey] || window.METALS.nichrome;
+    }
+    function onMetalChange() {
+        const sel = document.getElementById('metalType');
+        if (!sel) return;
+        window.selectedMetalKey = sel.value;
+        const m = getSelectedMetal();
+        const msg = document.getElementById('metalChoiceMsg');
+        if (msg) {
+            msg.innerHTML = 'נבחר: <b>' + m.shortName + '</b> · ערך תיאורטי: <b>' + m.rhoText + ' Ω·m</b>';
+        }
+        // רענון תצוגות שכבר חושבו
+        if (window.calculatedRho != null) {
+            calculateResistivity();   // יחשב מחדש עם הערך התיאורטי החדש
+            displayFinalSummary();
+        }
+    }
+    const completedStages = new Set([1]);
+
+    function openTab(evt, tabName) {
+        const contents = document.getElementsByClassName("content");
+        for (let i = 0; i < contents.length; i++) contents[i].classList.remove('active');
+
+        const tabs = document.getElementsByClassName("tab");
+        for (let i = 0; i < tabs.length; i++) tabs[i].classList.remove('active');
+
+        document.getElementById(tabName).classList.add('active');
+        evt.currentTarget.classList.add('active');
+
+        // עדכון תצוגות בלשוניות הניתוח
+        if (tabName === 'tab6') displayLengthData();
+        if (tabName === 'tab7') displayFinalSummary();
+
+        if (window.MathJax) MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
+    }
+
+    function checkAns(el, isCorrect, message, qid) {
+        const questionContainer = el.closest('.quiz');
+        const options = questionContainer.getElementsByClassName('option');
+        const feedback = questionContainer.querySelector('.feedback');
+
+        for (let opt of options) opt.className = 'option';
+        feedback.style.display = 'block';
+        feedback.innerText = message;
+
+        if (isCorrect) {
+            el.className = 'option correct';
+            feedback.style.backgroundColor = '#d4edda';
+            feedback.style.color = '#155724';
+            feedback.style.border = '1px solid #c3e6cb';
+        } else {
+            el.className = 'option wrong';
+            feedback.style.backgroundColor = '#f8d7da';
+            feedback.style.color = '#721c24';
+            feedback.style.border = '1px solid #f5c6cb';
+        }
+
+        if (qid) {
+            if (!window.userAnswers) window.userAnswers = {};
+            const qText = el.closest('.quiz').querySelector('.question').innerText.trim();
+            window.userAnswers[qid] = {
+                question: qText,
+                chosen: el.innerText.trim(),
+                isCorrect: isCorrect
+            };
+        }
+
+        if (window.MathJax) MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
+    }
+
+    function completeStage(stage) {
+        completedStages.add(stage);
+        const tabEl = document.querySelector(`.tab[data-tab="tab${stage}"]`);
+        tabEl.classList.add('completed');
+
+        const btn = document.getElementById(`btn${stage}`);
+        btn.disabled = true;
+        btn.style.background = 'var(--locked)';
+        btn.innerText = '✓ הושלם';
+
+        document.getElementById(`msg${stage}`).style.display = 'block';
+
+        updateProgress();
+    }
+
+    function updateProgress() {
+        const percent = (completedStages.size / totalStages) * 100;
+        document.getElementById('progressFill').style.width = percent + '%';
+    }
+
+    /* ===== שלב 3: תיל מתכתי ===== */
+    function checkWireData() {
+        let allFilled = true;
+        let validData = [];
+        for (let i = 1; i <= 7; i++) {
+            const I = document.getElementById(`I3_${i}`).value;
+            const V = document.getElementById(`V3_${i}`).value;
+            const Rcell = document.getElementById(`R3_${i}`);
+
+            if (I !== '' && V !== '' && parseFloat(I) > 0) {
+                const R = parseFloat(V) / parseFloat(I);
+                Rcell.innerText = R.toFixed(2);
+                validData.push({ I: parseFloat(I), V: parseFloat(V), R: R });
+            } else {
+                Rcell.innerText = '-';
+                allFilled = false;
+            }
+        }
+
+        const btn = document.getElementById('btn3');
+        const instr = document.getElementById('wireInstr');
+        if (allFilled && validData.length === 7) {
+            btn.disabled = false;
+            instr.innerText = '✓ כל הנתונים הוזנו - ניתן לסיים את השלב.';
+            instr.style.color = 'var(--success)';
+            showWirePreview(validData);
+        } else {
+            btn.disabled = true;
+            instr.innerText = `יש למלא את כל 7 שורות הטבלה (${validData.length}/7 הושלמו).`;
+            instr.style.color = '';
+            document.getElementById('wirePreview').style.display = 'none';
+        }
+    }
+
+    function showWirePreview(data) {
+        const previewBox = document.getElementById('wirePreview');
+        const content = document.getElementById('wirePreviewContent');
+
+        // רגרסיה ליניארית: V = R*I + b
+        const n = data.length;
+        const sumI = data.reduce((s, d) => s + d.I, 0);
+        const sumV = data.reduce((s, d) => s + d.V, 0);
+        const sumIV = data.reduce((s, d) => s + d.I * d.V, 0);
+        const sumII = data.reduce((s, d) => s + d.I * d.I, 0);
+        const slope = (n * sumIV - sumI * sumV) / (n * sumII - sumI * sumI);
+        const intercept = (sumV - slope * sumI) / n;
+
+        // ממוצע V/I
+        const avgRatio = data.reduce((s, d) => s + d.R, 0) / n;
+        // סטיית תקן של V/I
+        const stdRatio = Math.sqrt(data.reduce((s, d) => s + Math.pow(d.R - avgRatio, 2), 0) / n);
+
+        let html = '<div class="summary-row"><span class="summary-label">שיפוע מרגרסיה ליניארית (R):</span><span class="summary-value">' + slope.toFixed(2) + ' Ω</span></div>';
+        html += '<div class="summary-row"><span class="summary-label">חיתוך עם ציר V (תיאורטית 0):</span><span class="summary-value">' + intercept.toFixed(3) + ' V</span></div>';
+        html += '<div class="summary-row"><span class="summary-label">ממוצע V/I:</span><span class="summary-value">' + avgRatio.toFixed(2) + ' Ω</span></div>';
+        html += '<div class="summary-row"><span class="summary-label">סטיית תקן של V/I:</span><span class="summary-value">' + stdRatio.toFixed(3) + ' Ω</span></div>';
+
+        const isOhmic = stdRatio / avgRatio < 0.05;
+        html += '<div style="margin-top:15px; padding:12px; background:white; border-radius:5px; font-weight:bold; text-align:center;">' +
+            (isOhmic ? '✅ V/I קבוע (סטיה < 5%) - התיל אכן אוהמי!' : '⚠️ V/I משתנה משמעותית - בדוק את הנתונים שוב') + '</div>';
+
+        content.innerHTML = html;
+        previewBox.style.display = 'block';
+
+        // שמור את ערך ההתנגדות לחישובים בלשוניות הבאות
+        window.wireR50 = slope;
+        window.wireIntercept = intercept;
+        window.wireData = data;
+    }
+
+    /* ===== שלב 4: נורת להט ===== */
+    function checkBulbData() {
+        let allFilled = true;
+        let validData = [];
+        for (let i = 1; i <= 5; i++) {
+            const I = document.getElementById(`I4_${i}`).value;
+            const V = document.getElementById(`V4_${i}`).value;
+            const Rcell = document.getElementById(`R4_${i}`);
+
+            if (I !== '' && V !== '' && parseFloat(I) > 0) {
+                const R = parseFloat(V) / parseFloat(I);
+                Rcell.innerText = R.toFixed(2);
+                validData.push({ I: parseFloat(I), V: parseFloat(V), R: R });
+            } else {
+                Rcell.innerText = '-';
+                allFilled = false;
+            }
+        }
+
+        const btn = document.getElementById('btn4');
+        const instr = document.getElementById('bulbInstr');
+        if (allFilled && validData.length === 5) {
+            btn.disabled = false;
+            instr.innerText = '✓ כל הנתונים הוזנו - ניתן לסיים את השלב.';
+            instr.style.color = 'var(--success)';
+            showBulbPreview(validData);
+        } else {
+            btn.disabled = true;
+            instr.innerText = `יש למלא את כל 5 שורות הטבלה (${validData.length}/5 הושלמו).`;
+            instr.style.color = '';
+            document.getElementById('bulbPreview').style.display = 'none';
+        }
+    }
+
+    function showBulbPreview(data) {
+        const previewBox = document.getElementById('bulbPreview');
+        const content = document.getElementById('bulbPreviewContent');
+
+        const Rmin = Math.min(...data.map(d => d.R));
+        const Rmax = Math.max(...data.map(d => d.R));
+        const Rratio = Rmax / Rmin;
+
+        let html = '<div class="summary-row"><span class="summary-label">R הקטן ביותר (זרם נמוך, חוט קר):</span><span class="summary-value">' + Rmin.toFixed(2) + ' Ω</span></div>';
+        html += '<div class="summary-row"><span class="summary-label">R הגדול ביותר (זרם גבוה, חוט חם):</span><span class="summary-value">' + Rmax.toFixed(2) + ' Ω</span></div>';
+        html += '<div class="summary-row"><span class="summary-label">יחס Rmax/Rmin:</span><span class="summary-value">' + Rratio.toFixed(2) + '</span></div>';
+
+        let conclusion = '';
+        if (Rratio > 2) conclusion = '✅ R משתנה משמעותית - הנורה אינה אוהמית בבירור!';
+        else if (Rratio > 1.3) conclusion = '✓ R משתנה - מאפיין מוליך לא-אוהמי.';
+        else conclusion = '⚠️ R כמעט קבוע - בדוק שאכן השתמשת בנורה ולא בתיל.';
+
+        html += '<div style="margin-top:15px; padding:12px; background:white; border-radius:5px; font-weight:bold; text-align:center;">' + conclusion + '</div>';
+
+        content.innerHTML = html;
+        previewBox.style.display = 'block';
+
+        // שמור את נתוני הנורה לקובץ הסיכום
+        window.bulbData = data;
+        window.bulbRmin = Rmin;
+        window.bulbRmax = Rmax;
+    }
+
+    /* ===== שלב 5: סדרת אורכים, מדידה יחידה בכל אחד ===== */    function getLengthData() {
+        const lengths = [50, 45, 40, 35, 30, 25, 20];
+        let data = [];
+        for (let l of lengths) {
+            const I = document.getElementById(`I5_${l}`).value;
+            const V = document.getElementById(`V5_${l}`).value;
+            const Rcell = document.getElementById(`R5_${l}`);
+
+            if (I !== '' && V !== '' && parseFloat(I) > 0) {
+                const R = parseFloat(V) / parseFloat(I);
+                Rcell.innerText = R.toFixed(2);
+                data.push({ l_cm: l, l_m: l / 100, I: parseFloat(I), V: parseFloat(V), R: R });
+            } else {
+                Rcell.innerText = '-';
+            }
+        }
+        return data;
+    }
+
+    function checkLengthData() {
+        const data = getLengthData();
+        const btn = document.getElementById('btn5');
+        const instr = document.getElementById('lengthInstr');
+
+        if (data.length === 7) {
+            btn.disabled = false;
+            instr.innerText = '✓ כל הנתונים הוזנו - ניתן לסיים את השלב.';
+            instr.style.color = 'var(--success)';
+            showLengthPreview(data);
+        } else {
+            btn.disabled = true;
+            instr.innerText = `יש למלא זרם ומתח לכל 7 האורכים (${data.length}/7 הושלמו).`;
+            instr.style.color = '';
+            document.getElementById('lengthPreview').style.display = 'none';
+        }
+    }
+
+    function showLengthPreview(data) {
+        const previewBox = document.getElementById('lengthPreview');
+        const content = document.getElementById('lengthPreviewContent');
+
+        // רגרסיה ליניארית: R = m*l + b
+        const n = data.length;
+        const sumL = data.reduce((s, d) => s + d.l_m, 0);
+        const sumR = data.reduce((s, d) => s + d.R, 0);
+        const sumLR = data.reduce((s, d) => s + d.l_m * d.R, 0);
+        const sumLL = data.reduce((s, d) => s + d.l_m * d.l_m, 0);
+        const slope = (n * sumLR - sumL * sumR) / (n * sumLL - sumL * sumL);
+        const intercept = (sumR - slope * sumL) / n;
+
+        // בדיקה אם הזרם נשאר קבוע
+        const Imin = Math.min(...data.map(d => d.I));
+        const Imax = Math.max(...data.map(d => d.I));
+        const Iavg = data.reduce((s, d) => s + d.I, 0) / n;
+        const Idiff = (Imax - Imin) / Iavg * 100;
+
+        let html = '<div class="summary-row"><span class="summary-label">שיפוע גרף R(l) (= ρ/A):</span><span class="summary-value">' + slope.toFixed(2) + ' Ω/m</span></div>';
+        html += '<div class="summary-row"><span class="summary-label">חיתוך עם ציר R (תיאורטית 0):</span><span class="summary-value">' + intercept.toFixed(2) + ' Ω</span></div>';
+        html += '<div class="summary-row"><span class="summary-label">זרם ממוצע (אמור להיות קבוע):</span><span class="summary-value">' + Iavg.toFixed(3) + ' A</span></div>';
+        html += '<div class="summary-row"><span class="summary-label">סטיית הזרם בין מדידות:</span><span class="summary-value">' + Idiff.toFixed(1) + '%</span></div>';
+
+        let conclusion = '';
+        if (Idiff < 3) conclusion = '✅ הזרם כמעט קבוע - אישור עקיף שהזזת מצבט המתח לא משפיעה על הזרם!';
+        else if (Idiff < 10) conclusion = '✓ הזרם די קבוע - תנודות קטנות הן נורמליות.';
+        else conclusion = '⚠️ הזרם משתנה משמעותית - בדוק שלא שונו בטעות פרמטרים אחרים במעגל.';
+        html += '<div style="margin-top:15px; padding:12px; background:white; border-radius:5px; font-weight:bold; text-align:center;">' + conclusion + '</div>';
+
+        content.innerHTML = html;
+        previewBox.style.display = 'block';
+
+        window.lengthSlope = slope;
+        window.lengthIntercept = intercept;
+        window.lengthData = data;
+    }
+
+    function displayLengthData() {
+        const content = document.getElementById('lengthDataContent');
+        const data = window.lengthData || [];
+
+        if (data.length === 0) {
+            content.innerHTML = '<p style="color:#999;">לא הוזנו נתונים בשלב הקודם.</p>';
+            return;
+        }
+
+        let html = '<table style="width:100%; border-collapse:collapse;"><tr style="background:var(--primary); color:white;"><th style="padding:8px;">l (m)</th><th style="padding:8px;">I (A)</th><th style="padding:8px;">V (V)</th><th style="padding:8px;">R (Ω)</th></tr>';
+        data.forEach(d => {
+            html += `<tr><td style="padding:8px; text-align:center; border-bottom:1px solid #ddd;">${d.l_m.toFixed(2)}</td><td style="padding:8px; text-align:center; border-bottom:1px solid #ddd;">${d.I.toFixed(3)}</td><td style="padding:8px; text-align:center; border-bottom:1px solid #ddd;">${d.V.toFixed(3)}</td><td style="padding:8px; text-align:center; border-bottom:1px solid #ddd;">${d.R.toFixed(2)}</td></tr>`;
+        });
+
+        if (window.lengthSlope) {
+            html += `<tr style="background:#fff3cd;"><td colspan="3" style="padding:8px; text-align:center; font-weight:bold;">שיפוע מרגרסיה ליניארית של R(l)</td><td style="padding:8px; text-align:center; font-weight:bold; color:var(--accent);">${window.lengthSlope.toFixed(2)} Ω/m</td></tr>`;
+        }
+        html += '</table>';
+        content.innerHTML = html;
+    }
+
+    /* ===== שלב 6: התנגדות סגולית ===== */
+    function calculateResistivity() {
+        const dInput = document.getElementById('diameter').value;
+        const btn = document.getElementById('btn6');
+        const instr = document.getElementById('resistivityInstr');
+        const resultBox = document.getElementById('resistivityResult');
+        const resultContent = document.getElementById('resistivityContent');
+
+        if (!window.lengthSlope) {
+            btn.disabled = true;
+            instr.innerText = 'לא הוזנו נתונים בשלב הקודם. חזור לשלב ב\' והזן את הנתונים.';
+            instr.style.color = 'var(--error)';
+            resultBox.style.display = 'none';
+            return;
+        }
+
+        if (dInput === '' || parseFloat(dInput) <= 0) {
+            btn.disabled = true;
+            instr.innerText = 'יש להזין את קוטר התיל כדי לחשב את ההתנגדות הסגולית.';
+            instr.style.color = '';
+            resultBox.style.display = 'none';
+            return;
+        }
+
+        const d_mm = parseFloat(dInput);
+        const d_m = d_mm / 1000;
+        const A = Math.PI * Math.pow(d_m / 2, 2);  // m²
+        const slope = window.lengthSlope;  // Ω/m
+
+        // ρ = שיפוע × A
+        const rho = slope * A;
+
+        const metal = getSelectedMetal();
+        const rho_theoretical = metal.rho;
+        const errorPercent = Math.abs(rho - rho_theoretical) / rho_theoretical * 100;
+
+        let html = '<div class="summary-row"><span class="summary-label">קוטר התיל d:</span><span class="summary-value">' + d_mm.toFixed(3) + ' mm</span></div>';
+        html += '<div class="summary-row"><span class="summary-label">שטח חתך A = π(d/2)²:</span><span class="summary-value">' + A.toExponential(3) + ' m²</span></div>';
+        html += '<div class="summary-row"><span class="summary-label">שיפוע גרף R(l) (= R ליחידת אורך):</span><span class="summary-value">' + slope.toFixed(2) + ' Ω/m</span></div>';
+        html += '<div class="summary-row"><span class="summary-label">התנגדות סגולית ρ = שיפוע × A:</span><span class="summary-value">' + rho.toExponential(3) + ' Ω·m</span></div>';
+        html += '<div class="summary-row"><span class="summary-label">ערך תיאורטי (' + metal.shortName + '):</span><span class="summary-value">' + metal.rhoText + ' Ω·m</span></div>';
+        html += '<div class="summary-row"><span class="summary-label">שגיאה יחסית:</span><span class="summary-value">' + errorPercent.toFixed(1) + '%</span></div>';
+
+        let conclusion = '';
+        if (errorPercent < 10) conclusion = '🎯 דיוק טוב מאוד - הניסוי אישש את ערך ρ בהצלחה!';
+        else if (errorPercent < 25) conclusion = '✅ תוצאה סבירה - בתחום המקובל לניסוי תלמידים.';
+        else if (errorPercent < 50) conclusion = '👍 הסטייה גדולה יחסית - יש לדון במקורות שגיאה בדו"ח.';
+        else conclusion = '⚠️ סטייה גדולה מאוד - בדוק שוב את הנתונים, במיוחד את קוטר התיל ואת בחירת החומר.';
+
+        html += '<div style="margin-top:15px; padding:12px; background:white; border-radius:5px; font-weight:bold; text-align:center;">' + conclusion + '</div>';
+
+        resultContent.innerHTML = html;
+        resultBox.style.display = 'block';
+
+        btn.disabled = false;
+        instr.innerText = '✓ ההתנגדות הסגולית חושבה - ניתן לסיים את השלב.';
+        instr.style.color = 'var(--success)';
+
+        window.calculatedRho = rho;
+        window.crossSectionA = A;
+        window.wireDiameter = d_mm;   // נשמר לצורך פירוט החישוב בדו"ח
+    }
+
+    /* ===== שלב 7: סיכום סופי ===== */
+    function displayFinalSummary() {
+        const content = document.getElementById('finalSummaryContent');
+        let html = '';
+
+        if (window.wireR50) {
+            html += '<div class="summary-row"><span class="summary-label">התנגדות תיל 50 ס"מ (משלב א\'.1, רגרסיית V-I):</span><span class="summary-value">' + window.wireR50.toFixed(2) + ' Ω</span></div>';
+        }
+
+        if (window.lengthSlope) {
+            const R50_fromSlope = window.lengthSlope * 0.5 + (window.lengthIntercept || 0);
+            html += '<div class="summary-row"><span class="summary-label">התנגדות תיל 50 ס"מ (משלב ב\', שיפוע R-l):</span><span class="summary-value">' + R50_fromSlope.toFixed(2) + ' Ω</span></div>';
+
+            if (window.wireR50) {
+                const diff = Math.abs(window.wireR50 - R50_fromSlope) / window.wireR50 * 100;
+                html += '<div class="summary-row"><span class="summary-label">הפרש באחוזים בין שתי השיטות:</span><span class="summary-value">' + diff.toFixed(1) + '%</span></div>';
+            }
+
+            html += '<div class="summary-row"><span class="summary-label">שיפוע גרף R(l):</span><span class="summary-value">' + window.lengthSlope.toFixed(2) + ' Ω/m</span></div>';
+        }
+
+        if (window.calculatedRho) {
+            const metal = getSelectedMetal();
+            html += '<div class="summary-row"><span class="summary-label">חומר התיל הנבחר:</span><span class="summary-value">' + metal.shortName + '</span></div>';
+            html += '<div class="summary-row"><span class="summary-label">התנגדות סגולית ρ:</span><span class="summary-value">' + window.calculatedRho.toExponential(3) + ' Ω·m</span></div>';
+            html += '<div class="summary-row"><span class="summary-label">ערך תיאורטי (' + metal.shortName + '):</span><span class="summary-value">' + metal.rhoText + ' Ω·m</span></div>';
+            const err = Math.abs(window.calculatedRho - metal.rho) / metal.rho * 100;
+            html += '<div class="summary-row"><span class="summary-label">שגיאה ב-ρ:</span><span class="summary-value">' + err.toFixed(1) + '%</span></div>';
+        }
+
+        if (html === '') html = '<p style="color:#999;">לא הוזנו נתונים בשלבים הקודמים.</p>';
+        content.innerHTML = html;
+    }
+
+    /* ===== העלאת צילומי גרפים ===== */
+    window.graphImages = [];
+
+    function handleGraphUpload(event) {
+        const files = event.target.files;
+        for (const file of files) {
+            if (!file.type.startsWith('image/')) continue;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                window.graphImages.push({ name: file.name, dataUrl: e.target.result, caption: '' });
+                renderGraphGallery();
+            };
+            reader.readAsDataURL(file);
+        }
+        event.target.value = '';  // מאפשר העלאה חוזרת של אותו קובץ
+    }
+
+    function renderGraphGallery() {
+        const gallery = document.getElementById('graphGallery');
+        gallery.innerHTML = '';
+        window.graphImages.forEach((img, idx) => {
+            const card = document.createElement('div');
+            card.style.cssText = 'background:white; border:1px solid #ddd; border-radius:8px; padding:8px; width:190px; text-align:center; box-shadow:0 2px 6px rgba(0,0,0,0.08);';
+            const imgEl = document.createElement('img');
+            imgEl.src = img.dataUrl;
+            imgEl.style.cssText = 'width:100%; height:120px; object-fit:contain; border-radius:4px; background:#fafafa;';
+            const capEl = document.createElement('input');
+            capEl.type = 'text';
+            capEl.placeholder = 'כותרת הגרף (לדוגמה: V(I) של התיל)';
+            capEl.value = img.caption;
+            capEl.style.cssText = 'width:100%; margin-top:8px; padding:6px; border:1px solid #ddd; border-radius:4px; text-align:center; font-size:0.82em;';
+            capEl.oninput = function() { window.graphImages[idx].caption = this.value; };
+            const rmEl = document.createElement('button');
+            rmEl.innerText = '🗑 הסר';
+            rmEl.style.cssText = 'margin-top:8px; background:var(--error); color:white; border:none; padding:5px 12px; border-radius:4px; cursor:pointer; font-size:0.8em;';
+            rmEl.onclick = function() { window.graphImages.splice(idx, 1); renderGraphGallery(); };
+            card.appendChild(imgEl);
+            card.appendChild(capEl);
+            card.appendChild(rmEl);
+            gallery.appendChild(card);
+        });
+    }
+
+    /* ===== העלאת תמונות מערכת הניסוי ===== */
+    window.setupImages = [];
+
+    function handleSetupUpload(event) {
+        const files = event.target.files;
+        for (const file of files) {
+            if (!file.type.startsWith('image/')) continue;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                window.setupImages.push({ name: file.name, dataUrl: e.target.result, caption: '' });
+                renderSetupGallery();
+            };
+            reader.readAsDataURL(file);
+        }
+        event.target.value = '';
+    }
+
+    function renderSetupGallery() {
+        const gallery = document.getElementById('setupGallery');
+        if (!gallery) return;
+        gallery.innerHTML = '';
+        window.setupImages.forEach((img, idx) => {
+            const card = document.createElement('div');
+            card.style.cssText = 'background:white; border:1px solid #ddd; border-radius:8px; padding:8px; width:190px; text-align:center; box-shadow:0 2px 6px rgba(0,0,0,0.08);';
+            const imgEl = document.createElement('img');
+            imgEl.src = img.dataUrl;
+            imgEl.style.cssText = 'width:100%; height:120px; object-fit:contain; border-radius:4px; background:#fafafa;';
+            const capEl = document.createElement('input');
+            capEl.type = 'text';
+            capEl.placeholder = 'תיאור (לדוגמה: מבט כללי)';
+            capEl.value = img.caption;
+            capEl.style.cssText = 'width:100%; margin-top:8px; padding:6px; border:1px solid #ddd; border-radius:4px; text-align:center; font-size:0.82em;';
+            capEl.oninput = function() { window.setupImages[idx].caption = this.value; };
+            const rmEl = document.createElement('button');
+            rmEl.innerText = '🗑 הסר';
+            rmEl.style.cssText = 'margin-top:8px; background:var(--error); color:white; border:none; padding:5px 12px; border-radius:4px; cursor:pointer; font-size:0.8em;';
+            rmEl.onclick = function() { window.setupImages.splice(idx, 1); renderSetupGallery(); };
+            card.appendChild(imgEl);
+            card.appendChild(capEl);
+            card.appendChild(rmEl);
+            gallery.appendChild(card);
+        });
+    }
+
+    /* ===== עוזרים גנריים ליצירת docx ===== */
+    function getDocx() {
+        if (!window.docx) {
+            throw new Error('ספריית יצירת ה-Word לא נטענה. רענן את הדף ונסה שוב.');
+        }
+        return window.docx;
+    }
+
+    function escapeText(s) {
+        return s == null ? '' : String(s);
+    }
+
+    function P(text, opts) {
+        const d = getDocx();
+        opts = opts || {};
+        return new d.Paragraph({
+            children: [new d.TextRun({
+                text: escapeText(text),
+                font: 'Arial',
+                size: opts.size || 22,
+                bold: !!opts.bold,
+                italics: !!opts.italic,
+                color: opts.color || '000000',
+                rightToLeft: true
+            })],
+            alignment: opts.alignment || d.AlignmentType.RIGHT,
+            bidirectional: true,
+            spacing: opts.spacing || { after: 120 }
+        });
+    }
+
+    function P_mixed(parts, opts) {
+        const d = getDocx();
+        opts = opts || {};
+        const children = parts.map(p => new d.TextRun({
+            text: escapeText(p.text),
+            font: 'Arial',
+            size: p.size || opts.size || 22,
+            bold: !!p.bold,
+            italics: !!p.italic,
+            color: p.color || '000000',
+            rightToLeft: true
+        }));
+        return new d.Paragraph({
+            children: children,
+            alignment: opts.alignment || d.AlignmentType.RIGHT,
+            bidirectional: true,
+            spacing: opts.spacing || { after: 120 }
+        });
+    }
+
+    function H1(text) {
+        const d = getDocx();
+        return new d.Paragraph({
+            children: [new d.TextRun({
+                text: escapeText(text), font: 'Arial', size: 36, bold: true,
+                color: '1e3a5f', rightToLeft: true
+            })],
+            alignment: d.AlignmentType.CENTER,
+            bidirectional: true,
+            spacing: { after: 240, before: 120 },
+            border: { bottom: { color: '2980b9', size: 12, style: d.BorderStyle.SINGLE, space: 4 } }
+        });
+    }
+
+    function H2(text) {
+        const d = getDocx();
+        return new d.Paragraph({
+            children: [new d.TextRun({
+                text: escapeText(text), font: 'Arial', size: 28, bold: true,
+                color: '1e3a5f', rightToLeft: true
+            })],
+            alignment: d.AlignmentType.RIGHT,
+            bidirectional: true,
+            spacing: { after: 160, before: 320 }
+        });
+    }
+
+    function H3(text) {
+        const d = getDocx();
+        return new d.Paragraph({
+            children: [new d.TextRun({
+                text: escapeText(text), font: 'Arial', size: 24, bold: true,
+                color: '2980b9', rightToLeft: true
+            })],
+            alignment: d.AlignmentType.RIGHT,
+            bidirectional: true,
+            spacing: { after: 120, before: 220 }
+        });
+    }
+
+    function bullet(text) {
+        const d = getDocx();
+        return new d.Paragraph({
+            children: [new d.TextRun({
+                text: '• ' + escapeText(text),
+                font: 'Arial', size: 22, rightToLeft: true
+            })],
+            alignment: d.AlignmentType.RIGHT,
+            bidirectional: true,
+            spacing: { after: 80 },
+            indent: { right: 360 }
+        });
+    }
+
+    function formula(text) {
+        const d = getDocx();
+        return new d.Paragraph({
+            children: [new d.TextRun({
+                text: escapeText(text), font: 'Arial', size: 24, bold: true,
+                color: '2980b9', rightToLeft: true
+            })],
+            alignment: d.AlignmentType.CENTER,
+            bidirectional: true,
+            spacing: { after: 180, before: 100 },
+            border: {
+                top:    { color: '2980b9', size: 4, style: d.BorderStyle.SINGLE, space: 6 },
+                bottom: { color: '2980b9', size: 4, style: d.BorderStyle.SINGLE, space: 6 },
+                left:   { color: '2980b9', size: 4, style: d.BorderStyle.SINGLE, space: 6 },
+                right:  { color: '2980b9', size: 4, style: d.BorderStyle.SINGLE, space: 6 }
+            }
+        });
+    }
+
+    function tcell(text, opts) {
+        const d = getDocx();
+        opts = opts || {};
+        return new d.TableCell({
+            children: [new d.Paragraph({
+                children: [new d.TextRun({
+                    text: escapeText(text), font: 'Arial',
+                    size: opts.size || 22, bold: !!opts.bold,
+                    color: opts.color || '000000', rightToLeft: true
+                })],
+                alignment: opts.alignment || d.AlignmentType.CENTER,
+                bidirectional: true
+            })],
+            shading: opts.shading ? { fill: opts.shading } : undefined,
+            width: opts.width ? { size: opts.width, type: d.WidthType.DXA } : undefined
+        });
+    }
+
+    function buildTable(headers, rows, colWidths) {
+        const d = getDocx();
+        const headerRow = new d.TableRow({
+            tableHeader: true,
+            children: headers.map((h, i) => tcell(h, {
+                bold: true, color: 'ffffff', shading: '1e3a5f',
+                width: colWidths ? colWidths[i] : undefined
+            }))
+        });
+        const dataRows = rows.map((r, ri) =>
+            new d.TableRow({
+                children: r.map((c, i) => tcell(c, {
+                    shading: ri % 2 === 0 ? 'ffffff' : 'f3f6f9',
+                    width: colWidths ? colWidths[i] : undefined
+                }))
+            })
+        );
+        return new d.Table({
+            rows: [headerRow, ...dataRows],
+            width: { size: 100, type: d.WidthType.PERCENTAGE },
+            visuallyRightToLeft: true
+        });
+    }
+
+    function dataUrlToBytes(dataUrl) {
+        const base64 = dataUrl.split(',')[1];
+        const bin = atob(base64);
+        const bytes = new Uint8Array(bin.length);
+        for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+        return bytes;
+    }
+
+    function getImageType(dataUrl) {
+        const m = dataUrl.match(/^data:image\/([\w+]+)/);
+        if (!m) return 'png';
+        const t = m[1].toLowerCase();
+        if (t === 'jpeg') return 'jpg';
+        if (['png','jpg','gif','bmp'].includes(t)) return t;
+        return 'png';
+    }
+
+    function getImageDims(dataUrl) {
+        return new Promise(resolve => {
+            const img = new Image();
+            img.onload = () => resolve({ w: img.naturalWidth || 800, h: img.naturalHeight || 600 });
+            img.onerror = () => resolve({ w: 800, h: 600 });
+            img.src = dataUrl;
+        });
+    }
+
+    async function buildImageParagraph(imgObj) {
+        const d = getDocx();
+        const dims = await getImageDims(imgObj.dataUrl);
+        const maxWidth = 480;
+        const scale = Math.min(1, maxWidth / dims.w);
+        const w = Math.round(dims.w * scale);
+        const h = Math.round(dims.h * scale);
+        return new d.Paragraph({
+            children: [new d.ImageRun({
+                data: dataUrlToBytes(imgObj.dataUrl),
+                transformation: { width: w, height: h },
+                type: getImageType(imgObj.dataUrl)
+            })],
+            alignment: d.AlignmentType.CENTER,
+            spacing: { after: 80, before: 120 }
+        });
+    }
+
+    /* ===== בוני תוכן גנריים ===== */
+    function buildAnswersChildren(qids) {
+        const children = [];
+        const answers = window.userAnswers || {};
+        let any = false;
+        qids.forEach(qid => {
+            const a = answers[qid];
+            if (!a) return;
+            any = true;
+            children.push(P_mixed([
+                { text: a.isCorrect ? '✓ ' : '✗ ', bold: true,
+                  color: a.isCorrect ? '27ae60' : 'c0392b' },
+                { text: a.question, bold: true }
+            ], { spacing: { after: 60 } }));
+            children.push(P_mixed([
+                { text: '   הבחירה שלך: ', italic: true, color: '666666' },
+                { text: a.chosen, color: a.isCorrect ? '155724' : '721c24' }
+            ], { spacing: { after: 160 } }));
+        });
+        if (!any) {
+            children.push(P('(לא ניתנו תשובות לשאלות בשלב זה)',
+                           { italic: true, color: '888888' }));
+        }
+        return children;
+    }
+
+    function buildUserSummaryChildren(summaryId) {
+        const ta = document.getElementById(summaryId);
+        const txt = ta ? ta.value.trim() : '';
+        if (!txt) return [P('(לא נכתב סיכום חופשי)',
+                           { italic: true, color: '888888' })];
+        return txt.split(/\n/).map(line =>
+            P(line.trim() === '' ? ' ' : line, { spacing: { after: 80 } })
+        );
+    }
+
+    async function buildSetupImagesChildren() {
+        if (!window.setupImages || window.setupImages.length === 0) {
+            return [P('(לא צורפו תמונות של מערכת הניסוי)',
+                     { italic: true, color: '888888' })];
+        }
+        const children = [];
+        const d = getDocx();
+        for (const img of window.setupImages) {
+            children.push(await buildImageParagraph(img));
+            children.push(P(img.caption || img.name,
+                           { alignment: d.AlignmentType.CENTER,
+                             italic: true, color: '555555',
+                             spacing: { after: 200 } }));
+        }
+        return children;
+    }
+
+    async function buildGraphsChildren() {
+        if (!window.graphImages || window.graphImages.length === 0) {
+            return [P('(לא צורפו צילומי גרפים)',
+                     { italic: true, color: '888888' })];
+        }
+        const children = [];
+        const d = getDocx();
+        for (const img of window.graphImages) {
+            children.push(await buildImageParagraph(img));
+            children.push(P(img.caption || img.name,
+                           { alignment: d.AlignmentType.CENTER,
+                             italic: true, color: '555555',
+                             spacing: { after: 200 } }));
+        }
+        return children;
+    }
+
+    /* ===== תוכן ספציפי לכל לשונית ===== */
+    function buildTab1Content() {
+        return [
+            P_mixed([
+                { text: 'מטרת השלב: ', bold: true },
+                { text: 'הכרת חוק אוהם והקשר בין התנגדות מוליך למידותיו ולחומר ממנו עשוי.' }
+            ]),
+            formula('V = I · R          R = ρ · l / A'),
+            bullet('מוליך אוהמי: היחס V/I קבוע — גרף V(I) הוא קו ישר העובר דרך הראשית.'),
+            bullet('מוליך לא-אוהמי: היחס V/I משתנה (למשל נורת להט, דיודה).'),
+            bullet('ההתנגדות R גדלה ביחס ישר לאורך התיל l וביחס הפוך לשטח החתך A.'),
+            bullet('ההתנגדות הסגולית ρ היא תכונה של החומר עצמו (יחידות: Ω·m).')
+        ];
+    }
+
+    function buildTab2Content() {
+        const metal = getSelectedMetal();
+        return [
+            P_mixed([
+                { text: 'מטרת השלב: ', bold: true },
+                { text: 'הכרת המעגל החשמלי וציוד המדידה.' }
+            ]),
+            P_mixed([
+                { text: 'חומר התיל בניסוי זה: ', bold: true },
+                { text: metal.name, color: '2980b9', bold: true },
+                { text: '  (ρ תיאורטי: ' + metal.rhoText + ' Ω·m).' }
+            ], { spacing: { after: 160 } }),
+            bullet('סרגל התנגדות: תיל ' + metal.shortName + ' (קוטר 0.25 מ"מ) באורך 50 ס"מ.'),
+            bullet('נורת להט לזרם נמוך (לדוגמה 12V).'),
+            bullet('נגד משתנה (ראוסטט) לשליטה בזרם.'),
+            bullet('חיישן זרם (אמפרמטר) — מחובר בטור במעגל.'),
+            bullet('חיישן מתח (וולטמטר) — מחובר במקביל ישירות להדקי הסרגל.'),
+            P_mixed([
+                { text: 'אופן החיבור: ', bold: true },
+                { text: 'חיישן הזרם מחובר בטור (התנגדותו נמוכה ולכן אינו משפיע על המעגל). חיישן המתח מחובר במקביל לרכיב הנמדד (התנגדותו גבוהה מאוד ולכן אינו שואב זרם משמעותי).' }
+            ])
+        ];
+    }
+
+    function buildTab3Content() {
+        return [
+            P_mixed([
+                { text: 'מטרת השלב: ', bold: true },
+                { text: 'מדידת אופיין V(I) של תיל ניקל-כרום באורך 50 ס"מ, ובדיקה האם הוא אוהמי.' }
+            ]),
+            bullet('ביצוע 7 מדידות בערכי זרם שונים על ידי הזזת גררת הראוסטט.'),
+            bullet('בכל מדידה רישום זרם I ומתח V, וחישוב R = V/I.'),
+            bullet('בניית גרף V(I) ב-Excel וביצוע רגרסיה ליניארית.'),
+            bullet('השיפוע של הגרף שווה להתנגדות R של התיל; הקו צפוי לעבור דרך הראשית.')
+        ];
+    }
+
+    function buildTab4Content() {
+        return [
+            P_mixed([
+                { text: 'מטרת השלב: ', bold: true },
+                { text: 'מדידת אופיין V(I) של נורת להט והשוואה לתיל הניקל-כרום.' }
+            ]),
+            bullet('החלפת התיל בנורת להט במעגל.'),
+            bullet('ביצוע 5 מדידות בערכי זרם שונים.'),
+            bullet('צפוי שהאופיין יהיה לא ליניארי, מאחר שהחוט מתחמם ומגדיל את התנגדותו.'),
+            bullet('יחס Rmax/Rmin משמש לכימות אי-הליניאריות.')
+        ];
+    }
+
+    function buildTab5Content() {
+        return [
+            P_mixed([
+                { text: 'מטרת השלב: ', bold: true },
+                { text: 'מדידת התנגדות התיל באורכים שונים לחישוב ההתנגדות הסגולית.' }
+            ]),
+            bullet('הזזת מצבט התנין של חיישן המתח לאורכים שונים: 50, 45, 40, 35, 30, 25, 20 ס"מ.'),
+            bullet('מדידה יחידה של I ו-V בכל אורך (התיל כבר אושר כאוהמי בשלב א\'.1).'),
+            bullet('בניית גרף R(l) ב-Excel וביצוע רגרסיה ליניארית.'),
+            formula('R = (ρ/A) · l       m = ρ/A'),
+            bullet('הזרם אמור להישאר כמעט קבוע — הוכחה עקיפה שהזזת המצבט אינה משנה את הזרם.')
+        ];
+    }
+
+    function buildTab6Content() {
+        const metal = getSelectedMetal();
+        return [
+            P_mixed([
+                { text: 'מטרת השלב: ', bold: true },
+                { text: 'חישוב ההתנגדות הסגולית ρ של תיל ' + metal.shortName + ' והשוואה לערך התיאורטי.' }
+            ]),
+            formula('ρ = m · A = שיפוע · π(d/2)²'),
+            bullet('שיפוע גרף R(l) הוא ההתנגדות ליחידת אורך של התיל (Ω/m).'),
+            bullet('שטח החתך A מחושב מקוטר התיל (d = 0.25 מ"מ — רשום על הסרגל).'),
+            bullet('ערך תיאורטי ל-' + metal.shortName + ': ρ ≈ ' + metal.rhoText + ' Ω·m.'),
+            bullet('שגיאה של כמה אחוזים נחשבת לסבירה לניסוי תלמידים.')
+        ];
+    }
+
+    function buildTab7Content() {
+        return [
+            P_mixed([
+                { text: 'מטרת השלב: ', bold: true },
+                { text: 'דיון בגורמי השגיאה ובמסקנות הניסוי.' }
+            ]),
+            H3('גורמי שגיאה אפשריים'),
+            bullet('חימום התיל במהלך המדידה — מעלה את ההתנגדות.'),
+            bullet('שגיאה בקוטר התיל — A פרופורציוני לקוטר בריבוע, ולכן שגיאה ב-d מתעצמת ב-ρ.'),
+            bullet('דיוק מיקום מצבט התנין על הסרגל.'),
+            bullet('שגיאות אקראיות בקריאת החיישנים.'),
+            bullet('התנגדות חוטים ומגעים — מוסיפה תוספת קבועה ל-R.'),
+            bullet('אחידות התיל לכל אורכו.'),
+            H3('מסקנות צפויות'),
+            bullet('חוק אוהם מתקיים עבור תיל מתכתי בטמפרטורה כמעט קבועה.'),
+            bullet('נורת להט אינה אוהמית בגלל החימום של חוט הלהט.'),
+            bullet('ההתנגדות פרופורציונית לאורך התיל לפי R = ρ · l / A.')
+        ];
+    }
+
+    /* ===== הרכבת הדו"ח ===== */
+    async function downloadDocxReport() {
+        const msg = document.getElementById('summaryFileMsg');
+        let d;
+        try { d = getDocx(); } catch (e) {
+            msg.style.display = 'block';
+            msg.style.color = 'var(--error)';
+            msg.innerText = '⚠️ ' + e.message;
+            return;
+        }
+
+        const studentName = (document.getElementById('studentName').value || '').trim();
+        const studentClass = (document.getElementById('studentClass').value || '').trim();
+        const reportDateInput = document.getElementById('reportDate').value;
+        const reportDateStr = reportDateInput
+            ? new Date(reportDateInput).toLocaleDateString('he-IL')
+            : new Date().toLocaleDateString('he-IL');
+
+        msg.style.display = 'block';
+        msg.style.color = 'var(--primary)';
+        msg.innerText = '⏳ יוצר את הדו"ח...';
+
+        try {
+            const children = [];
+
+            children.push(H1('דו"ח מעבדה: אופיין תיל מתכתי ונורת להט'));
+            children.push(buildTable(
+                ['שם התלמיד/ה', 'כיתה', 'תאריך'],
+                [[studentName || '—', studentClass || '—', reportDateStr]],
+                [3500, 2000, 2500]
+            ));
+            children.push(P(''));
+            const metalForGoal = getSelectedMetal();
+            children.push(P_mixed([
+                { text: 'מטרת הניסוי: ', bold: true },
+                { text: 'בדיקת חוק אוהם, השוואה בין מוליך אוהמי ללא-אוהמי, וחישוב ההתנגדות הסגולית של חוט ' + metalForGoal.shortName + '.' }
+            ], { spacing: { after: 240 } }));
+
+            // לשונית 1
+            children.push(H2('1. רקע תיאורטי'));
+            buildTab1Content().forEach(c => children.push(c));
+            children.push(H3('שאלות ותשובות'));
+            buildAnswersChildren(['q1_1','q1_2','q1_3']).forEach(c => children.push(c));
+            children.push(H3('סיכום חופשי של התלמיד/ה'));
+            buildUserSummaryChildren('summary1').forEach(c => children.push(c));
+
+            // לשונית 2
+            children.push(H2('2. המעגל והציוד'));
+            buildTab2Content().forEach(c => children.push(c));
+            children.push(H3('צילומי מערכת הניסוי'));
+            (await buildSetupImagesChildren()).forEach(c => children.push(c));
+            children.push(H3('שאלות ותשובות'));
+            buildAnswersChildren(['q2_1','q2_2','q2_3']).forEach(c => children.push(c));
+            children.push(H3('סיכום חופשי של התלמיד/ה'));
+            buildUserSummaryChildren('summary2').forEach(c => children.push(c));
+
+            // לשונית 3 - תיל
+            children.push(H2('3. שלב א\'.1 — אופיין תיל מתכתי'));
+            buildTab3Content().forEach(c => children.push(c));
+            if (window.wireData && window.wireData.length) {
+                children.push(H3('נתוני המדידה'));
+                const rows = window.wireData.map(x => [
+                    x.I.toFixed(3), x.V.toFixed(3), x.R.toFixed(2)
+                ]);
+                children.push(buildTable(
+                    ['I (A)', 'V (V)', 'R = V/I (Ω)'], rows, [2500, 2500, 3000]));
+                if (window.wireR50 != null) {
+                    children.push(P(''));
+                    children.push(P_mixed([
+                        { text: 'התנגדות התיל מרגרסיה ליניארית של V(I): ', bold: true },
+                        { text: window.wireR50.toFixed(2) + ' Ω',
+                          color: 'e67e22', bold: true }
+                    ]));
+                }
+            }
+            children.push(H3('שאלות ותשובות'));
+            buildAnswersChildren(['q3_1','q3_2','q3_3']).forEach(c => children.push(c));
+            children.push(H3('סיכום חופשי של התלמיד/ה'));
+            buildUserSummaryChildren('summary3').forEach(c => children.push(c));
+
+            // לשונית 4 - נורה
+            children.push(H2('4. שלב א\'.2 — אופיין נורת להט'));
+            buildTab4Content().forEach(c => children.push(c));
+            if (window.bulbData && window.bulbData.length) {
+                children.push(H3('נתוני המדידה'));
+                const rows = window.bulbData.map(x => [
+                    x.I.toFixed(3), x.V.toFixed(3), x.R.toFixed(2)
+                ]);
+                children.push(buildTable(
+                    ['I (A)', 'V (V)', 'R = V/I (Ω)'], rows, [2500, 2500, 3000]));
+                if (window.bulbRmin != null && window.bulbRmax != null) {
+                    children.push(P(''));
+                    children.push(P_mixed([
+                        { text: 'R מינימלי: ', bold: true },
+                        { text: window.bulbRmin.toFixed(2) + ' Ω',
+                          color: 'e67e22', bold: true },
+                        { text: '   |   R מקסימלי: ', bold: true },
+                        { text: window.bulbRmax.toFixed(2) + ' Ω',
+                          color: 'e67e22', bold: true },
+                        { text: '   |   יחס Rmax/Rmin: ', bold: true },
+                        { text: (window.bulbRmax / window.bulbRmin).toFixed(2),
+                          color: 'e67e22', bold: true }
+                    ]));
+                }
+            }
+            children.push(H3('שאלות ותשובות'));
+            buildAnswersChildren(['q4_1','q4_2','q4_3']).forEach(c => children.push(c));
+            children.push(H3('סיכום חופשי של התלמיד/ה'));
+            buildUserSummaryChildren('summary4').forEach(c => children.push(c));
+
+            // לשונית 5 - אורכים
+            children.push(H2('5. שלב ב\' — מדידות באורכים שונים'));
+            buildTab5Content().forEach(c => children.push(c));
+            if (window.lengthData && window.lengthData.length) {
+                children.push(H3('נתוני המדידה'));
+                const rows = window.lengthData.map(x => [
+                    x.l_m.toFixed(2), x.I.toFixed(3),
+                    x.V.toFixed(3), x.R.toFixed(2)
+                ]);
+                children.push(buildTable(
+                    ['l (m)', 'I (A)', 'V (V)', 'R (Ω)'],
+                    rows, [2000, 2200, 2200, 2300]));
+                if (window.lengthSlope != null) {
+                    children.push(P(''));
+                    children.push(P_mixed([
+                        { text: 'שיפוע גרף R(l) (= ρ/A): ', bold: true },
+                        { text: window.lengthSlope.toFixed(2) + ' Ω/m',
+                          color: 'e67e22', bold: true }
+                    ]));
+                    if (window.lengthIntercept != null) {
+                        children.push(P_mixed([
+                            { text: 'חיתוך עם ציר R: ', bold: true },
+                            { text: window.lengthIntercept.toFixed(2) + ' Ω',
+                              color: 'e67e22', bold: true }
+                        ]));
+                    }
+                }
+            }
+            children.push(H3('שאלות ותשובות'));
+            buildAnswersChildren(['q5_1','q5_2','q5_3']).forEach(c => children.push(c));
+            children.push(H3('סיכום חופשי של התלמיד/ה'));
+            buildUserSummaryChildren('summary5').forEach(c => children.push(c));
+
+            // לשונית 6 - ρ + גרפים
+            children.push(H2('6. חישוב ההתנגדות הסגולית'));
+            buildTab6Content().forEach(c => children.push(c));
+
+            const metalSel = getSelectedMetal();
+            children.push(P_mixed([
+                { text: 'חומר התיל בניסוי זה: ', bold: true },
+                { text: metalSel.name, color: '2980b9', bold: true }
+            ], { spacing: { after: 180 } }));
+
+            if (window.calculatedRho != null && window.lengthSlope != null
+                && window.wireDiameter != null && window.crossSectionA != null) {
+                const m_slope = window.lengthSlope;
+                const d_mm = window.wireDiameter;
+                const d_m = d_mm / 1000;
+                const A_val = window.crossSectionA;
+                const rho_val = window.calculatedRho;
+                const errPct = Math.abs(rho_val - metalSel.rho) / metalSel.rho * 100;
+
+                children.push(H3('פירוט החישוב — מההתנגדות ליחידת אורך אל ρ'));
+
+                // שלב 1
+                children.push(P_mixed([
+                    { text: 'שלב 1 — מהגרף R(l): ההתנגדות ליחידת אורך', bold: true, color: '1e3a5f' }
+                ], { spacing: { after: 80 } }));
+                children.push(P('מהרגרסיה הליניארית של הגרף R כפונקציה של l, השיפוע m הוא ההתנגדות לכל מטר של תיל:',
+                                { indent: { right: 360 } }));
+                children.push(formula('m = R / l = ' + m_slope.toFixed(2) + '  Ω/m'));
+
+                // שלב 2
+                children.push(P_mixed([
+                    { text: 'שלב 2 — חישוב שטח החתך A מהקוטר', bold: true, color: '1e3a5f' }
+                ], { spacing: { after: 80 } }));
+                children.push(P_mixed([
+                    { text: 'קוטר התיל: ', bold: true },
+                    { text: 'd = ' + d_mm.toFixed(3) + ' mm = ' + d_m.toExponential(3) + ' m' }
+                ], { indent: { right: 360 } }));
+                children.push(P('שטח החתך מתקבל מנוסחת שטח עיגול:', { indent: { right: 360 } }));
+                children.push(formula('A = π · (d/2)² = π · (' + (d_m/2).toExponential(3) + ')² = ' + A_val.toExponential(3) + '  m²'));
+
+                // שלב 3 — קישור התיאורטי
+                children.push(P_mixed([
+                    { text: 'שלב 3 — קישור בין ההתנגדות ליחידת אורך ל-ρ', bold: true, color: '1e3a5f' }
+                ], { spacing: { after: 80 } }));
+                children.push(P_mixed([
+                    { text: 'מהנוסחה ', bold: true },
+                    { text: 'R = ρ · l / A', bold: true, color: '2980b9' },
+                    { text: ' נחלק שני האגפים ב-', bold: true },
+                    { text: 'l', bold: true, color: '2980b9' },
+                    { text: ' ונקבל:', bold: true }
+                ], { indent: { right: 360 } }));
+                children.push(formula('R / l = ρ / A     ⇒     m = ρ / A'));
+                children.push(P('כלומר ההתנגדות ליחידת אורך שווה ליחס שבין ρ של החומר לבין שטח החתך של התיל.',
+                                { indent: { right: 360 } }));
+
+                // שלב 4
+                children.push(P_mixed([
+                    { text: 'שלב 4 — חילוץ ρ מהמשוואה', bold: true, color: '1e3a5f' }
+                ], { spacing: { after: 80 } }));
+                children.push(P('נכפיל את שני האגפים ב-A:', { indent: { right: 360 } }));
+                children.push(formula('ρ = m · A'));
+                children.push(P('הצבת הערכים המספריים:', { indent: { right: 360 } }));
+                children.push(formula('ρ = ' + m_slope.toFixed(2) + '  ×  ' + A_val.toExponential(3) + ' = ' + rho_val.toExponential(3) + '  Ω·m'));
+
+                // שלב 5
+                children.push(P_mixed([
+                    { text: 'שלב 5 — השוואה לערך התיאורטי', bold: true, color: '1e3a5f' }
+                ], { spacing: { after: 80 } }));
+                children.push(P_mixed([
+                    { text: 'עבור ' + metalSel.shortName + ': ', bold: true },
+                    { text: 'ρ_תיאורטי = ' + metalSel.rhoText + ' Ω·m', bold: true, color: '2980b9' }
+                ], { indent: { right: 360 } }));
+                children.push(formula('שגיאה יחסית = |ρ_ניסויי − ρ_תיאורטי| / ρ_תיאורטי × 100% = ' + errPct.toFixed(1) + '%'));
+
+                // טבלת תוצאות מסכמת
+                children.push(H3('טבלת תוצאות'));
+                const rows = [
+                    ['קוטר התיל d', d_mm.toFixed(3) + ' mm'],
+                    ['שטח חתך A = π(d/2)²', A_val.toExponential(3) + ' m²'],
+                    ['התנגדות ליחידת אורך m (= שיפוע)', m_slope.toFixed(2) + ' Ω/m'],
+                    ['ρ ניסויי (= m · A)', rho_val.toExponential(3) + ' Ω·m'],
+                    ['חומר התיל', metalSel.shortName],
+                    ['ρ תיאורטי', metalSel.rhoText + ' Ω·m'],
+                    ['שגיאה יחסית', errPct.toFixed(1) + '%']
+                ];
+                children.push(buildTable(['גודל', 'ערך'], rows, [5000, 4000]));
+            } else if (window.calculatedRho != null) {
+                // נפילה לאחור: יש ρ אבל חסר אחד מהרכיבים
+                children.push(H3('תוצאות החישוב'));
+                const errPct = Math.abs(window.calculatedRho - metalSel.rho) / metalSel.rho * 100;
+                const rows = [
+                    ['שטח חתך התיל A',
+                     (window.crossSectionA != null
+                        ? window.crossSectionA.toExponential(3) : '-') + ' m²'],
+                    ['התנגדות סגולית ניסויית ρ',
+                     window.calculatedRho.toExponential(3) + ' Ω·m'],
+                    ['חומר התיל', metalSel.shortName],
+                    ['ערך תיאורטי', metalSel.rhoText + ' Ω·m'],
+                    ['שגיאה יחסית', errPct.toFixed(1) + '%']
+                ];
+                children.push(buildTable(['גודל', 'ערך'], rows, [4500, 4500]));
+            }
+            children.push(H3('צילומי הגרפים'));
+            (await buildGraphsChildren()).forEach(c => children.push(c));
+            children.push(H3('שאלות ותשובות'));
+            buildAnswersChildren(['q6_1','q6_2','q6_3']).forEach(c => children.push(c));
+            children.push(H3('סיכום חופשי של התלמיד/ה'));
+            buildUserSummaryChildren('summary6').forEach(c => children.push(c));
+
+            // לשונית 7 - שגיאות
+            children.push(H2('7. שגיאות ומסקנות'));
+            buildTab7Content().forEach(c => children.push(c));
+            children.push(H3('שאלות ותשובות'));
+            buildAnswersChildren(['q7_1','q7_2','q7_3']).forEach(c => children.push(c));
+            children.push(H3('סיכום חופשי של התלמיד/ה'));
+            buildUserSummaryChildren('summary7').forEach(c => children.push(c));
+
+            const doc = new d.Document({
+                creator: 'תדריך מעבדה',
+                title: 'דו"ח מעבדה — אופיין תיל ונורה',
+                styles: {
+                    default: {
+                        document: { run: { font: 'Arial', size: 22 } }
+                    }
+                },
+                sections: [{
+                    properties: {
+                        page: { margin: { top: 1080, right: 1080, bottom: 1080, left: 1080 } }
+                    },
+                    children: children
+                }]
+            });
+
+            const blob = await d.Packer.toBlob(doc);
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            const safeName = (studentName || 'תלמיד').replace(/[\\/:*?"<>|]/g, '_');
+            a.download = `דוח_מעבדה_${safeName}.docx`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            msg.style.color = 'var(--success)';
+            msg.innerText = '✓ קובץ הדו"ח ירד בהצלחה.';
+        } catch (err) {
+            console.error(err);
+            msg.style.color = 'var(--error)';
+            msg.innerText = '⚠️ אירעה שגיאה ביצירת הדו"ח: ' + (err.message || err);
+        }
+    }
+
+    updateProgress();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,2055 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>מעבדת פיזיקה - כא"מ ומתח הדקים של סוללה</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML" async></script>
+    <script src="https://unpkg.com/docx@8.5.0/build/index.umd.js"></script>
+    <style>
+        :root {
+            --primary: #1e3a5f;
+            --secondary: #2980b9;
+            --accent: #e67e22;
+            --success: #27ae60;
+            --error: #e74c3c;
+            --locked: #95a5a6;
+            --bg: #f4f7f6;
+        }
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background-color: var(--bg);
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        .container {
+            max-width: 1050px;
+            margin: auto;
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: var(--primary);
+            border-bottom: 3px solid var(--secondary);
+            padding-bottom: 12px;
+            font-size: 1.8em;
+        }
+        h2 { color: var(--primary); margin-top: 0; }
+        h3 { color: var(--secondary); }
+
+        /* ניווט */
+        .tabs {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+            background: #eee;
+            border-radius: 10px;
+            padding: 5px;
+            margin-bottom: 25px;
+        }
+        .tab {
+            flex: 1;
+            min-width: 120px;
+            padding: 10px;
+            text-align: center;
+            cursor: pointer;
+            font-weight: bold;
+            border-radius: 8px;
+            transition: 0.3s;
+            margin: 2px;
+            font-size: 0.85em;
+            position: relative;
+        }
+        .tab:hover:not(.locked) { background: #ddd; }
+        .tab.active { background: var(--secondary); color: white; }
+        .tab.locked {
+            color: var(--locked);
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+        .tab.completed::after {
+            content: "✓";
+            position: absolute;
+            top: 2px;
+            left: 5px;
+            color: var(--success);
+            font-weight: bold;
+        }
+        .tab.locked::after {
+            content: "🔒";
+            position: absolute;
+            top: 2px;
+            left: 5px;
+            font-size: 0.8em;
+        }
+
+        /* תוכן */
+        .content {
+            display: none;
+            border-right: 5px solid var(--secondary);
+            padding-right: 20px;
+            animation: fadeIn 0.4s;
+        }
+        .content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .theory { margin-bottom: 20px; font-size: 1.1em; line-height: 1.7; }
+        .example {
+            background: #fff9c4;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #fbc02d;
+            margin: 15px 0;
+        }
+        .important {
+            background: #e8f5e9;
+            border-right: 5px solid var(--success);
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+        .warning {
+            background: #ffebee;
+            border-right: 5px solid var(--error);
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+        .formula {
+            background: #f0f4f8;
+            border: 1px dashed var(--secondary);
+            padding: 15px;
+            text-align: center;
+            font-size: 1.2em;
+            margin: 15px 0;
+            border-radius: 8px;
+        }
+
+        /* שאלות */
+        .quiz {
+            background: #e3f2fd;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            border-right: 4px solid var(--secondary);
+        }
+        .question {
+            font-weight: bold;
+            font-size: 1.05em;
+            margin-bottom: 15px;
+            color: var(--primary);
+        }
+        .option {
+            background: white;
+            border: 2px solid var(--secondary);
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: 0.2s;
+            font-weight: 500;
+        }
+        .option:hover { background: #bbdefb; }
+        .option.correct { background: #c8e6c9; border-color: var(--success); }
+        .option.wrong { background: #ffcdd2; border-color: var(--error); }
+        .feedback {
+            font-weight: bold;
+            margin-top: 10px;
+            display: none;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        /* סקיצות */
+        .sketch-container {
+            text-align: center;
+            margin: 25px 0;
+            background: #fff;
+            padding: 25px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+        }
+        svg { max-width: 100%; height: auto; }
+
+        /* טבלת נתונים */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        .data-table th {
+            background: var(--primary);
+            color: white;
+            padding: 12px;
+            font-size: 1.05em;
+        }
+        .data-table td {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            text-align: center;
+        }
+        .data-table input {
+            width: 90%;
+            padding: 8px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            text-align: center;
+            font-size: 1em;
+            transition: 0.2s;
+        }
+        .data-table input:focus {
+            outline: none;
+            border-color: var(--secondary);
+            background: #f0f8ff;
+        }
+        .data-table .computed {
+            color: var(--accent);
+            font-weight: bold;
+        }
+
+        /* כפתור סיום שלב */
+        .complete-section {
+            margin-top: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, #ecf0f1 0%, #d5dbdb 100%);
+            border-radius: 10px;
+            text-align: center;
+            border: 2px dashed var(--secondary);
+        }
+        .complete-btn {
+            background: var(--success);
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            font-size: 1.05em;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.3s;
+            box-shadow: 0 3px 8px rgba(39, 174, 96, 0.3);
+        }
+        .complete-btn:hover {
+            background: #229954;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 12px rgba(39, 174, 96, 0.4);
+        }
+        .complete-btn:disabled {
+            background: var(--locked);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        .complete-msg {
+            display: none;
+            margin-top: 15px;
+            color: var(--success);
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+
+        /* סיכום נתונים */
+        .summary-box {
+            background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+            padding: 25px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border: 2px solid var(--success);
+        }
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(0,0,0,0.08);
+            font-size: 1.05em;
+        }
+        .summary-row:last-child { border-bottom: none; }
+        .summary-label { font-weight: bold; color: var(--primary); }
+        .summary-value { color: var(--accent); font-weight: bold; }
+
+        /* פרוגרס בר */
+        .progress-bar {
+            background: #ddd;
+            height: 8px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            background: linear-gradient(90deg, var(--secondary), var(--success));
+            height: 100%;
+            width: 0%;
+            transition: width 0.5s;
+        }
+
+        ul { line-height: 1.8; }
+
+        .single-input {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 20px 0;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        .single-input label { font-weight: bold; color: var(--primary); }
+        .single-input input {
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            text-align: center;
+            font-size: 1em;
+            width: 150px;
+        }
+        .single-input input:focus {
+            outline: none;
+            border-color: var(--secondary);
+        }
+
+        /* ===== tab-summary (טקסט חופשי לכל לשונית) ===== */
+        .tab-summary {
+            background: #f0f4f8;
+            border: 2px dashed var(--secondary);
+            border-radius: 10px;
+            padding: 18px 20px;
+            margin: 25px 0 15px 0;
+        }
+        .tab-summary > label {
+            display: block;
+            font-weight: bold;
+            color: var(--primary);
+            margin-bottom: 10px;
+            font-size: 1.05em;
+        }
+        .tab-summary textarea {
+            width: 100%;
+            min-height: 110px;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 1em;
+            line-height: 1.6;
+            resize: vertical;
+            box-sizing: border-box;
+            direction: rtl;
+            background: white;
+        }
+        .tab-summary textarea:focus {
+            outline: none;
+            border-color: var(--secondary);
+            box-shadow: 0 0 0 3px rgba(41, 128, 185, 0.15);
+        }
+
+        /* ===== פרטי תלמיד וכפתור הורדה ===== */
+        .student-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 14px;
+            margin: 18px 0;
+        }
+        .student-info > div { display: flex; flex-direction: column; }
+        .student-info label {
+            font-weight: bold;
+            color: var(--primary);
+            margin-bottom: 4px;
+        }
+        .student-info input {
+            padding: 9px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 1em;
+            background: white;
+        }
+        .student-info input:focus {
+            outline: none;
+            border-color: var(--secondary);
+        }
+
+        /* ===== גלריית תמונות (תמונות מערכת + גרפים) ===== */
+        .image-thumb {
+            position: relative;
+            display: inline-block;
+            background: white;
+            padding: 6px;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+        .image-thumb img {
+            max-width: 180px;
+            max-height: 140px;
+            border-radius: 4px;
+            display: block;
+        }
+        .image-thumb .remove-btn {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: var(--error);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 26px;
+            height: 26px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 1em;
+            line-height: 1;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        }
+        .image-thumb .thumb-caption {
+            font-size: 0.8em;
+            color: #555;
+            text-align: center;
+            max-width: 180px;
+            margin-top: 4px;
+            word-break: break-word;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>תדריך מעבדה: כא"מ ומתח הדקים של סוללה</h1>
+    <p style="text-align:center; color:#666; font-style:italic;">מטרת הניסוי: מציאת הכוח האלקטרו-מניע (כא"מ) וההתנגדות הפנימית של סוללה באמצעות מדידת מתח ההדקים כפונקציה של הזרם</p>
+
+    <div class="progress-bar">
+        <div class="progress-fill" id="progressFill"></div>
+    </div>
+
+    <div class="tabs">
+        <div class="tab active" data-tab="tab1" onclick="openTab(event, 'tab1')">1. רקע תיאורטי</div>
+        <div class="tab" data-tab="tab2" onclick="openTab(event, 'tab2')">2. המעגל והציוד</div>
+        <div class="tab" data-tab="tab3" onclick="openTab(event, 'tab3')">3. ביצוע המדידות</div>
+        <div class="tab" data-tab="tab4" onclick="openTab(event, 'tab4')">4. ניתוח גרפי</div>
+        <div class="tab" data-tab="tab5" onclick="openTab(event, 'tab5')">5. חישוב ε ו-r</div>
+        <div class="tab" data-tab="tab6" onclick="openTab(event, 'tab6')">6. שגיאות</div>
+        <div class="tab" data-tab="tab7" onclick="openTab(event, 'tab7')">7. מסקנות</div>
+    </div>
+
+    <!-- ===== לשונית 1: רקע תיאורטי ===== -->
+    <div id="tab1" class="content active">
+        <div class="theory">
+            <h2>שלב 1: רקע תיאורטי - כא"מ, מתח הדקים והתנגדות פנימית</h2>
+            <p>סוללה אינה "מקור מתח אידיאלי". בתוכה מתרחשת תגובה כימית שמספקת אנרגיה לכל מטען היחידה שעובר דרכה - גודל זה נקרא <strong>הכוח האלקטרו-מניע (כא"מ)</strong> ומסומן באות \(\varepsilon\). אולם בתוך הסוללה עצמה קיימת גם <strong>התנגדות פנימית</strong> \(r\), שעליה "מתבזבז" חלק מהמתח ברגע שזורם זרם.</p>
+            <p>מתוצאה זו, המתח הנמדד בין שני <strong>הדקי</strong> הסוללה (מתח ההדקים, \(V\)) קטן מהכא"מ ככל שהזרם הנשאב מהסוללה גדול יותר.</p>
+        </div>
+
+        <div class="formula">
+            <strong>משוואת מתח ההדקים:</strong> \(\quad V = \varepsilon - I \cdot r\)
+            <br>
+            <span style="font-size:0.9em; color:#666;">
+                \(\varepsilon\) - הכא"מ (וולט); \(r\) - ההתנגדות הפנימית (אום); \(I\) - הזרם הזורם בסוללה (אמפר)
+            </span>
+        </div>
+
+        <div class="important">
+            <strong>📌 עקרונות מנחים:</strong>
+            <ul>
+                <li><strong>הכא"מ \(\varepsilon\)</strong>: גודל אופייני של הסוללה - האנרגיה שהיא משדרת לכל יחידת מטען. נמדד ביחידות וולט.</li>
+                <li><strong>ההתנגדות הפנימית \(r\)</strong>: התנגדות "אבודה" בתוך הסוללה עצמה (בנוזל האלקטרוליטי, באלקטרודות). היא קטנה בסוללה חדשה, וגדלה ככל שהסוללה מתבלה.</li>
+                <li><strong>מתח ההדקים \(V\)</strong>: המתח בפועל שניתן למדוד בקצוות הסוללה כשהיא מחוברת למעגל. \(V\) <em>תלוי</em> בזרם, ולכן אינו תכונה קבועה של הסוללה לבדה אלא של המעגל כולו.</li>
+                <li><strong>שני מקרים מיוחדים:</strong>
+                    <ul>
+                        <li><em>מעגל פתוח</em> (\(I = 0\)): אין נפילת מתח על ההתנגדות הפנימית, ולכן \(V = \varepsilon\). זה הערך הגבוה ביותר ש-\(V\) יכול לקבל.</li>
+                        <li><em>קצר</em> (\(V = 0\)): כל הכא"מ "אובד" על \(r\), והזרם המקסימלי הוא \(I_{\text{קצר}} = \varepsilon / r\).</li>
+                    </ul>
+                </li>
+                <li><strong>הקשר ליניארי:</strong> אם נשרטט גרף של \(V\) כפונקציה של \(I\), נקבל קו ישר עם <strong>שיפוע שלילי</strong> שגודלו \(r\), וחיתוך עם ציר \(V\) שערכו \(\varepsilon\).</li>
+            </ul>
+        </div>
+
+        <div class="example">
+            <strong>אנלוגיה אינטואיטיבית:</strong> דמיין משאבת מים שמספקת לחץ קבוע (\(\varepsilon\)) בכניסה. אך בתוך גוף המשאבה עצמה יש "חיכוך פנימי" (\(r\)). ככל שזרימת המים גדולה יותר (\(I\) גדול), כך יותר לחץ "מתבזבז" על החיכוך הפנימי, והלחץ שמגיע ליציאה (\(V\)) קטן.</p>
+        </div>
+
+        <!-- שאלות -->
+        <div class="quiz">
+            <p class="question">שאלה 1: בניסוי זה משנים את ההתנגדות בעזרת ראוסטט וכך משנים את הזרם, ומודדים את מתח ההדקים. מי מבין השניים הוא המשתנה הבלתי-תלוי ומי התלוי?</p>
+            <div class="option" onclick="checkAns(this, false, 'לא נכון. הוולטמטר רק קורא את התוצאה - איזה מכשיר משמש לקריאה לא קובע מה תלוי במה. הקביעה היא פיזיקלית ולא טכנית.', 'q1_1')">המתח הוא הבלתי-תלוי כי הוא נקרא על-ידי הוולטמטר.</div>
+            <div class="option" onclick="checkAns(this, true, 'נכון! אנחנו שולטים בזרם דרך הראוסטט (משתנה בלתי-תלוי), ומתח ההדקים נקבע אוטומטית על-ידי המשוואה \\(V = \\varepsilon - I r\\) (משתנה תלוי).', 'q1_1')">הזרם הוא הבלתי-תלוי; מתח ההדקים הוא התלוי.</div>
+            <div class="option" onclick="checkAns(this, false, 'לא. שני הגדלים אינם בלתי-תלויים בו-זמנית - הם קשורים זה לזה דרך משוואת הסוללה.', 'q1_1')">שניהם בלתי-תלויים זה בזה.</div>
+            <div class="feedback"></div>
+        </div>
+
+        <div class="quiz">
+            <p class="question">שאלה 2: מתי בדיוק מתח ההדקים שנמדוד יהיה שווה לכא"מ של הסוללה?</p>
+            <div class="option" onclick="checkAns(this, false, 'לא נכון. במצב קצר \\(V = 0\\) (כל הכא&quot;מ אובד על \\(r\\)) - בדיוק ההפך מהמצב שבו \\(V = \\varepsilon\\).', 'q1_2')">כאשר יש קצר במעגל (\(V = 0\)).</div>
+            <div class="option" onclick="checkAns(this, true, 'מצוין! במעגל פתוח \\(I = 0\\), ולכן \\(V = \\varepsilon - 0 \\cdot r = \\varepsilon\\). זוהי בדיוק הסיבה שאם נחבר וולטמטר באיכות גבוהה ישירות לקצוות סוללה לא טעונה - נקבל קריאה הקרובה מאוד לכא&quot;מ.', 'q1_2')">כאשר המעגל פתוח (\(I=0\)).</div>
+            <div class="option" onclick="checkAns(this, false, 'לא. ראוסטט במצב כלשהו לא מבטיח \\(I = 0\\), ולכן יש נפילת מתח על \\(r\\).', 'q1_2')">תמיד, ללא תלות בערך הראוסטט.</div>
+            <div class="feedback"></div>
+        </div>
+
+        <div class="quiz">
+            <p class="question">שאלה 3: בסוללה ישנה (\(r\) גדול), כיצד יראה הגרף של \(V\) כפונקציה של \(I\) לעומת סוללה חדשה (\(r\) קטן) עם אותו כא"מ?</p>
+            <div class="option" onclick="checkAns(this, false, 'לא. החיתוך עם ציר \\(V\\) הוא הכא&quot;מ - בשתי הסוללות זהה. מה שמשתנה הוא השיפוע.', 'q1_3')">הגרף יתחיל מנקודת חיתוך נמוכה יותר אך באותו שיפוע.</div>
+            <div class="option" onclick="checkAns(this, true, 'מדויק! החיתוך \\(\\varepsilon\\) זהה, אך השיפוע \\(-r\\) תלול יותר (בערך מוחלט). הגרף &quot;צונח&quot; מהר יותר. זוהי גם הסיבה ש-AA ישנה לא יכולה להחזיק זרם גבוה בלי שמתח ההדקים יקרוס.', 'q1_3')">אותו חיתוך עם ציר \(V\), אך שיפוע תלול יותר.</div>
+            <div class="option" onclick="checkAns(this, false, 'לא נכון. שתי הסוללות נותנות מתח דומה במעגל פתוח; הסוללה הישנה לא מסוגלת להחזיק את המתח כשנוצר זרם.', 'q1_3')">הסוללה הישנה תיתן מתח קבוע יותר בכל הזרמים.</div>
+            <div class="feedback"></div>
+        </div>
+
+        <!-- כפתור סיום -->
+        <div class="tab-summary">
+            <label for="summary1">📝 סיכום הלשונית / ניתוח ממצאים (טקסט חופשי):</label>
+            <textarea id="summary1" placeholder="רשום כאן את הנוסחאות החשובות, ההגדרות והרעיונות המרכזיים שהבנת מהרקע התיאורטי."></textarea>
+        </div>
+
+        <div class="complete-section">
+            <p>לאחר קריאת הרקע ומענה על השאלות, רשום בדו"ח את הנוסחה \(V = \varepsilon - Ir\) ואת ההגדרות של \(\varepsilon\) ו-\(r\).</p>
+            <button class="complete-btn" id="btn1" onclick="completeStage(1)">✓ סיימתי, הבנתי ורשמתי בדו"ח</button>
+            <div class="complete-msg" id="msg1">השלב הושלם בהצלחה! ניתן לעבור לשלב הבא 🎉</div>
+        </div>
+    </div>
+
+    <!-- ===== לשונית 2: המעגל והציוד ===== -->
+    <div id="tab2" class="content">
+        <div class="theory">
+            <h2>שלב 2: הכרת המעגל והציוד</h2>
+            <p>המעגל פשוט יחסית: סוללה, נגד משתנה (ראוסטט) לשליטה בזרם, אמפרמטר בטור, ווולטמטר במקביל לקצוות הסוללה.</p>
+        </div>
+
+        <div class="sketch-container">
+            <h3>תרשים המעגל</h3>
+            <svg viewBox="0 0 700 380" xmlns="http://www.w3.org/2000/svg">
+                <!-- ========================
+                     תרשים המעגל - מבנה:
+                     [סוללה (ε,r)] → [מפסק] → [ראוסטט] → [אמפרמטר A] → חזרה לסוללה
+                     הוולטמטר V מחובר במקביל ישירות להדקי הסוללה
+                     ======================== -->
+
+                <!-- סוללה (פינה שמאלית-תחתונה) -->
+                <g transform="translate(80, 280)">
+                    <line x1="-15" y1="-25" x2="15" y2="-25" stroke="#333" stroke-width="3"/>
+                    <line x1="-10" y1="-15" x2="10" y2="-15" stroke="#333" stroke-width="2"/>
+                    <line x1="-15" y1="-5" x2="15" y2="-5" stroke="#333" stroke-width="3"/>
+                    <line x1="-10" y1="5" x2="10" y2="5" stroke="#333" stroke-width="2"/>
+                    <text x="-35" y="-22" font-size="16" font-weight="bold" fill="var(--error)">+</text>
+                    <text x="-30" y="9" font-size="16" font-weight="bold" fill="#333">−</text>
+                    <text x="-50" y="35" font-size="13" fill="#333">סוללה (ε, r)</text>
+                </g>
+
+                <!-- ציון נקודות הדקי הסוללה -->
+                <circle cx="80" cy="255" r="3" fill="var(--success)"/>
+                <text x="95" y="260" font-size="11" fill="var(--success)" font-weight="bold">הדק חיובי</text>
+                <circle cx="80" cy="285" r="3" fill="var(--success)"/>
+                <text x="95" y="298" font-size="11" fill="var(--success)" font-weight="bold">הדק שלילי</text>
+
+                <!-- חוט: סוללה (הדק חיובי) -> שמאלה -> מעלה -> מפסק -->
+                <line x1="80" y1="255" x2="80" y2="80" stroke="#333" stroke-width="2"/>
+                <line x1="80" y1="80" x2="155" y2="80" stroke="#333" stroke-width="2"/>
+
+                <!-- מפסק -->
+                <g transform="translate(175, 80)">
+                    <circle cx="-10" cy="0" r="3" fill="#333"/>
+                    <line x1="-10" y1="0" x2="12" y2="-12" stroke="#333" stroke-width="2.5"/>
+                    <circle cx="15" cy="0" r="3" fill="#333"/>
+                    <text x="0" y="-22" font-size="11" fill="#333" text-anchor="middle" font-weight="bold">מפסק</text>
+                </g>
+
+                <!-- חוט: מפסק -> ראוסטט -->
+                <line x1="190" y1="80" x2="220" y2="80" stroke="#333" stroke-width="2"/>
+
+                <!-- נגד משתנה (ראוסטט) -->
+                <g transform="translate(260, 80)">
+                    <rect x="-40" y="-15" width="80" height="30" fill="#ffeaa7" stroke="#333" stroke-width="2"/>
+                    <line x1="-30" y1="-30" x2="30" y2="5" stroke="var(--error)" stroke-width="2.5"/>
+                    <polygon points="30,5 22,3 28,-4" fill="var(--error)"/>
+                    <text x="0" y="-25" font-size="12" fill="#333" text-anchor="middle" font-weight="bold">נגד משתנה</text>
+                </g>
+
+                <!-- חוט: ראוסטט -> אמפרמטר -->
+                <line x1="300" y1="80" x2="380" y2="80" stroke="#333" stroke-width="2"/>
+
+                <!-- אמפרמטר -->
+                <g transform="translate(410, 80)">
+                    <circle cx="0" cy="0" r="25" fill="#fff3cd" stroke="var(--accent)" stroke-width="2.5"/>
+                    <text x="0" y="6" font-size="20" font-weight="bold" fill="var(--accent)" text-anchor="middle">A</text>
+                    <text x="0" y="-38" font-size="12" fill="#333" text-anchor="middle" font-weight="bold">אמפרמטר</text>
+                    <text x="0" y="-52" font-size="10" fill="#666" text-anchor="middle">(בטור)</text>
+                </g>
+
+                <!-- חוט חזור: אמפרמטר -> ימינה -> מטה -> שמאלה -> סוללה (הדק שלילי) -->
+                <line x1="435" y1="80" x2="630" y2="80" stroke="#333" stroke-width="2"/>
+                <line x1="630" y1="80" x2="630" y2="320" stroke="#333" stroke-width="2"/>
+                <line x1="630" y1="320" x2="80" y2="320" stroke="#333" stroke-width="2"/>
+                <line x1="80" y1="320" x2="80" y2="305" stroke="#333" stroke-width="2"/>
+
+                <!-- ========== וולטמטר במקביל לסוללה ========== -->
+                <!-- חוט מהדק חיובי של הסוללה -> ימינה -> מטה -> וולטמטר -->
+                <line x1="80" y1="250" x2="80" y2="200" stroke="var(--success)" stroke-width="2"/>
+                <line x1="80" y1="200" x2="170" y2="200" stroke="var(--success)" stroke-width="2"/>
+                <line x1="170" y1="200" x2="170" y2="220" stroke="var(--success)" stroke-width="2"/>
+
+                <!-- וולטמטר -->
+                <g transform="translate(195, 245)">
+                    <circle cx="0" cy="0" r="25" fill="#d4edda" stroke="var(--success)" stroke-width="2.5"/>
+                    <text x="0" y="6" font-size="20" font-weight="bold" fill="var(--success)" text-anchor="middle">V</text>
+                    <text x="0" y="40" font-size="12" fill="#333" text-anchor="middle" font-weight="bold">וולטמטר</text>
+                    <text x="0" y="55" font-size="10" fill="#666" text-anchor="middle">(במקביל להדקי הסוללה)</text>
+                </g>
+
+                <!-- חוט מהדק שלילי -> וולטמטר -->
+                <line x1="80" y1="290" x2="115" y2="290" stroke="var(--success)" stroke-width="2"/>
+                <line x1="115" y1="290" x2="115" y2="270" stroke="var(--success)" stroke-width="2"/>
+                <line x1="115" y1="270" x2="170" y2="270" stroke="var(--success)" stroke-width="2"/>
+
+                <!-- כותרת תחתונה -->
+                <text x="350" y="365" font-size="13" fill="#333" text-anchor="middle" font-style="italic">האמפרמטר בטור במעגל הראשי; הוולטמטר (ירוק) מחובר ישירות להדקי הסוללה</text>
+            </svg>
+        </div>
+
+        <div class="important">
+            <strong>📌 רשימת הציוד:</strong>
+            <ul>
+                <li><strong>סוללה</strong> (לדוגמה AA או 4.5V) - הרכיב הנחקר. עדיף משומשת מעט, כדי שההתנגדות הפנימית תהיה נמדדת בקלות.</li>
+                <li><strong>נגד משתנה (ראוסטט):</strong> לשליטה בזרם הזורם במעגל. בחר ראוסטט עם תחום מתאים - לא נמוך מדי כדי לא לקבל קצר, ולא גבוה מדי כדי לקבל זרם נמדד.</li>
+                <li><strong>מפסק (מתג):</strong> לסגירה ופתיחה של המעגל בין מדידות.</li>
+                <li><strong>אמפרמטר</strong> (תחום מתאים, למשל ±2A או ±200mA) - לחיבור בטור.</li>
+                <li><strong>וולטמטר</strong> (תחום ±2V או ±20V) - לחיבור במקביל ישירות לקצוות הסוללה.</li>
+                <li><strong>תילים, תנינים</strong> ומחבר MultiLogPRO/TriLink למחשב (במידה ועובדים עם חיישנים דיגיטליים).</li>
+            </ul>
+        </div>
+
+        <div class="example">
+            <strong>עקרונות חיבור החיישנים:</strong>
+            <ul>
+                <li><strong>אמפרמטר בטור:</strong> כל הזרם הזורם במעגל זורם דרכו, ולכן הוא מודד את הזרם המדויק. התנגדותו הפנימית נמוכה מאוד כדי לא להפריע למעגל.</li>
+                <li><strong>וולטמטר במקביל לסוללה:</strong> שני קצותיו מחוברים ישירות להדקי הסוללה, ולכן הוא מודד את הפרש הפוטנציאלים בין שני הדקיה - בדיוק את \(V\) שאנו מחפשים. התנגדותו הפנימית גבוהה מאוד כדי שלא ימשוך זרם משמעותי.</li>
+                <li><strong>קוטביות נכונה:</strong> התיל האדום של החיישן הוא הקוטב החיובי, השחור הוא השלילי. חיבור הפוך יביא לקריאה שלילית.</li>
+            </ul>
+        </div>
+
+        <div class="warning">
+            <strong>⚠️ זהירות לפני ההפעלה:</strong>
+            <ul>
+                <li><strong>התחל תמיד עם הראוסטט במצב של התנגדות מירבית</strong> (זרם מינימלי) - הגנה על המעגל מזרם פתאומי גבוה ומחימום הסוללה.</li>
+                <li>אל תיצור קצר ישיר על הסוללה (חיבור הדק לחיוב ישירות לשלילי) - הזרם יהיה גבוה מאוד, הסוללה תתחמם ועלולה להינזק.</li>
+                <li>בין מדידה למדידה <strong>פתח את המפסק</strong> כדי למנוע התחממות הסוללה ושינוי \(r\).</li>
+                <li>אל תמדוד זרמים מעל טווח האמפרמטר.</li>
+            </ul>
+        </div>
+
+        <!-- שאלות -->
+        <div class="quiz">
+            <p class="question">שאלה 1: מדוע הוולטמטר מחובר במקביל לסוללה ולא בטור?</p>
+            <div class="option" onclick="checkAns(this, true, 'נכון! מתח הוא הפרש פוטנציאלים בין שתי נקודות. כדי למדוד את ההפרש בין הדקי הסוללה - יש לחבר את הוולטמטר ישירות בין שתי הנקודות הללו, כלומר במקביל. בנוסף, התנגדות הוולטמטר גבוהה מאוד, כך שהוא לא מושך זרם משמעותי.', 'q2_1')">כדי למדוד את הפרש הפוטנציאלים בין ההדקים.</div>
+            <div class="option" onclick="checkAns(this, false, 'טעות. דווקא האמפרמטר נמצא בטור.', 'q2_1')">חיבור בטור הוא הנכון - אנחנו מחברים במקביל בטעות.</div>
+            <div class="option" onclick="checkAns(this, false, 'לא. סוג הסוללה לא קובע איך לחבר את החיישנים.', 'q2_1')">בגלל סוג הסוללה.</div>
+            <div class="feedback"></div>
+        </div>
+
+        <div class="quiz">
+            <p class="question">שאלה 2: מה תפקידו של הראוסטט בניסוי?</p>
+            <div class="option" onclick="checkAns(this, false, 'לא נכון. החיישנים פועלים באופן עצמאי ואינם תלויים בנגד המשתנה.', 'q2_2')">להפעיל את החיישנים.</div>
+            <div class="option" onclick="checkAns(this, true, 'מצוין! על-ידי הזזת הגררה של הראוסטט אנו משנים את ההתנגדות החיצונית במעגל, וכך משנים את הזרם הנשאב מהסוללה. כל ערך זרם נותן ערך אחר של מתח הדקים, ובכך אנו אוספים זוגות \\((I, V)\\) לבניית הגרף.', 'q2_2')">לשלוט בזרם הזורם במעגל.</div>
+            <div class="option" onclick="checkAns(this, false, 'לא. הראוסטט אינו מודד דבר - הוא רק נגד שניתן לשנות את ערכו.', 'q2_2')">למדוד את הזרם המדויק.</div>
+            <div class="feedback"></div>
+        </div>
+
+        <div class="quiz">
+            <p class="question">שאלה 3: מדוע מומלץ לפתוח את המפסק בין מדידה למדידה?</p>
+            <div class="option" onclick="checkAns(this, true, 'נכון! זרם מתמשך גורם לחימום הסוללה (אפקט ג\'אול בתוך \\(r\\)). חימום משנה את ההתנגדות הפנימית - וכך הניסוי מודד &quot;סוללה משתנה&quot; במקום סוללה קבועה. פתיחת המפסק נותנת לסוללה זמן להתאזן.', 'q2_3')">כדי שהסוללה לא תתחמם ותשנה את \(r\).</div>
+            <div class="option" onclick="checkAns(this, false, 'לא נכון. החיישנים לא צריכים זמן בין מדידות; הם מודדים תוך שניות.', 'q2_3')">כדי לתת לחיישנים זמן להתאזן.</div>
+            <div class="option" onclick="checkAns(this, false, 'לא. אם המפסק סגור, הזרם נשאר ולא משתנה דרסטית רק בגלל זמן.', 'q2_3')">כי בלי לפתוח את המפסק הזרם משתנה אוטומטית.</div>
+            <div class="feedback"></div>
+        </div>
+
+        <!-- ===== צילום מערכת הניסוי (חלק מהדו"ח) ===== -->
+        <div class="complete-section" style="border-color: var(--accent); background: linear-gradient(135deg, #fff5e6 0%, #ffe0b3 100%); margin-top: 25px;">
+            <h3 style="margin-top:0; color:var(--accent);">📷 צילום מערכת הניסוי</h3>
+            <p>ניתן לצלם את מערכת הניסוי שהקמת (הסוללה, האמפרמטר, הוולטמטר, הראוסטט, החיווט) ולצרף את התמונות כאן. התמונות יופיעו בדו"ח תחת חלק תכנון הציוד.</p>
+            <input type="file" id="setupUpload" accept="image/*" multiple onchange="handleSetupUpload(event)"
+                   style="display:inline-block; padding:10px; background:white; border:2px dashed var(--accent); border-radius:8px; cursor:pointer; max-width:100%;">
+            <div id="setupGallery" style="display:flex; flex-wrap:wrap; gap:12px; justify-content:center; margin-top:18px;"></div>
+        </div>
+
+        <div class="tab-summary">
+            <label for="summary2">📝 סיכום הלשונית / ניתוח ממצאים (טקסט חופשי):</label>
+            <textarea id="summary2" placeholder="תיאור המעגל שהקמת, הסבר על תפקיד כל רכיב, ומיקום מכשירי המדידה."></textarea>
+        </div>
+
+        <div class="complete-section">
+            <p>סרטט בדו"ח את תרשים המעגל וזהה את הציוד.</p>
+            <button class="complete-btn" id="btn2" onclick="completeStage(2)">✓ סיימתי, הבנתי ורשמתי בדו"ח</button>
+            <div class="complete-msg" id="msg2">השלב הושלם בהצלחה! ניתן לעבור לשלב הבא 🎉</div>
+        </div>
+    </div>
+
+    <!-- ===== לשונית 3: ביצוע המדידות ===== -->
+    <div id="tab3" class="content">
+        <div class="theory">
+            <h2>שלב 3: ביצוע המדידות - איסוף זוגות \(I, V\)</h2>
+            <p>בשלב זה נמדוד את מתח ההדקים בערכי זרם שונים. נשנה את הזרם בעזרת הראוסטט, ובכל ערך נרשום את הזרם (\(I\)) ואת מתח ההדקים (\(V\)). מהנתונים נבנה גרף ונחלץ את \(\varepsilon\) ו-\(r\).</p>
+        </div>
+
+        <div class="important">
+            <strong>📌 הוראות ביצוע:</strong>
+            <ul>
+                <li>וודא שהמפסק פתוח, ושהראוסטט במצב של התנגדות מירבית.</li>
+                <li>סגור את המפסק וקרא את \(I\) ו-\(V\) - זוהי המדידה הראשונה (זרם נמוך ביותר).</li>
+                <li>פתח את המפסק, הזז את גררת הראוסטט מעט (כדי להקטין את ההתנגדות החיצונית), וסגור שוב את המפסק - זוהי המדידה השנייה.</li>
+                <li>חזור על התהליך 7 פעמים, כשבכל פעם הזרם גדל מעט יותר. שאף לפיזור רחב של ערכי \(I\) - זה ייתן רגרסיה מדויקת יותר.</li>
+                <li>שים לב לא לחרוג מתחום האמפרמטר ולא לפעול בזרמים גבוהים זמן ממושך (חימום הסוללה).</li>
+                <li>הזן את הזוגות \((I, V)\) בטבלה למטה. עמודת \(R = V/I\) (ההתנגדות החיצונית הכוללת לפי החיישנים) תחושב אוטומטית - והיא <strong>אמורה לרדת</strong> ככל שהזרם גדל.</li>
+            </ul>
+        </div>
+
+        <div class="warning">
+            <strong>⚠️ נקודה חשובה לדו"ח:</strong> שים לב שעמודת \(V/I\) <em>אינה</em> ההתנגדות הפנימית של הסוללה! היא ההתנגדות החיצונית הכוללת בכל מדידה (ראוסטט + מוליכים). כדי למצוא את \(r\) - יש להשתמש בשיפוע גרף \(V(I)\), כמו שנראה בלשונית הבאה.
+        </div>
+
+        <h3 style="text-align:center;">טבלת מדידות</h3>
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>מדידה #</th>
+                    <th>זרם I (אמפר)</th>
+                    <th>מתח הדקים V (וולט)</th>
+                    <th>R<sub>חיצונית</sub> = V/I (אום)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>1 (זרם נמוך)</td>
+                    <td><input type="number" step="0.001" id="I3_1" placeholder="0.05" oninput="checkVoltageData()"></td>
+                    <td><input type="number" step="0.001" id="V3_1" placeholder="1.475" oninput="checkVoltageData()"></td>
+                    <td class="computed" id="R3_1">-</td>
+                </tr>
+                <tr>
+                    <td>2</td>
+                    <td><input type="number" step="0.001" id="I3_2" placeholder="0.10" oninput="checkVoltageData()"></td>
+                    <td><input type="number" step="0.001" id="V3_2" placeholder="1.450" oninput="checkVoltageData()"></td>
+                    <td class="computed" id="R3_2">-</td>
+                </tr>
+                <tr>
+                    <td>3</td>
+                    <td><input type="number" step="0.001" id="I3_3" placeholder="0.20" oninput="checkVoltageData()"></td>
+                    <td><input type="number" step="0.001" id="V3_3" placeholder="1.400" oninput="checkVoltageData()"></td>
+                    <td class="computed" id="R3_3">-</td>
+                </tr>
+                <tr>
+                    <td>4</td>
+                    <td><input type="number" step="0.001" id="I3_4" placeholder="0.30" oninput="checkVoltageData()"></td>
+                    <td><input type="number" step="0.001" id="V3_4" placeholder="1.350" oninput="checkVoltageData()"></td>
+                    <td class="computed" id="R3_4">-</td>
+                </tr>
+                <tr>
+                    <td>5</td>
+                    <td><input type="number" step="0.001" id="I3_5" placeholder="0.40" oninput="checkVoltageData()"></td>
+                    <td><input type="number" step="0.001" id="V3_5" placeholder="1.300" oninput="checkVoltageData()"></td>
+                    <td class="computed" id="R3_5">-</td>
+                </tr>
+                <tr>
+                    <td>6</td>
+                    <td><input type="number" step="0.001" id="I3_6" placeholder="0.50" oninput="checkVoltageData()"></td>
+                    <td><input type="number" step="0.001" id="V3_6" placeholder="1.250" oninput="checkVoltageData()"></td>
+                    <td class="computed" id="R3_6">-</td>
+                </tr>
+                <tr>
+                    <td>7 (זרם גבוה)</td>
+                    <td><input type="number" step="0.001" id="I3_7" placeholder="0.60" oninput="checkVoltageData()"></td>
+                    <td><input type="number" step="0.001" id="V3_7" placeholder="1.200" oninput="checkVoltageData()"></td>
+                    <td class="computed" id="R3_7">-</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div id="voltagePreview" style="display:none;" class="summary-box">
+            <h3 style="margin-top:0;">📊 ניתוח מקדים של הנתונים</h3>
+            <div id="voltagePreviewContent"></div>
+        </div>
+
+        <div class="example">
+            <strong>הערה לדו"ח:</strong> בנה גרף של \(V\) (ציר Y) כפונקציה של \(I\) (ציר X) ב-Excel. אם הסוללה מתנהגת כצפוי - הגרף יהיה ישר עם שיפוע שלילי. <strong>השיפוע = \(-r\)</strong>, <strong>החיתוך עם ציר V = \(\varepsilon\)</strong>.
+        </div>
+
+        <!-- שאלות -->
+        <div class="quiz">
+            <p class="question">שאלה 1: מדוע נרצה לבצע מספר רב של מדידות (7 ולא רק 2-3)?</p>
+            <div class="option" onclick="checkAns(this, true, 'מצוין! ריבוי מדידות עוזר בשני אופנים: (א) מקטין את השפעת השגיאות האקראיות (ממוצוע סטטיסטי). (ב) מאפשר לראות אם הקשר באמת ליניארי או שיש סטיות מהמודל. עם 2 נקודות אפשר תמיד להעביר ישר - זה לא בודק כלום.', 'q3_1')">להקטין שגיאות אקראיות ולאפשר רגרסיה מהימנה.</div>
+            <div class="option" onclick="checkAns(this, false, 'לא נכון. מספר המדידות לא קשור להתרוקנות הסוללה.', 'q3_1')">כדי לבדוק מתי הסוללה מתרוקנת.</div>
+            <div class="option" onclick="checkAns(this, false, 'לא. מספר המדידות אינו משפיע על דיוק האמפרמטר עצמו.', 'q3_1')">כי האמפרמטר מדויק רק בערכים גבוהים.</div>
+            <div class="feedback"></div>
+        </div>
+
+        <div class="quiz">
+            <p class="question">שאלה 2: מה צפוי לקרות לערכי \(R = V/I\) בעמודה הימנית בטבלה ככל שהזרם גדל?</p>
+            <div class="option" onclick="checkAns(this, false, 'לא נכון. זרם גדול מתקבל דווקא כשההתנגדות החיצונית קטנה (לפי \\(I = \\varepsilon/(R + r)\\)).', 'q3_2')">\(R\) צריך לגדול עם הזרם.</div>
+            <div class="option" onclick="checkAns(this, true, 'נכון! זרם גדל ⇐ הראוסטט הוקטן ⇐ ההתנגדות החיצונית קטנה. עמודה זו לא מודדת את \\(r\\) הפנימית - היא מתעדת את ההתנגדות החיצונית בכל מדידה. \\(r\\) עצמה מחושבת מהשיפוע, לא מהיחס \\(V/I\\).', 'q3_2')">\(R\) יקטן עם עליית הזרם.</div>
+            <div class="option" onclick="checkAns(this, false, 'לא נכון. \\(V/I\\) משתנה בבירור - היא ההתנגדות החיצונית, שאנחנו משנים אותה בעזרת הראוסטט.', 'q3_2')">\(R\) צריך להישאר קבוע - זוהי ההתנגדות הפנימית.</div>
+            <div class="feedback"></div>
+        </div>
+
+        <div class="quiz">
+            <p class="question">שאלה 3: בכל המדידות, מתח ההדקים \(V\) צפוי להיות:</p>
+            <div class="option" onclick="checkAns(this, true, 'מצוין! במעגל פתוח \\(V = \\varepsilon\\). ברגע שזורם זרם, \\(V = \\varepsilon - Ir\\) שמראה ש-\\(V\\) קטן יותר. ככל שהזרם גדול - \\(V\\) קטן יותר.', 'q3_3')">קטן או שווה לכא"מ \(\varepsilon\).</div>
+            <div class="option" onclick="checkAns(this, false, 'לא. מתח ההדקים לא יכול לעלות מעל \\(\\varepsilon\\) - זה היה מצריך אנרגיה מהאוויר.', 'q3_3')">גדול מהכא"מ כשהזרם גדול.</div>
+            <div class="option" onclick="checkAns(this, false, 'לא. מתח ההדקים תלוי בזרם - לא קבוע.', 'q3_3')">קבוע ושווה תמיד לכא"מ.</div>
+            <div class="feedback"></div>
+        </div>
+
+        <div class="tab-summary">
+            <label for="summary3">📝 סיכום הלשונית / ניתוח ממצאים (טקסט חופשי):</label>
+            <textarea id="summary3" placeholder="תיאור תהליך איסוף הנתונים, קשיים או הפתעות במהלך המדידה."></textarea>
+        </div>
+
+        <div class="complete-section">
+            <p id="voltageInstr">יש למלא את כל 7 שורות הטבלה לפני המעבר לשלב הבא.</p>
+            <button class="complete-btn" id="btn3" onclick="completeStage(3)">✓ סיימתי, הבנתי ורשמתי בדו"ח</button>
+            <div class="complete-msg" id="msg3">הנתונים נאספו בהצלחה! ניתן לעבור לניתוח גרפי 🎉</div>
+        </div>
+    </div>
+
+    <!-- ===== לשונית 4: ניתוח גרפי וליניאריזציה ===== -->
+    <div id="tab4" class="content">
+        <div class="theory">
+            <h2>שלב 4: ניתוח גרפי - דיאגרמת פיזור וישר רגרסיה</h2>
+            <p>המשוואה \(V = \varepsilon - I \cdot r\) היא מהצורה \(y = a \cdot x + b\) - משוואת ישר. לכן גרף \(V\) מול \(I\) צפוי להיות קו ישר. השיפוע והחיתוך נותנים לנו את ההתנגדות הפנימית והכא"מ בהתאמה.</p>
+        </div>
+
+        <div class="formula">
+            \(V = \underbrace{(-r)}_{\text{שיפוע}} \cdot I + \underbrace{\varepsilon}_{\text{חיתוך עם ציר V}}\)
+            <br>
+            <span style="font-size:0.9em; color:#666;">
+                שיפוע שלילי - מאחר שמתח ההדקים יורד ככל שהזרם גדל
+            </span>
+        </div>
+
+        <div class="important">
+            <strong>📌 כללים כלליים לבניית הגרף וניתוחו (תקפים לנייר מילימטרי ול-Excel כאחד):</strong>
+            <ul>
+                <li><strong>קנה מידה אחיד וקבוע בכל ציר:</strong> מרווחים שווים בין הערכים על הציר. אסור להעתיק לציר את ערכי המדידה כמות שהם (זה מעוות את הגרף ואת השיפוע). ב-Excel - יש לוודא שצירי הגרף הם <em>ליניאריים</em> (לא לוגריתמיים).</li>
+                <li><strong>הגרף צריך להיות גדול וברור:</strong> בנייר - לתפוס לפחות 75% משטח הדף. ב-Excel - להגדיל את הגרף עד שהוא תופס חלק משמעותי מהמסך, כך שהפיזור והקו ייראו ברור.</li>
+                <li><strong>נקודות חריגות:</strong> אם נקודה אחת רחוקה מאוד מקו המגמה של שאר הנקודות, אין לכלול אותה בחישוב הרגרסיה (אך יש להציג אותה על הגרף ולציין זאת בדיון). <em>אסור</em> "לעקם" את הקו כדי שיעבור דרכה.</li>
+                <li><strong>ישר הרגרסיה:</strong> ישר שעובר ב"לב" הנקודות, באופן שמספר הנקודות שמעליו ומתחתיו דומה. אין חובה שיעבור דרך נקודה כלשהי. ב-Excel - השתמש בפונקציית "Trendline" ובחר Linear.</li>
+                <li><strong>חילוץ השיפוע והחיתוך:</strong> בנייר מילימטרי - בחר שתי נקודות <em>על הקו</em> (לא נקודות מדידה!) במרחק רב, וחשב \(\Delta V / \Delta I\). ב-Excel - הצג את משוואת הקו על הגרף (Display Equation on Chart), או השתמש בפונקציות SLOPE ו-INTERCEPT.</li>
+                <li><strong>שיפוע שלילי הוא תקין וצפוי:</strong> מתח ההדקים יורד עם עליית הזרם, לכן השיפוע יוצא עם סימן מינוס. הערך המוחלט שלו הוא ההתנגדות הפנימית \(r\).</li>
+            </ul>
+        </div>
+
+        <div class="example">
+            <strong>💻 הנחיות מהירות ל-Excel:</strong>
+            <ol>
+                <li>הזן את עמודת הזרם \(I\) (אמפר) בעמודה A ועמודת המתח \(V\) (וולט) בעמודה B.</li>
+                <li>בחר את שתי העמודות → לשונית Insert → Scatter (Scatter with only Markers - בלי קווים מחברים).</li>
+                <li>לחץ ימני על אחת הנקודות בגרף → Add Trendline → בחר Linear → סמן <em>Display Equation on chart</em> ו-<em>Display R-squared value</em>.</li>
+                <li>המשוואה שתופיע על הגרף תהיה מהצורה \(y = a x + b\). כאן: \(a\) = השיפוע (\(-r\)), \(b\) = החיתוך עם ציר V (\(\varepsilon\)).</li>
+                <li>לחילופין, בתאים נפרדים: <code dir="ltr">=SLOPE(B2:B8,A2:A8)</code> ו-<code dir="ltr">=INTERCEPT(B2:B8,A2:A8)</code> מחזירים את אותם ערכים.</li>
+                <li>הערך \(R^2\) (מקדם המתאם בריבוע) צריך להיות קרוב ל-1 (לפחות 0.95) להתאמה ליניארית טובה.</li>
+            </ol>
+        </div>
+
+        <div id="voltageDataDisplay" class="summary-box">
+            <h3 style="margin-top:0;">📊 הנתונים שאספת בשלב הקודם</h3>
+            <div id="voltageDataContent"></div>
+        </div>
+
+        <div class="sketch-container">
+            <h3>איור סכמטי של הגרף הצפוי</h3>
+            <svg viewBox="0 0 500 350" xmlns="http://www.w3.org/2000/svg">
+                <!-- צירים -->
+                <line x1="60" y1="290" x2="460" y2="290" stroke="#333" stroke-width="2" marker-end="url(#arrowEnd2)"/>
+                <line x1="60" y1="290" x2="60" y2="40" stroke="#333" stroke-width="2" marker-end="url(#arrowEnd2)"/>
+                <text x="465" y="295" font-size="14" fill="#333">I (A)</text>
+                <text x="40" y="35" font-size="14" fill="#333">V (V)</text>
+
+                <!-- ישר עם שיפוע שלילי: V = ε - r*I -->
+                <line x1="60" y1="80" x2="430" y2="270" stroke="var(--secondary)" stroke-width="3"/>
+
+                <!-- נקודת חיתוך עם ציר V (ε) -->
+                <circle cx="60" cy="80" r="5" fill="var(--error)"/>
+                <text x="20" y="84" font-size="14" font-weight="bold" fill="var(--error)">ε</text>
+                <line x1="40" y1="80" x2="60" y2="80" stroke="var(--error)" stroke-width="1" stroke-dasharray="2,2"/>
+
+                <!-- נקודת חיתוך עם ציר I (זרם הקצר) -->
+                <circle cx="425" cy="290" r="5" fill="var(--accent)"/>
+                <text x="395" y="320" font-size="13" font-weight="bold" fill="var(--accent)">I_קצר</text>
+
+                <!-- נקודות מדידה לדוגמה -->
+                <circle cx="100" cy="100" r="4" fill="#333"/>
+                <circle cx="160" cy="135" r="4" fill="#333"/>
+                <circle cx="220" cy="165" r="4" fill="#333"/>
+                <circle cx="280" cy="195" r="4" fill="#333"/>
+                <circle cx="340" cy="225" r="4" fill="#333"/>
+
+                <!-- חצים מסבירים את השיפוע -->
+                <line x1="220" y1="165" x2="340" y2="165" stroke="var(--accent)" stroke-width="1.5" stroke-dasharray="4,2"/>
+                <line x1="340" y1="165" x2="340" y2="225" stroke="var(--accent)" stroke-width="1.5" stroke-dasharray="4,2"/>
+                <text x="280" y="158" font-size="12" fill="var(--accent)" text-anchor="middle">ΔI</text>
+                <text x="350" y="200" font-size="12" fill="var(--accent)">ΔV</text>
+                <text x="280" y="120" font-size="11" fill="var(--accent)" text-anchor="middle" font-style="italic">שיפוע = ΔV/ΔI = −r</text>
+
+                <!-- חיצים -->
+                <defs>
+                    <marker id="arrowEnd2" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+                        <path d="M0,0 L0,6 L9,3 z" fill="#333"/>
+                    </marker>
+                </defs>
+
+                <text x="250" y="325" font-size="12" fill="#666" text-anchor="middle" font-style="italic">חיתוך עם ציר V = ε (כא"מ); השיפוע השלילי = -r (התנגדות פנימית)</text>
+            </svg>
+        </div>
+
+        <!-- שאלות -->
+        <div class="quiz">
+            <p class="question">שאלה 1: מה מייצג השיפוע של גרף \(V\) מול \(I\)?</p>
+            <div class="option" onclick="checkAns(this, false, 'לא. הכא&quot;מ נמצא בנקודת החיתוך עם ציר V, לא בשיפוע.', 'q4_1')">השיפוע הוא הכא"מ \(\varepsilon\) של הסוללה.</div>
+            <div class="option" onclick="checkAns(this, true, 'מדויק! לפי המשוואה \\(V = -rI + \\varepsilon\\), המקדם של \\(I\\) הוא \\(-r\\). הערך המוחלט של השיפוע נותן את ההתנגדות הפנימית, והסימן השלילי משקף את העובדה ש-\\(V\\) <em>יורד</em> ככל ש-\\(I\\) גדל.', 'q4_1')">הערך המוחלט של השיפוע הוא ההתנגדות הפנימית \(r\).</div>
+            <div class="option" onclick="checkAns(this, false, 'לא. השיפוע משקף את \\(r\\), לא את היחס בין \\(V\\) ל-\\(I\\) לכל נקודה בנפרד.', 'q4_1')">השיפוע הוא ההתנגדות החיצונית הממוצעת.</div>
+            <div class="feedback"></div>
+        </div>
+
+        <div class="quiz">
+            <p class="question">שאלה 2: אם נמשיך את ישר הרגרסיה עד שיחתוך את ציר ה-\(I\), מה תייצג נקודת החיתוך?</p>
+            <div class="option" onclick="checkAns(this, true, 'מעולה! חיתוך עם ציר \\(I\\) משמעותו \\(V = 0\\) - מתח ההדקים מתאפס. זה מצב <em>קצר</em>. הזרם בנקודה זו הוא \\(I_{\\text{קצר}} = \\varepsilon / r\\) - הזרם המקסימלי שהסוללה יכולה לספק (תיאורטית).', 'q4_2')">זרם הקצר \(I_{\text{קצר}} = \varepsilon/r\), שבו \(V=0\).</div>
+            <div class="option" onclick="checkAns(this, false, 'לא. כשהגרף חותך את ציר \\(I\\), המתח \\(V = 0\\), לא \\(\\varepsilon\\).', 'q4_2')">הכא"מ של הסוללה.</div>
+            <div class="option" onclick="checkAns(this, false, 'לא. הזרם המינימלי הוא 0 (במעגל פתוח), והוא מתאים לחיתוך עם <em>ציר V</em>, לא עם ציר \\(I\\).', 'q4_2')">הזרם המינימלי שהסוללה יכולה לספק.</div>
+            <div class="feedback"></div>
+        </div>
+
+        <div class="quiz">
+            <p class="question">שאלה 3: בעת ניתוח הגרף (בנייר או ב-Excel) גילית נקודה חריגה הרחק מקו המגמה של שאר הנקודות. מה תעשה?</p>
+            <div class="option" onclick="checkAns(this, true, 'בדיוק! העברת ישר הרגרסיה צריכה לשקף את המודל הפיזיקלי. נקודה חריגה כנראה נובעת משגיאה (קריאה לא מדויקת, חוט רעוע וכו\') ואין סיבה ש&quot;תכריח&quot; את הקו לעבור דרכה. ב-Excel - אפשר לחשב את הרגרסיה רק על שאר הנקודות, או להשתמש ב-SLOPE/INTERCEPT עם טווח ללא הנקודה החריגה.', 'q4_3')">להציג אותה על הגרף אך לא לכלול ברגרסיה.</div>
+            <div class="option" onclick="checkAns(this, false, 'לא נכון. עיקום הקו הורס את המודל הליניארי ואת חישוב השיפוע התקין. מודל ליניארי חייב להישאר ליניארי.', 'q4_3')">לעקם את הקו כך שיעבור דרכה ואז יחזור לשאר הנקודות.</div>
+            <div class="option" onclick="checkAns(this, false, 'לא. אסור להסתיר נתונים. הנקודה צריכה להישאר על הגרף - רק הקו לא צריך לעבור דרכה.', 'q4_3')">למחוק אותה לחלוטין מהטבלה והגרף.</div>
+            <div class="feedback"></div>
+        </div>
+
+        <!-- ===== צירוף צילומי גרפים (חלק מהדו"ח) ===== -->
+        <div class="complete-section" style="border-color: var(--accent); background: linear-gradient(135deg, #fff5e6 0%, #ffe0b3 100%); margin-top: 25px;">
+            <h3 style="margin-top:0; color:var(--accent);">📈 צירוף צילומי הגרפים</h3>
+            <p>צרפו כאן את צילומי הגרף \(V(I)\) שהכנתם (ב-Excel או בנייר מילימטרי). ניתן לבחור מספר תמונות בבת אחת. הגרפים יופיעו בדו"ח בלשונית הניתוח הגרפי.</p>
+            <input type="file" id="graphUpload" accept="image/*" multiple onchange="handleGraphUpload(event)"
+                   style="display:inline-block; padding:10px; background:white; border:2px dashed var(--accent); border-radius:8px; cursor:pointer; max-width:100%;">
+            <div id="graphGallery" style="display:flex; flex-wrap:wrap; gap:12px; justify-content:center; margin-top:18px;"></div>
+        </div>
+
+        <div class="tab-summary">
+            <label for="summary4">📝 סיכום הלשונית / ניתוח ממצאים (טקסט חופשי):</label>
+            <textarea id="summary4" placeholder="ניתוח הגרף שבנית: תיאור צורת הקשר, איכות ההתאמה הליניארית, ופרשנות השיפוע והחיתוך."></textarea>
+        </div>
+
+        <div class="complete-section">
+            <p>בנה את הגרף בנייר מילימטרי או ב-Excel והעבר ישר רגרסיה. רשום בדו"ח את ערך השיפוע ואת ערך החיתוך עם ציר \(V\).</p>
+            <button class="complete-btn" id="btn4" onclick="completeStage(4)">✓ סיימתי, הבנתי ורשמתי בדו"ח</button>
+            <div class="complete-msg" id="msg4">השלב הושלם! עכשיו נחלץ את הערכים המספריים 🎉</div>
+        </div>
+    </div>
+
+    <!-- ===== לשונית 5: חישוב ε ו-r ===== -->
+    <div id="tab5" class="content">
+        <div class="theory">
+            <h2>שלב 5: חישוב הכא"מ וההתנגדות הפנימית</h2>
+            <p>כעת נחלץ את \(\varepsilon\) ו-\(r\) מהרגרסיה הליניארית של הנתונים. הערכים שיוצגו למטה מבוססים על הנתונים שהזנת בשלב 3, באמצעות שיטת הריבועים הפחותים.</p>
+        </div>
+
+        <div class="formula">
+            <strong>חילוץ הפרמטרים מהגרף:</strong>
+            <br>
+            \(\varepsilon = \) חיתוך הקו עם ציר \(V\) (כש-\(I = 0\))
+            <br>
+            \(r = -\) שיפוע הקו = \(|\)שיפוע\(|\)
+            <br>
+            \(I_{\text{קצר}} = \dfrac{\varepsilon}{r}\)
+        </div>
+
+        <div id="paramsResult" class="summary-box">
+            <h3 style="margin-top:0;">🔬 תוצאות הרגרסיה הליניארית</h3>
+            <div id="paramsContent"></div>
+        </div>
+
+        <div class="important">
+            <strong>📌 השוואה לערכים אופייניים:</strong>
+            <ul>
+                <li><strong>סוללת AA חדשה:</strong> \(\varepsilon \approx 1.5\,\text{V}\), \(r \approx 0.1\text{-}0.3\,\Omega\).</li>
+                <li><strong>סוללת AA משומשת:</strong> \(\varepsilon \approx 1.2\text{-}1.4\,\text{V}\), \(r \approx 0.5\text{-}2\,\Omega\). <em>(מומלץ לניסוי - קל יותר למדוד \(r\))</em></li>
+                <li><strong>סוללת 4.5V:</strong> \(\varepsilon \approx 4.5\,\text{V}\), \(r\) משתנה לפי המצב.</li>
+                <li><strong>סוללה ישנה מאוד:</strong> \(\varepsilon\) נשמר בקירוב, אך \(r\) גדל משמעותית - לכן הסוללה "לא מחזיקה" זרמים גבוהים.</li>
+            </ul>
+        </div>
+
+        <!-- שאלות -->
+        <div class="quiz">
+            <p class="question">שאלה 1: מהו ההסבר הפיזיקלי לכך שמתח ההדקים יורד ככל שהזרם גדל?</p>
+            <div class="option" onclick="checkAns(this, true, 'מצוין! הזרם זורם דרך כל המעגל, כולל בתוך הסוללה עצמה. בתוכה הוא נופל על \\(r\\) (כמו על כל נגד), וגודל הנפילה הוא \\(I \\cdot r\\). מה שנשאר להדקי הסוללה הוא \\(\\varepsilon - Ir\\). ככל ש-\\(I\\) גדול - הנפילה הפנימית גדולה יותר ו-\\(V\\) קטן יותר.', 'q5_1')">נפילת מתח \(I \cdot r\) על ההתנגדות הפנימית.</div>
+            <div class="option" onclick="checkAns(this, false, 'לא. סוללה לא מתרוקנת בשניות של מדידה - הירידה ב-\\(V\\) היא תופעה חולפת ומיידית, לא דעיכת אנרגיה.', 'q5_1')">הסוללה מתרוקנת מהר ככל שהזרם גדול.</div>
+            <div class="option" onclick="checkAns(this, false, 'לא נכון. הוולטמטר מודד מדויק; הירידה ב-\\(V\\) היא אמיתית, לא חוסר דיוק במכשיר.', 'q5_1')">זוהי שגיאה במכשיר המדידה.</div>
+            <div class="feedback"></div>
+        </div>
+
+        <div class="quiz">
+            <p class="question">שאלה 2: אם נחליף את הסוללה לסוללה ישנה יותר עם אותו כא"מ אך \(r\) גדול פי 3, כיצד יראה הגרף?</p>
+            <div class="option" onclick="checkAns(this, false, 'לא. הכא&quot;מ זהה - לכן הגרף עדיין מתחיל מאותה נקודה על ציר \\(V\\).', 'q5_2')">הגרף יתחיל מנקודת חיתוך נמוכה יותר.</div>
+            <div class="option" onclick="checkAns(this, true, 'נכון! \\(\\varepsilon\\) זהה ⇐ אותו חיתוך עם ציר \\(V\\). \\(r\\) פי 3 ⇐ שיפוע תלול פי 3 (בערך מוחלט). הגרף &quot;צונח&quot; מהר יותר. בנוסף, \\(I_{\\text{קצר}} = \\varepsilon/r\\) קטן פי 3.', 'q5_2')">אותו חיתוך, אך שיפוע תלול פי 3.</div>
+            <div class="option" onclick="checkAns(this, false, 'לא. \\(r\\) משפיע על השיפוע, לא על נקודת החיתוך עם ציר \\(V\\).', 'q5_2')">אותו שיפוע אך נקודת חיתוך נמוכה יותר.</div>
+            <div class="feedback"></div>
+        </div>
+
+        <div class="quiz">
+            <p class="question">שאלה 3: אם החיבור שלך נותן \(\varepsilon = 1.48\,\text{V}\) ו-\(r = 0.7\,\Omega\), מה זרם הקצר התיאורטי?</p>
+            <div class="option" onclick="checkAns(this, false, 'לא. זרם הקצר הוא \\(\\varepsilon/r\\), לא \\(\\varepsilon \\cdot r\\). חישוב נכון: \\(1.48/0.7 \\approx 2.1\\) A.', 'q5_3')">\(\approx 1.0\) A.</div>
+            <div class="option" onclick="checkAns(this, true, 'מצוין! \\(I_{\\text{קצר}} = \\varepsilon/r = 1.48/0.7 \\approx 2.1\\) A. שים לב שזה ערך תיאורטי; בפועל לא תיצור קצר כי הסוללה תתחמם או תפלוט גז.', 'q5_3')">\(\approx 2.1\) A.</div>
+            <div class="option" onclick="checkAns(this, false, 'לא. \\(0.7 \\cdot 1.48 \\approx 1.04\\), לא 0.5 A. בנוסף - הנוסחה הנכונה היא חילוק ולא כפל.', 'q5_3')">\(\approx 0.5\) A.</div>
+            <div class="feedback"></div>
+        </div>
+
+        <div class="tab-summary">
+            <label for="summary5">📝 סיכום הלשונית / ניתוח ממצאים (טקסט חופשי):</label>
+            <textarea id="summary5" placeholder="הצגת הערכים המספריים שהתקבלו ל-ε ו-r, השוואה לערכים אופייניים, וחישוב זרם הקצר."></textarea>
+        </div>
+
+        <div class="complete-section">
+            <p id="paramsInstr">יש להזין את כל הנתונים בשלב 3 כדי לקבל את ערכי \(\varepsilon\) ו-\(r\).</p>
+            <button class="complete-btn" id="btn5" onclick="completeStage(5)">✓ סיימתי, הבנתי ורשמתי בדו"ח</button>
+            <div class="complete-msg" id="msg5">החישוב הושלם! ממשיכים לדיון בשגיאות 🎉</div>
+        </div>
+    </div>
+
+    <!-- ===== לשונית 6: שגיאות ואי-ודאות ===== -->
+    <div id="tab6" class="content">
+        <div class="theory">
+            <h2>שלב 6: דיון בשגיאות ואי-ודאות</h2>
+            <p>בכל ניסוי קיימים גורמי שגיאה. חלקם <em>אקראיים</em> (משתנים בכל מדידה ומתקזזים בממוצע) וחלקם <em>מערכתיים</em> (תמיד מטים את התוצאה לאותו כיוון). חשוב לזהות אותם, להעריך את השפעתם, ולשאוף להקטינם בניסויים עתידיים.</p>
+        </div>
+
+        <div class="important">
+            <strong>📌 גורמי שגיאה אפשריים בניסוי - יש לדון בהם בדו"ח:</strong>
+            <ul>
+                <li><strong>התנגדות החוטים והמגעים (שגיאה מערכתית):</strong> תיל החיבור והתנינים אינם בעלי התנגדות אפסית. ההתנגדות הזו מתווספת בטור ל-\(r\) הפנימית, ולכן השיפוע שמתקבל מהגרף הוא בפועל \(-(r + R_{\text{חוטים}})\). תוצאה: <em>\(r\) המחושב גדול מ-\(r\) האמיתי</em>.</li>
+                <li><strong>השפעת הוולטמטר (שגיאה מערכתית קטנה):</strong> אמנם התנגדות הוולטמטר גבוהה (לרוב מאות מגה-אום), אך לא אינסופית - חלק זעיר מהזרם זורם דרכו. השפעה זו זניחה אך קיימת.</li>
+                <li><strong>חימום הסוללה (שגיאה מערכתית):</strong> זרם זורם בתוך הסוללה גורם לחימום (אפקט ג'אול). כשהסוללה חמה, \(r\) משתנה - כך שהמדידות הראשונות שונות מהאחרונות. פתיחת המפסק בין מדידות מקטינה אפקט זה.</li>
+                <li><strong>"דעיכת" הסוללה במהלך הניסוי (שגיאה מערכתית):</strong> שימוש מתמשך מוריד את \(\varepsilon\) במעט (סדר גודל של אחוזים). זה מטה את הנקודות האחרונות.</li>
+                <li><strong>שגיאות אקראיות בקריאה:</strong> רעש בקריאת המתח והזרם, שיפוט החלוקות במכשיר אנלוגי, רטט של המחט. מתקזזים יחסית עם מספר רב של מדידות.</li>
+                <li><strong>דיוק האמפרמטר והוולטמטר:</strong> לכל מכשיר יש שגיאה מינימלית (לרוב ±1% או יותר). מופיעה גם כאקראית וגם כמערכתית.</li>
+            </ul>
+        </div>
+
+        <div class="example">
+            <strong>דוגמה לחישוב השפעת שגיאה מערכתית:</strong>
+            <br>
+            נניח שהוולטמטר מוסיף קבוע של 0.05V לכל קריאה (שגיאת כיול). כל הנקודות יוסטו כלפי מעלה בערך זהה. השיפוע נשאר זהה (כי הסטה אחידה לא משנה את הקצב), ולכן <em>\(r\)</em> שיחושב מהשיפוע - <em>לא יושפע</em>. אך החיתוך עם ציר \(V\) יוסט ב-0.05V, וערך \(\varepsilon\) שיחושב יהיה <em>גדול</em> ב-0.05V מהאמיתי.
+        </div>
+
+        <div class="warning">
+            <strong>📝 חובה לכלול בדו"ח:</strong>
+            <ul>
+                <li>פירוט של 3 לפחות מקורות שגיאה והערכת השפעתם.</li>
+                <li>הסברה - האם כל מקור שגיאה הוא מערכתי או אקראי, ולאיזה כיוון הוא מטה את הערכים המחושבים.</li>
+                <li>הצעות קונקרטיות לשיפור הניסוי (לדוגמה: שימוש בחוטי חיבור עבים יותר, פתיחת המפסק בין מדידות, וכד').</li>
+            </ul>
+        </div>
+
+        <!-- שאלות -->
+        <div class="quiz">
+            <p class="question">שאלה 1: כיצד תשפיע התנגדות החוטים והמגעים על ערך \(r\) שיתקבל בניסוי?</p>
+            <div class="option" onclick="checkAns(this, false, 'לא נכון. התנגדות נוספת בטור רק תגדיל את ההתנגדות הכוללת הנמדדת מהשיפוע, לא תקטין אותה.', 'q6_1')">\(r\) המחושב יהיה קטן מ-\(r\) האמיתי.</div>
+            <div class="option" onclick="checkAns(this, true, 'מדויק! החוטים מהווים נגד נוסף בטור עם \\(r\\) הפנימית. כשמסתכלים על המעגל מבחוץ - לא ניתן להבחין בין השניים. השיפוע נותן את הסכום \\(r + R_{\\text{חוטים}}\\), שגדול מ-\\(r\\) הפנימית בלבד.', 'q6_1')">\(r\) המחושב יהיה גדול מ-\(r\) האמיתי.</div>
+            <div class="option" onclick="checkAns(this, false, 'לא נכון. תוספת התנגדות בטור בהחלט משפיעה על השיפוע ולכן על \\(r\\) המחושב.', 'q6_1')">לא תהיה כל השפעה.</div>
+            <div class="feedback"></div>
+        </div>
+
+        <div class="quiz">
+            <p class="question">שאלה 2: אם הוולטמטר מציג תמיד 0.1V <em>יותר</em> מהמתח האמיתי (שגיאת כיול קבועה), איזו שגיאה זו, וכיצד היא תשפיע על תוצאות הרגרסיה?</p>
+            <div class="option" onclick="checkAns(this, false, 'לא. הסטה קבועה (כמו תוספת \\(+0.1\\) לכולם) <em>אינה</em> משנה את השיפוע - היא רק מסיטה את כל הקו במקביל לעצמו.', 'q6_2')">שגיאה מערכתית - השיפוע ישתנה ויהיה תלול יותר, לכן \(r\) יצא גדול יותר.</div>
+            <div class="option" onclick="checkAns(this, true, 'נכון! זוהי שגיאה מערכתית. כל הנקודות יוסטו כלפי מעלה ב-0.1V באותה כמות. הקו ישמור על אותו שיפוע, ולכן \\(r\\) המחושב לא ישתנה. אבל החיתוך עם ציר \\(V\\) יעלה ב-0.1V - ולכן \\(\\varepsilon\\) שיחושב יהיה גדול ב-0.1V מהאמיתי.', 'q6_2')">שגיאה מערכתית - \(\varepsilon\) יצא גדול ב-0.1V, אך \(r\) לא ישתנה.</div>
+            <div class="option" onclick="checkAns(this, false, 'לא. שגיאה אקראית הייתה משתנה ממדידה למדידה - שגיאת כיול קבועה היא דווקא הדוגמה הקלאסית לשגיאה <em>מערכתית</em>.', 'q6_2')">שגיאה אקראית - תיתן פיזור גדול יותר בנקודות אך לא תשנה את הערכים הממוצעים.</div>
+            <div class="feedback"></div>
+        </div>
+
+        <div class="quiz">
+            <p class="question">שאלה 3: מהי הדרך הטובה ביותר להקטין את השפעת חימום הסוללה על תוצאות המדידה?</p>
+            <div class="option" onclick="checkAns(this, true, 'נכון! פתיחת המפסק עוצרת את זרימת הזרם וכך נעצר גם החימום (אפקט ג\'אול). מתן זמן קצר לסוללה להתאזן בין מדידות מבטיח שכל מדידה תתבצע בסביבת טמפרטורה דומה.', 'q6_3')">לפתוח את המפסק בין מדידה למדידה.</div>
+            <div class="option" onclick="checkAns(this, false, 'לא. דווקא להפך - זרמים גבוהים יחממו את הסוללה יותר.', 'q6_3')">למדוד תמיד בזרמים הגבוהים ביותר.</div>
+            <div class="option" onclick="checkAns(this, false, 'לא. ההפסקות חיוניות, לא ההיפך. מדידות מהירות רצופות מצטברות לחימום משמעותי.', 'q6_3')">למדוד את כל הנקודות מהר ככל האפשר ברצף, בלי הפסקות.</div>
+            <div class="feedback"></div>
+        </div>
+
+        <div class="tab-summary">
+            <label for="summary6">📝 סיכום הלשונית / ניתוח ממצאים (טקסט חופשי):</label>
+            <textarea id="summary6" placeholder="דיון בשגיאות מערכתיות ואקראיות שזיהית בניסוי, ובהשפעתן על דיוק התוצאות."></textarea>
+        </div>
+
+        <div class="complete-section">
+            <p>רשום בדו"ח את שלושת מקורות השגיאה העיקריים והערכת השפעתם הצפויה על \(\varepsilon\) ו-\(r\).</p>
+            <button class="complete-btn" id="btn6" onclick="completeStage(6)">✓ סיימתי, הבנתי ורשמתי בדו"ח</button>
+            <div class="complete-msg" id="msg6">השלב הושלם! ממשיכים לסיכום הסופי 🎉</div>
+        </div>
+    </div>
+
+    <!-- ===== לשונית 7: מסקנות ===== -->
+    <div id="tab7" class="content">
+        <div class="theory">
+            <h2>שלב 7: דיון ומסקנות</h2>
+            <p>שלב הסיכום הוא החלק החשוב ביותר בדו"ח. כאן בוחנים האם הניסוי השיג את מטרתו, משווים את התוצאות לערכים מצופים, ומסיקים מסקנות פיזיקליות.</p>
+        </div>
+
+        <div id="finalSummaryBox" class="summary-box">
+            <h3 style="margin-top:0;">📈 סיכום תוצאות הניסוי</h3>
+            <div id="finalSummaryContent"></div>
+        </div>
+
+        <div class="important">
+            <strong>📌 חובה לכלול בדו"ח:</strong>
+            <ul>
+                <li><strong>מטרת הניסוי וההיפותזה:</strong> לאשש את המודל \(V = \varepsilon - Ir\) ולמצוא את \(\varepsilon\) ואת \(r\) של הסוללה.</li>
+                <li><strong>תרשים המעגל</strong> וזיהוי הציוד.</li>
+                <li><strong>טבלת הנתונים</strong> עם זוגות \((I, V)\) שנמדדו, ועמודה של \(R = V/I\).</li>
+                <li><strong>גרף \(V\) כפונקציה של \(I\)</strong> בנייר מילימטרי או ב-Excel, עם ישר רגרסיה.</li>
+                <li><strong>חישוב מהגרף:</strong> השיפוע (= \(-r\)), והחיתוך עם ציר \(V\) (= \(\varepsilon\)).</li>
+                <li><strong>חישוב זרם הקצר:</strong> \(I_{\text{קצר}} = \varepsilon/r\).</li>
+                <li><strong>השוואה לערכים אופייניים</strong> של הסוללה (1.5V לסוללת AA, וכו') וחישוב שגיאה יחסית.</li>
+                <li><strong>פירוט של 3 מקורות שגיאה</strong> והערכת השפעתם.</li>
+                <li><strong>מסקנה ברורה:</strong> האם המודל \(V = \varepsilon - Ir\) אושש? האם הקשר אכן ליניארי? האם \(\varepsilon\) ו-\(r\) שהתקבלו סבירים לסוג הסוללה שנבדקה?</li>
+            </ul>
+        </div>
+
+        <div class="example">
+            <strong>שאלות נוספות לדיון בדו"ח:</strong>
+            <ul>
+                <li>מדוע במציאות לא ניתן להגיע לזרם הקצר התיאורטי \(\varepsilon/r\)? (רמז: התחממות והתנהגות לא-ליניארית בזרמים גבוהים מאוד.)</li>
+                <li>איך יש לבחור את הראוסטט המתאים לניסוי (תחום ההתנגדויות שלו) על מנת לקבל פיזור טוב של נקודות בגרף?</li>
+                <li>מה היה קורה אם היינו מחליפים את הסוללה במקור מתח של ספק כוח (ר≈0)? כיצד היה נראה הגרף?</li>
+            </ul>
+        </div>
+
+        <!-- שאלות -->
+        <div class="quiz">
+            <p class="question">שאלה 1: מהי המסקנה העיקרית הצפויה מהניסוי כולו?</p>
+            <div class="option" onclick="checkAns(this, false, 'לא. הניסוי דווקא תומך בקיומו של מודל הסוללה כשני רכיבים: \\(\\varepsilon\\) (כא&quot;מ אידיאלי) ו-\\(r\\) (התנגדות פנימית).', 'q7_1')">לסוללה אין התנגדות פנימית - היא מקור מתח אידיאלי.</div>
+            <div class="option" onclick="checkAns(this, true, 'מצוין! זוהי בדיוק המסקנה - הקשר \\(V = \\varepsilon - Ir\\) אושש, וניתן באמצעותו לחלץ את הכא&quot;מ ואת ההתנגדות הפנימית. הסוללה אינה מקור מתח אידיאלי, אלא בעלת התנגדות פנימית קטנה אך משמעותית.', 'q7_1')">הסוללה מתנהגת לפי המודל \(V = \varepsilon - Ir\).</div>
+            <div class="option" onclick="checkAns(this, false, 'לא. מתח ההדקים <em>תלוי</em> בזרם, ובדיוק זוהי הנקודה המרכזית של הניסוי.', 'q7_1')">מתח ההדקים של סוללה תמיד קבוע ולא תלוי בזרם.</div>
+            <div class="feedback"></div>
+        </div>
+
+        <div class="quiz">
+            <p class="question">שאלה 2: מדוע במציאות לא ניתן באמת להגיע לזרם הקצר \(I_{\text{קצר}} = \varepsilon/r\)?</p>
+            <div class="option" onclick="checkAns(this, true, 'נכון! המודל הליניארי \\(V = \\varepsilon - Ir\\) תקף רק בטווח מוגבל של זרמים. בזרמים גבוהים מאוד הסוללה מתחממת מהר, \\(r\\) משתנה, מתרחשות תגובות כימיות לא ליניאריות, והסוללה עלולה להיהרס. גם החוטים מתחממים.', 'q7_2')">המודל הליניארי לא תקף בזרמים גבוהים מאוד.</div>
+            <div class="option" onclick="checkAns(this, false, 'לא נכון. הניסוי מאשש את המודל בטווח שנמדד; בעיה בזרמים גבוהים היא <em>מעבר</em> לטווח התיקוף, לא תקלה במודל.', 'q7_2')">המודל בכלל לא נכון.</div>
+            <div class="option" onclick="checkAns(this, false, 'לא. תיאורטית כל סוללה יכולה להגיע לקצר; הסיבה שלא מגיעים אליו בפועל היא טכנית-בטיחותית, לא חוסר אפשרות בעקרון.', 'q7_2')">סוללות לא יכולות להגיע למתח 0V לעולם.</div>
+            <div class="feedback"></div>
+        </div>
+
+        <div class="quiz">
+            <p class="question">שאלה 3: היה והיינו מחליפים את הסוללה במקור מתח אידיאלי (\(r = 0\)) באותו מתח, איך היה נראה גרף \(V(I)\)?</p>
+            <div class="option" onclick="checkAns(this, false, 'לא. \\(V\\) קבוע משמעו <em>אופקי</em>, לא תלול.', 'q7_3')">קו תלול עם שיפוע גדול מאוד.</div>
+            <div class="option" onclick="checkAns(this, true, 'מדויק! במקור אידיאלי \\(V = \\varepsilon - 0 \\cdot I = \\varepsilon\\) - מתח קבוע ללא תלות בזרם. הגרף הוא קו אופקי בגובה \\(\\varepsilon\\). זוהי בדיוק התכונה שמאפיינת ספק כוח טוב לעומת סוללה.', 'q7_3')">קו אופקי בגובה \(\varepsilon\).</div>
+            <div class="option" onclick="checkAns(this, false, 'לא. הגרף לא צריך להיעלם - יש מתח בכל זרם, פשוט הוא קבוע.', 'q7_3')">לא היה גרף בכלל - אין נקודות מדידה.</div>
+            <div class="feedback"></div>
+        </div>
+
+        <div class="tab-summary">
+            <label for="summary7">📝 סיכום הלשונית / ניתוח ממצאים (טקסט חופשי):</label>
+            <textarea id="summary7" style="min-height:160px;" placeholder="מסקנות הניסוי: האם המודל אושש? האם הערכים סבירים? הצעות לשיפור."></textarea>
+        </div>
+
+        <div class="complete-section">
+            <p>סיכום הניסוי, השוואה לערכים תיאורטיים, דיון בשגיאות והצעות לשיפור - הכל בדו"ח שלך.</p>
+            <button class="complete-btn" id="btn7" onclick="completeStage(7)">✓ סיימתי, הבנתי ורשמתי בדו"ח</button>
+            <div class="complete-msg" id="msg7">🎓 ברכות! השלמת בהצלחה את כל שלבי תדריך המעבדה! 🎉</div>
+        </div>
+    </div>
+
+    <!-- ===== מקטע הורדת דו"ח Word (.docx) ===== -->
+    <div class="complete-section" style="border-color: var(--success); margin-top: 30px;">
+        <h3 style="margin-top:0; color:var(--success);">📄 קובץ דו"ח מלא (Word / docx)</h3>
+        <p>הדו"ח יכלול: תקציר של כל לשונית, השאלות והתשובות שבחרת, הטקסט החופשי שכתבת בכל לשונית, טבלת הנתונים, החישובים, ותמונות שצירפת. הקובץ ניתן לעריכה ב-Word, Google Docs ו-LibreOffice.</p>
+        <div class="student-info">
+            <div><label for="studentName">שם התלמיד/ה:</label><input type="text" id="studentName" placeholder="שם מלא"></div>
+            <div><label for="studentClass">כיתה:</label><input type="text" id="studentClass" placeholder="לדוגמה: י'3"></div>
+            <div><label for="reportDate">תאריך:</label><input type="date" id="reportDate"></div>
+        </div>
+        <button class="complete-btn" onclick="downloadDocxReport()">⬇️ הורד דו"ח Word (.docx)</button>
+        <p id="summaryFileMsg" style="display:none; margin-top:14px; color:var(--success); font-weight:bold; font-size:1.05em;"></p>
+    </div>
+</div>
+
+
+<script>
+    const totalStages = 7;
+    const completedStages = new Set([1]);
+
+    function openTab(evt, tabName) {
+        const contents = document.getElementsByClassName("content");
+        for (let i = 0; i < contents.length; i++) contents[i].classList.remove('active');
+
+        const tabs = document.getElementsByClassName("tab");
+        for (let i = 0; i < tabs.length; i++) tabs[i].classList.remove('active');
+
+        document.getElementById(tabName).classList.add('active');
+        evt.currentTarget.classList.add('active');
+
+        // עדכון תצוגות בלשוניות הניתוח
+        if (tabName === 'tab4') displayVoltageData();
+        if (tabName === 'tab5') displayParams();
+        if (tabName === 'tab7') displayFinalSummary();
+
+        if (window.MathJax) MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
+    }
+
+    function checkAns(el, isCorrect, message, qid) {
+        const questionContainer = el.closest('.quiz');
+        const options = questionContainer.getElementsByClassName('option');
+        const feedback = questionContainer.querySelector('.feedback');
+
+        for (let opt of options) opt.className = 'option';
+        feedback.style.display = 'block';
+        feedback.innerText = message;
+
+        if (isCorrect) {
+            el.className = 'option correct';
+            feedback.style.backgroundColor = '#d4edda';
+            feedback.style.color = '#155724';
+            feedback.style.border = '1px solid #c3e6cb';
+        } else {
+            el.className = 'option wrong';
+            feedback.style.backgroundColor = '#f8d7da';
+            feedback.style.color = '#721c24';
+            feedback.style.border = '1px solid #f5c6cb';
+        }
+
+        // שמירת תשובת התלמיד לדו"ח
+        if (qid) {
+            if (!window.userAnswers) window.userAnswers = {};
+            const qText = el.closest('.quiz').querySelector('.question').innerText.trim();
+            window.userAnswers[qid] = {
+                question: qText,
+                chosen: el.innerText.trim(),
+                isCorrect: isCorrect
+            };
+        }
+
+        if (window.MathJax) MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
+    }
+
+    function completeStage(stage) {
+        completedStages.add(stage);
+        const tabEl = document.querySelector(`.tab[data-tab="tab${stage}"]`);
+        tabEl.classList.add('completed');
+
+        const btn = document.getElementById(`btn${stage}`);
+        btn.disabled = true;
+        btn.style.background = 'var(--locked)';
+        btn.innerText = '✓ הושלם';
+
+        document.getElementById(`msg${stage}`).style.display = 'block';
+
+        updateProgress();
+    }
+
+    function updateProgress() {
+        const percent = (completedStages.size / totalStages) * 100;
+        document.getElementById('progressFill').style.width = percent + '%';
+    }
+
+    /* ===== שלב 3: איסוף נתוני V-I ===== */
+    function checkVoltageData() {
+        let allFilled = true;
+        let validData = [];
+        for (let i = 1; i <= 7; i++) {
+            const I = document.getElementById(`I3_${i}`).value;
+            const V = document.getElementById(`V3_${i}`).value;
+            const Rcell = document.getElementById(`R3_${i}`);
+
+            if (I !== '' && V !== '' && parseFloat(I) > 0) {
+                const R = parseFloat(V) / parseFloat(I);
+                Rcell.innerText = R.toFixed(2);
+                validData.push({ I: parseFloat(I), V: parseFloat(V), R: R });
+            } else {
+                Rcell.innerText = '-';
+                allFilled = false;
+            }
+        }
+
+        const btn = document.getElementById('btn3');
+        const instr = document.getElementById('voltageInstr');
+        if (allFilled && validData.length === 7) {
+            btn.disabled = false;
+            instr.innerText = '✓ כל הנתונים הוזנו - ניתן לסיים את השלב.';
+            instr.style.color = 'var(--success)';
+            showVoltagePreview(validData);
+        } else {
+            btn.disabled = true;
+            instr.innerText = `יש למלא את כל 7 שורות הטבלה (${validData.length}/7 הושלמו).`;
+            instr.style.color = '';
+            document.getElementById('voltagePreview').style.display = 'none';
+        }
+    }
+
+    function linearRegression(data, xKey, yKey) {
+        const n = data.length;
+        const sumX = data.reduce((s, d) => s + d[xKey], 0);
+        const sumY = data.reduce((s, d) => s + d[yKey], 0);
+        const sumXY = data.reduce((s, d) => s + d[xKey] * d[yKey], 0);
+        const sumXX = data.reduce((s, d) => s + d[xKey] * d[xKey], 0);
+        const slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
+        const intercept = (sumY - slope * sumX) / n;
+
+        // R² (מקדם המתאם בריבוע)
+        const meanY = sumY / n;
+        const ssTotal = data.reduce((s, d) => s + Math.pow(d[yKey] - meanY, 2), 0);
+        const ssRes = data.reduce((s, d) => s + Math.pow(d[yKey] - (slope * d[xKey] + intercept), 2), 0);
+        const r2 = 1 - ssRes / ssTotal;
+
+        return { slope, intercept, r2 };
+    }
+
+    function showVoltagePreview(data) {
+        const previewBox = document.getElementById('voltagePreview');
+        const content = document.getElementById('voltagePreviewContent');
+
+        // רגרסיה: V = slope * I + intercept; שיפוע = -r, חיתוך = ε
+        const reg = linearRegression(data, 'I', 'V');
+        const epsilon = reg.intercept;
+        const r_internal = -reg.slope;
+        const I_short = epsilon / r_internal;
+
+        let html = '<div class="summary-row"><span class="summary-label">שיפוע הקו (= -r):</span><span class="summary-value">' + reg.slope.toFixed(3) + ' V/A</span></div>';
+        html += '<div class="summary-row"><span class="summary-label">חיתוך עם ציר V (= ε):</span><span class="summary-value">' + epsilon.toFixed(3) + ' V</span></div>';
+        html += '<div class="summary-row"><span class="summary-label">התנגדות פנימית r:</span><span class="summary-value">' + r_internal.toFixed(3) + ' Ω</span></div>';
+        html += '<div class="summary-row"><span class="summary-label">זרם קצר תיאורטי I_קצר = ε/r:</span><span class="summary-value">' + I_short.toFixed(2) + ' A</span></div>';
+        html += '<div class="summary-row"><span class="summary-label">איכות ההתאמה (R²):</span><span class="summary-value">' + reg.r2.toFixed(4) + '</span></div>';
+
+        let conclusion = '';
+        if (reg.r2 > 0.99) conclusion = '✅ התאמה מצוינת לישר! הקשר V-I אכן ליניארי - מודל הסוללה מאומת.';
+        else if (reg.r2 > 0.95) conclusion = '✓ התאמה טובה לישר. סטיות קלות נובעות משגיאות מדידה.';
+        else if (reg.r2 > 0.85) conclusion = '⚠️ התאמה בינונית - בדוק את הנתונים, ייתכן שיש נקודה חריגה או חימום.';
+        else conclusion = '❌ התאמה לא טובה - בדוק שוב את הנתונים, ייתכן שיש שגיאה משמעותית.';
+
+        if (r_internal < 0) conclusion += '<br>❌ התקבל \"r\" שלילי - יש בעיה בנתונים. צפוי שיפוע שלילי, לא חיובי.';
+        if (epsilon < 0) conclusion += '<br>❌ התקבל \"ε\" שלילי - יש בעיה בנתונים.';
+
+        html += '<div style="margin-top:15px; padding:12px; background:white; border-radius:5px; font-weight:bold; text-align:center;">' + conclusion + '</div>';
+
+        content.innerHTML = html;
+        previewBox.style.display = 'block';
+
+        // שמור את הערכים לחישובים בלשוניות הבאות
+        window.regressionResults = {
+            slope: reg.slope,
+            intercept: reg.intercept,
+            r2: reg.r2,
+            epsilon: epsilon,
+            r: r_internal,
+            I_short: I_short,
+            data: data
+        };
+    }
+
+    /* ===== שלב 4: תצוגת הנתונים ===== */
+    function displayVoltageData() {
+        const content = document.getElementById('voltageDataContent');
+        const results = window.regressionResults;
+
+        if (!results) {
+            content.innerHTML = '<p style="color:#999;">לא הוזנו נתונים בשלב הקודם.</p>';
+            return;
+        }
+
+        const data = results.data;
+        let html = '<table style="width:100%; border-collapse:collapse;"><tr style="background:var(--primary); color:white;"><th style="padding:8px;">#</th><th style="padding:8px;">I (A)</th><th style="padding:8px;">V (V)</th><th style="padding:8px;">R = V/I (Ω)</th></tr>';
+        data.forEach((d, idx) => {
+            html += `<tr><td style="padding:8px; text-align:center; border-bottom:1px solid #ddd;">${idx + 1}</td><td style="padding:8px; text-align:center; border-bottom:1px solid #ddd;">${d.I.toFixed(3)}</td><td style="padding:8px; text-align:center; border-bottom:1px solid #ddd;">${d.V.toFixed(3)}</td><td style="padding:8px; text-align:center; border-bottom:1px solid #ddd;">${d.R.toFixed(2)}</td></tr>`;
+        });
+        html += `<tr style="background:#fff3cd;"><td colspan="2" style="padding:8px; text-align:center; font-weight:bold;">שיפוע מרגרסיה ליניארית של V(I)</td><td colspan="2" style="padding:8px; text-align:center; font-weight:bold; color:var(--accent);">${results.slope.toFixed(3)} V/A</td></tr>`;
+        html += `<tr style="background:#fff3cd;"><td colspan="2" style="padding:8px; text-align:center; font-weight:bold;">חיתוך עם ציר V (= ε)</td><td colspan="2" style="padding:8px; text-align:center; font-weight:bold; color:var(--accent);">${results.intercept.toFixed(3)} V</td></tr>`;
+        html += '</table>';
+        content.innerHTML = html;
+    }
+
+    /* ===== שלב 5: ε ו-r ===== */
+    function displayParams() {
+        const content = document.getElementById('paramsContent');
+        const btn = document.getElementById('btn5');
+        const instr = document.getElementById('paramsInstr');
+        const results = window.regressionResults;
+
+        if (!results) {
+            content.innerHTML = '<p style="color:#999;">לא הוזנו נתונים בשלב 3. חזור לשלב 3 והזן את הנתונים.</p>';
+            btn.disabled = true;
+            instr.innerText = 'יש להזין את כל הנתונים בשלב 3 כדי לקבל את ערכי ε ו-r.';
+            instr.style.color = 'var(--error)';
+            return;
+        }
+
+        let html = '<div class="summary-row"><span class="summary-label">כא"מ של הסוללה ε (חיתוך עם ציר V):</span><span class="summary-value">' + results.epsilon.toFixed(3) + ' V</span></div>';
+        html += '<div class="summary-row"><span class="summary-label">התנגדות פנימית r (= -שיפוע):</span><span class="summary-value">' + results.r.toFixed(3) + ' Ω</span></div>';
+        html += '<div class="summary-row"><span class="summary-label">זרם קצר תיאורטי I_קצר = ε/r:</span><span class="summary-value">' + results.I_short.toFixed(2) + ' A</span></div>';
+        html += '<div class="summary-row"><span class="summary-label">איכות ההתאמה הליניארית (R²):</span><span class="summary-value">' + results.r2.toFixed(4) + '</span></div>';
+
+        // הערכת איכות
+        let assessment = '';
+        if (results.r2 > 0.99) assessment = '🎯 התאמה מצוינת - הניסוי תומך בחוזקה במודל \\(V = \\varepsilon - Ir\\).';
+        else if (results.r2 > 0.95) assessment = '✅ התאמה טובה - המודל אומת ברמת דיוק סבירה.';
+        else assessment = '⚠️ התאמה לא מספקת - בדוק את הנתונים בשלב 3.';
+
+        // השוואה לערכים אופייניים
+        let typicalCompare = '<br><br><strong>השוואה לערכים אופייניים:</strong><br>';
+        if (results.epsilon > 1.3 && results.epsilon < 1.7) {
+            typicalCompare += `• ε = ${results.epsilon.toFixed(2)} V מתאים לסוללת AA (סטנדרט 1.5V).`;
+        } else if (results.epsilon > 4 && results.epsilon < 5) {
+            typicalCompare += `• ε = ${results.epsilon.toFixed(2)} V מתאים לסוללת 4.5V.`;
+        } else if (results.epsilon > 8 && results.epsilon < 10) {
+            typicalCompare += `• ε = ${results.epsilon.toFixed(2)} V מתאים לסוללת 9V.`;
+        } else {
+            typicalCompare += `• ε = ${results.epsilon.toFixed(2)} V - לא מתאים לסוג סוללה סטנדרטי. ודא שהזנת את הנתונים נכון.`;
+        }
+
+        if (results.r > 0 && results.r < 5) {
+            typicalCompare += `<br>• r = ${results.r.toFixed(2)} Ω הוא ערך סביר לסוללה במצב פעיל.`;
+        }
+
+        html += '<div style="margin-top:15px; padding:12px; background:white; border-radius:5px; font-weight:bold; text-align:center;">' + assessment + typicalCompare + '</div>';
+
+        content.innerHTML = html;
+        btn.disabled = false;
+        instr.innerText = '✓ הערכים חושבו - ניתן לסיים את השלב.';
+        instr.style.color = 'var(--success)';
+
+        if (window.MathJax) MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
+    }
+
+    /* ===== שלב 7: סיכום סופי ===== */
+    function displayFinalSummary() {
+        const content = document.getElementById('finalSummaryContent');
+        const results = window.regressionResults;
+
+        if (!results) {
+            content.innerHTML = '<p style="color:#999;">לא הוזנו נתונים בשלבים הקודמים.</p>';
+            return;
+        }
+
+        let html = '';
+        html += '<div class="summary-row"><span class="summary-label">מספר נקודות מדידה:</span><span class="summary-value">' + results.data.length + '</span></div>';
+        html += '<div class="summary-row"><span class="summary-label">טווח זרמים שנמדד:</span><span class="summary-value">' +
+            Math.min(...results.data.map(d => d.I)).toFixed(3) + ' - ' +
+            Math.max(...results.data.map(d => d.I)).toFixed(3) + ' A</span></div>';
+        html += '<div class="summary-row"><span class="summary-label">טווח מתחים שנמדד:</span><span class="summary-value">' +
+            Math.min(...results.data.map(d => d.V)).toFixed(3) + ' - ' +
+            Math.max(...results.data.map(d => d.V)).toFixed(3) + ' V</span></div>';
+        html += '<div class="summary-row"><span class="summary-label">כא"מ של הסוללה ε:</span><span class="summary-value">' + results.epsilon.toFixed(3) + ' V</span></div>';
+        html += '<div class="summary-row"><span class="summary-label">התנגדות פנימית r:</span><span class="summary-value">' + results.r.toFixed(3) + ' Ω</span></div>';
+        html += '<div class="summary-row"><span class="summary-label">זרם קצר תיאורטי:</span><span class="summary-value">' + results.I_short.toFixed(2) + ' A</span></div>';
+        html += '<div class="summary-row"><span class="summary-label">איכות ההתאמה (R²):</span><span class="summary-value">' + results.r2.toFixed(4) + '</span></div>';
+
+        // מסקנה
+        let conclusion = '';
+        if (results.r2 > 0.97 && results.r > 0 && results.epsilon > 0) {
+            conclusion = '🎓 הניסוי הושלם בהצלחה! המודל \\(V = \\varepsilon - Ir\\) אושש, וערכי \\(\\varepsilon\\) ו-\\(r\\) של הסוללה חולצו.';
+        } else if (results.r2 > 0.9) {
+            conclusion = '✅ הניסוי הושלם, התקבל קשר ליניארי סביר. דון בדו"ח במקורות שגיאה שעשויים להסביר את הסטיות.';
+        } else {
+            conclusion = '⚠️ ההתאמה הליניארית חלשה - דון בדו"ח באפשרויות: שגיאות מדידה משמעותיות, חימום הסוללה במהלך הניסוי, או שינוי \\(r\\) במהלך הניסוי.';
+        }
+
+        html += '<div style="margin-top:15px; padding:12px; background:white; border-radius:5px; font-weight:bold; text-align:center;">' + conclusion + '</div>';
+
+        content.innerHTML = html;
+
+        if (window.MathJax) MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
+    }
+
+
+
+    /* ============================================================ */
+    /* ============ העלאת תמונות (סטאפ + גרפים) =================== */
+    /* ============================================================ */
+    window.setupImages = [];
+    window.graphImages = [];
+
+    function handleSetupUpload(event) {
+        for (const file of event.target.files) {
+            if (!file.type.startsWith('image/')) continue;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                window.setupImages.push({ name: file.name, dataUrl: e.target.result });
+                renderSetupGallery();
+            };
+            reader.readAsDataURL(file);
+        }
+        event.target.value = '';
+    }
+    function renderSetupGallery() {
+        const g = document.getElementById('setupGallery');
+        if (!g) return;
+        g.innerHTML = window.setupImages.map((img, idx) =>
+            '<div class="image-thumb">' +
+                '<img src="' + img.dataUrl + '" alt="setup">' +
+                '<button class="remove-btn" onclick="removeSetupImage(' + idx + ')" title="הסר">×</button>' +
+                '<div class="thumb-caption">' + escapeHtml(img.name) + '</div>' +
+            '</div>'
+        ).join('');
+    }
+    function removeSetupImage(idx) {
+        window.setupImages.splice(idx, 1);
+        renderSetupGallery();
+    }
+
+    function handleGraphUpload(event) {
+        for (const file of event.target.files) {
+            if (!file.type.startsWith('image/')) continue;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                window.graphImages.push({ name: file.name, dataUrl: e.target.result });
+                renderGraphGallery();
+            };
+            reader.readAsDataURL(file);
+        }
+        event.target.value = '';
+    }
+    function renderGraphGallery() {
+        const g = document.getElementById('graphGallery');
+        if (!g) return;
+        g.innerHTML = window.graphImages.map((img, idx) =>
+            '<div class="image-thumb">' +
+                '<img src="' + img.dataUrl + '" alt="graph">' +
+                '<button class="remove-btn" onclick="removeGraphImage(' + idx + ')" title="הסר">×</button>' +
+                '<div class="thumb-caption">' + escapeHtml(img.name) + '</div>' +
+            '</div>'
+        ).join('');
+    }
+    function removeGraphImage(idx) {
+        window.graphImages.splice(idx, 1);
+        renderGraphGallery();
+    }
+
+    function escapeHtml(s) {
+        const div = document.createElement('div');
+        div.innerText = s;
+        return div.innerHTML;
+    }
+
+    /* ============================================================ */
+    /* ============ עוזרי docx (גנריים) ============================ */
+    /* ============================================================ */
+    function getDocx() {
+        if (typeof window.docx === 'undefined') {
+            throw new Error('ספריית docx לא נטענה. בדוק את חיבור האינטרנט.');
+        }
+        return window.docx;
+    }
+    function escapeText(s) { return (s === null || s === undefined) ? '' : String(s); }
+
+    function P(text, opts) {
+        opts = opts || {};
+        const d = getDocx();
+        const run = new d.TextRun({
+            text: escapeText(text),
+            rightToLeft: true,
+            bold: !!opts.bold,
+            italics: !!opts.italics,
+            size: opts.size,
+            color: opts.color,
+            font: opts.font || 'Arial'
+        });
+        return new d.Paragraph({
+            bidirectional: true,
+            alignment: opts.align || d.AlignmentType.START,
+            spacing: opts.spacing || { after: 120 },
+            indent: opts.indent,
+            heading: opts.heading,
+            shading: opts.shading,
+            border: opts.border,
+            children: [run]
+        });
+    }
+
+    function P_mixed(parts, opts) {
+        opts = opts || {};
+        const d = getDocx();
+        const runs = parts.map(p => new d.TextRun({
+            text: escapeText(p.text),
+            rightToLeft: true,
+            bold: !!p.bold,
+            italics: !!p.italics,
+            color: p.color,
+            size: p.size,
+            font: 'Arial'
+        }));
+        return new d.Paragraph({
+            bidirectional: true,
+            alignment: opts.align || d.AlignmentType.START,
+            spacing: opts.spacing || { after: 120 },
+            children: runs
+        });
+    }
+
+    function H1(text) {
+        const d = getDocx();
+        return P(text, {
+            bold: true, size: 36, color: '1e3a5f',
+            align: d.AlignmentType.CENTER,
+            spacing: { before: 200, after: 240 }
+        });
+    }
+    function H2(text) {
+        const d = getDocx();
+        return P(text, {
+            bold: true, size: 28, color: '1e3a5f',
+            spacing: { before: 280, after: 140 },
+            border: { bottom: { style: d.BorderStyle.SINGLE, size: 8, color: '2980b9', space: 4 } }
+        });
+    }
+    function H3(text) {
+        return P(text, {
+            bold: true, size: 24, color: '2980b9',
+            spacing: { before: 200, after: 100 }
+        });
+    }
+    function bullet(text) {
+        return P('• ' + text, { spacing: { after: 60 }, indent: { start: 360 } });
+    }
+    function formula(text) {
+        const d = getDocx();
+        return P(text, {
+            bold: true, size: 26, color: '1e3a5f',
+            align: d.AlignmentType.CENTER,
+            shading: { fill: 'F0F4F8', type: d.ShadingType.CLEAR },
+            border: {
+                top: { style: d.BorderStyle.DASHED, size: 6, color: '2980b9', space: 4 },
+                bottom: { style: d.BorderStyle.DASHED, size: 6, color: '2980b9', space: 4 },
+                left: { style: d.BorderStyle.DASHED, size: 6, color: '2980b9', space: 4 },
+                right: { style: d.BorderStyle.DASHED, size: 6, color: '2980b9', space: 4 }
+            },
+            spacing: { before: 140, after: 200 }
+        });
+    }
+
+    function tcell(text, opts) {
+        opts = opts || {};
+        const d = getDocx();
+        const cellBorder = { style: d.BorderStyle.SINGLE, size: 4, color: 'AAAAAA' };
+        return new d.TableCell({
+            width: { size: opts.width || 2000, type: d.WidthType.DXA },
+            borders: { top: cellBorder, bottom: cellBorder, left: cellBorder, right: cellBorder },
+            shading: opts.shading ? { fill: opts.shading, type: d.ShadingType.CLEAR } : undefined,
+            margins: { top: 80, bottom: 80, left: 100, right: 100 },
+            children: [new d.Paragraph({
+                bidirectional: true,
+                alignment: d.AlignmentType.CENTER,
+                children: [new d.TextRun({
+                    text: escapeText(text),
+                    rightToLeft: true,
+                    bold: !!opts.bold,
+                    color: opts.color,
+                    font: 'Arial'
+                })]
+            })]
+        });
+    }
+
+    function buildTable(headers, rows, colWidths) {
+        const d = getDocx();
+        colWidths = colWidths || headers.map(() => 2000);
+        const totalWidth = colWidths.reduce((s, w) => s + w, 0);
+        const headerCells = headers.map((h, i) =>
+            tcell(h, { width: colWidths[i], bold: true, shading: '1e3a5f', color: 'FFFFFF' }));
+        const dataRows = rows.map(r => new d.TableRow({
+            children: r.map((c, i) => tcell(c, { width: colWidths[i] }))
+        }));
+        return new d.Table({
+            width: { size: totalWidth, type: d.WidthType.DXA },
+            columnWidths: colWidths,
+            rows: [new d.TableRow({ children: headerCells, tableHeader: true })].concat(dataRows)
+        });
+    }
+
+    function dataUrlToBytes(dataUrl) {
+        const base64 = dataUrl.split(',')[1];
+        const binary = atob(base64);
+        const bytes = new Uint8Array(binary.length);
+        for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+        return bytes;
+    }
+    function getImageType(dataUrl) {
+        const m = dataUrl.match(/^data:image\/(\w+)/);
+        if (!m) return 'png';
+        const t = m[1].toLowerCase();
+        if (t === 'jpeg') return 'jpg';
+        if (['png', 'jpg', 'gif', 'bmp'].includes(t)) return t;
+        return 'png';
+    }
+    function getImageDims(dataUrl) {
+        return new Promise((resolve) => {
+            const img = new Image();
+            img.onload = () => resolve({ w: img.naturalWidth, h: img.naturalHeight });
+            img.onerror = () => resolve({ w: 480, h: 320 });
+            img.src = dataUrl;
+        });
+    }
+    async function buildImageParagraph(imgObj) {
+        const d = getDocx();
+        const dims = await getImageDims(imgObj.dataUrl);
+        const maxW = 480, maxH = 360;
+        let w = dims.w, h = dims.h;
+        const scale = Math.min(maxW / w, maxH / h, 1);
+        w = Math.round(w * scale);
+        h = Math.round(h * scale);
+        const imageParagraph = new d.Paragraph({
+            alignment: d.AlignmentType.CENTER,
+            spacing: { before: 100, after: 80 },
+            children: [new d.ImageRun({
+                data: dataUrlToBytes(imgObj.dataUrl),
+                transformation: { width: w, height: h },
+                type: getImageType(imgObj.dataUrl)
+            })]
+        });
+        const caption = P(imgObj.name || '', {
+            italics: true, color: '555555', size: 18,
+            align: d.AlignmentType.CENTER,
+            spacing: { after: 160 }
+        });
+        return [imageParagraph, caption];
+    }
+
+    /* ============================================================ */
+    /* ============ בנאי תשובות וטקסט חופשי (גנריים) =============== */
+    /* ============================================================ */
+    function buildAnswersChildren(qids) {
+        const out = [H3('שאלות הבנה - תשובות התלמיד')];
+        const ans = window.userAnswers || {};
+        let any = false;
+        qids.forEach((qid, i) => {
+            const a = ans[qid];
+            if (!a) {
+                out.push(P_mixed([
+                    { text: `שאלה ${i+1}: `, bold: true },
+                    { text: '(לא נענתה)', italics: true, color: '888888' }
+                ]));
+                return;
+            }
+            any = true;
+            out.push(P_mixed([
+                { text: `שאלה ${i+1}: `, bold: true },
+                { text: a.question }
+            ], { spacing: { before: 100, after: 40 } }));
+            out.push(P_mixed([
+                { text: (a.isCorrect ? '✓ ' : '✗ '),
+                  bold: true, color: (a.isCorrect ? '27ae60' : 'c0392b') },
+                { text: 'בחירת התלמיד: ', bold: true },
+                { text: a.chosen }
+            ], { spacing: { after: 60 }, indent: { start: 240 } }));
+        });
+        if (!any) {
+            out.push(P('לא נענו שאלות בלשונית זו.', { color: '888888', italics: true }));
+        }
+        return out;
+    }
+
+    function buildUserSummaryChildren(summaryId) {
+        const out = [H3('סיכום וניתוח אישי')];
+        const el = document.getElementById(summaryId);
+        const text = el ? (el.value || '').trim() : '';
+        if (text) {
+            text.split(/\n+/).forEach(line => {
+                if (line.trim()) out.push(P(line.trim()));
+            });
+        } else {
+            out.push(P('(לא נכתב סיכום אישי)', { italics: true, color: '888888' }));
+        }
+        return out;
+    }
+
+    async function buildSetupImagesChildren() {
+        const out = [H3('תרשים / צילום מערכת הניסוי')];
+        if (window.setupImages && window.setupImages.length) {
+            for (const img of window.setupImages) {
+                const c = await buildImageParagraph(img);
+                c.forEach(x => out.push(x));
+            }
+        } else {
+            out.push(P('לא צורפו צילומים של מערכת הניסוי.', { color: 'c0392b', italics: true }));
+        }
+        return out;
+    }
+
+    async function buildGraphsChildren() {
+        const out = [H3('צילומי הגרפים שצורפו')];
+        if (window.graphImages && window.graphImages.length) {
+            for (const img of window.graphImages) {
+                const c = await buildImageParagraph(img);
+                c.forEach(x => out.push(x));
+            }
+        } else {
+            out.push(P('לא צורפו צילומי גרפים.', { color: 'c0392b', italics: true }));
+        }
+        return out;
+    }
+
+    /* ============================================================ */
+    /* ============ תוכן ספציפי לתדריך זה ========================== */
+    /* ============================================================ */
+    function buildTab1Content() {
+        return [
+            H2('שלב 1: רקע תיאורטי - כא"מ, מתח הדקים והתנגדות פנימית'),
+            P('סוללה אינה מקור מתח אידיאלי. בתוכה מתרחשת תגובה כימית שמספקת אנרגיה לכל מטען היחידה שעובר דרכה - גודל זה נקרא הכוח האלקטרו-מניע (כא"מ) ומסומן באות ε. אולם בתוך הסוללה עצמה קיימת גם התנגדות פנימית r, שעליה "מתבזבז" חלק מהמתח ברגע שזורם זרם.'),
+            P('עקרונות מנחים:', { bold: true, spacing: { before: 140, after: 80 } }),
+            bullet('הכא"מ ε הוא המתח של הסוללה בתנאי מעגל פתוח (זרם אפס).'),
+            bullet('כאשר זורם זרם I, נוצרת נפילת מתח I·r בתוך הסוללה.'),
+            bullet('מתח ההדקים V הוא המתח הנמדד בקצוות הסוללה כאשר זורם זרם.'),
+            formula('המשוואה המרכזית:    V = ε − I · r'),
+            P('הגרף של V כפונקציה של I הוא קו ישר: השיפוע הוא −r, והחיתוך עם ציר ה-V הוא ε.')
+        ];
+    }
+    function buildTab2Content() {
+        return [
+            H2('שלב 2: המעגל והציוד'),
+            P('המעגל הניסויי כולל את הרכיבים הבאים:'),
+            bullet('סוללה (לדוגמה AA או 9V) - מקור הכוח האלקטרו-מניע שמטרתנו לאפיין.'),
+            bullet('ראוסטט (התנגדות משתנה) - לשליטה בעוצמת הזרם הזורם במעגל.'),
+            bullet('אמפרמטר - מחובר בטור, מודד את הזרם I.'),
+            bullet('וולטמטר - מחובר במקביל לסוללה, מודד את מתח ההדקים V.'),
+            bullet('מפסק - לפתיחת המעגל בין מדידה למדידה כדי למנוע התחממות.'),
+            P('הזרם הוא המשתנה הבלתי-תלוי (אנו שולטים בו דרך הראוסטט); מתח ההדקים הוא המשתנה התלוי.')
+        ];
+    }
+    function buildTab3Content() {
+        return [
+            H2('שלב 3: ביצוע המדידות'),
+            P('בוצעו 7 מדידות של זוגות (I, V) על-ידי שינוי ערך הראוסטט. בכל מדידה נמדדים הזרם והמתח, וניתן לחשב את ההתנגדות החיצונית הרגעית R = V/I.'),
+            bullet('יש לבחור 7 ערכים שונים של I בטווח רחב, ולפזר אותם אחיד.'),
+            bullet('בין מדידה למדידה כדאי לפתוח את המפסק כדי שהסוללה לא תתחמם.'),
+            bullet('יש לרשום את הקריאות בדיוק כפי שמופיעות במכשירים.')
+        ];
+    }
+    function buildTab4Content() {
+        return [
+            H2('שלב 4: ניתוח גרפי - דיאגרמת פיזור וישר רגרסיה'),
+            P('המשוואה V = ε − I·r היא מהצורה y = a·x + b - משוואת ישר. לכן גרף V מול I צפוי להיות קו ישר.'),
+            P('שלבי הניתוח:', { bold: true, spacing: { before: 140, after: 80 } }),
+            bullet('בונים גרף פיזור: ציר X = זרם I, ציר Y = מתח הדקים V.'),
+            bullet('מעבירים ישר רגרסיה דרך הנקודות (שיטת ריבועים פחותים).'),
+            bullet('השיפוע של הישר הוא −r (ערכו המוחלט הוא ההתנגדות הפנימית).'),
+            bullet('החיתוך עם ציר V הוא ε (הכא"מ של הסוללה).'),
+            bullet('בנייר מילימטרי: בוחרים שתי נקודות על הקו (לא נקודות מדידה) ומחשבים ΔV/ΔI.'),
+            bullet('ב-Excel: משתמשים ב-SLOPE ו-INTERCEPT, או בקו מגמה ליניארי על הגרף.')
+        ];
+    }
+    function buildTab5Content() {
+        return [
+            H2('שלב 5: חישוב ε ו-r'),
+            P('מתוצאות הרגרסיה הליניארית מחלצים את שני הפרמטרים הפיזיקליים:'),
+            formula('ε = חיתוך עם ציר V        r = |שיפוע|'),
+            P('בנוסף ניתן לחשב את זרם הקצר התיאורטי - הזרם שהיה זורם אם היינו מקצרים את הסוללה ישירות:'),
+            formula('I_קצר = ε / r'),
+            P('זהו הזרם המקסימלי שהסוללה יכולה לספק תיאורטית (במציאות לא ניתן להגיע אליו בגלל חימום והתנהגות לא-ליניארית).')
+        ];
+    }
+    function buildTab6Content() {
+        return [
+            H2('שלב 6: שגיאות במדידה'),
+            P('שגיאות נפוצות בניסוי:', { bold: true }),
+            bullet('שגיאת דיוק של מכשירי המדידה - האמפרמטר והוולטמטר יש להם דיוק מוגבל (לדוגמה ±2%).'),
+            bullet('התנגדות החוטים והמגעים - מתווספת ל-r שמחושב; r המחושב גדול יותר מהאמיתי.'),
+            bullet('שגיאת קריאה - דיוק קריאת הספרה האחרונה בתצוגה.'),
+            bullet('חימום הסוללה - בזרמים גבוהים הסוללה מתחממת ו-r משתנה.'),
+            bullet('פריקת הסוללה במהלך הניסוי - ε יורד אט-אט.'),
+            P('ניתן להבחין בין שגיאות מערכתיות (משפיעות באותו כיוון) לאקראיות (משפיעות אקראית).')
+        ];
+    }
+    function buildTab7Content() {
+        return [
+            H2('שלב 7: דיון ומסקנות'),
+            P('המסקנה העיקרית של הניסוי: הסוללה מתנהגת לפי המודל V = ε − I·r. ניתן לחלץ את הפרמטרים ε ו-r שלה מתוך גרף V(I).'),
+            P('יש לכלול בדו"ח:', { bold: true }),
+            bullet('מטרת הניסוי וההיפותזה.'),
+            bullet('תרשים המעגל וזיהוי הציוד.'),
+            bullet('טבלת הנתונים ועמודת R = V/I.'),
+            bullet('גרף V(I) עם ישר רגרסיה.'),
+            bullet('חישוב ε, r, וזרם הקצר.'),
+            bullet('השוואה לערכים מצופים וחישוב שגיאה.'),
+            bullet('פירוט מקורות שגיאה ומסקנה.')
+        ];
+    }
+
+    function buildDataChildren() {
+        const out = [H3('טבלת המדידות שאסף התלמיד')];
+        const rows = [];
+        let any = false;
+        for (let i = 1; i <= 7; i++) {
+            const I = document.getElementById('I3_' + i).value;
+            const V = document.getElementById('V3_' + i).value;
+            const R = document.getElementById('R3_' + i).innerText;
+            if (I || V) any = true;
+            rows.push([
+                (i === 7 ? '7 (זרם גבוה)' : String(i)),
+                I || '—',
+                V || '—',
+                (R && R !== '-') ? R : '—'
+            ]);
+        }
+        if (!any) {
+            out.push(P('לא הוזנו נתונים בטבלה.', { color: 'c0392b', italics: true }));
+            return out;
+        }
+        out.push(buildTable(
+            ['מס׳', 'זרם I (A)', 'מתח הדקים V (V)', 'R = V/I (Ω)'],
+            rows,
+            [1500, 2000, 2500, 2000]
+        ));
+        out.push(P(''));
+        return out;
+    }
+
+    function buildCalculationsChildren() {
+        const out = [H3('חישובים מהרגרסיה הליניארית')];
+        const r = window.regressionResults;
+        if (!r) {
+            out.push(P('הניתוח הגרפי לא בוצע ביישומון (לא הוזנו מספיק נתונים בשלב 3).',
+                       { color: 'c0392b', italics: true }));
+            return out;
+        }
+        out.push(buildTable(
+            ['גודל', 'ערך'],
+            [
+                ['מספר נקודות מדידה', String(r.data.length)],
+                ['טווח זרמים', Math.min(...r.data.map(d=>d.I)).toFixed(3) + ' - ' + Math.max(...r.data.map(d=>d.I)).toFixed(3) + ' A'],
+                ['טווח מתחים', Math.min(...r.data.map(d=>d.V)).toFixed(3) + ' - ' + Math.max(...r.data.map(d=>d.V)).toFixed(3) + ' V'],
+                ['כא"מ של הסוללה ε', r.epsilon.toFixed(3) + ' V'],
+                ['התנגדות פנימית r', r.r.toFixed(3) + ' Ω'],
+                ['זרם קצר תיאורטי I_קצר', r.I_short.toFixed(2) + ' A'],
+                ['איכות ההתאמה R²', r.r2.toFixed(4)]
+            ],
+            [4500, 3500]
+        ));
+        out.push(P(''));
+        // מסקנה
+        let conclusion;
+        if (r.r2 > 0.97 && r.r > 0 && r.epsilon > 0) {
+            conclusion = '🎓 המודל V = ε − Ir אושש; ערכי ε ו-r של הסוללה חולצו בהצלחה.';
+        } else if (r.r2 > 0.9) {
+            conclusion = '✅ התקבל קשר ליניארי סביר. יש לדון במקורות שגיאה שעשויים להסביר את הסטיות.';
+        } else {
+            conclusion = '⚠️ ההתאמה הליניארית חלשה - יש לדון בשגיאות מדידה משמעותיות או בחימום הסוללה.';
+        }
+        out.push(P(conclusion, { bold: true, color: '1e3a5f' }));
+        return out;
+    }
+
+    /* ============================================================ */
+    /* ============ הפונקציה הראשית: הורדת הדו"ח =================== */
+    /* ============================================================ */
+    async function downloadDocxReport() {
+        const msg = document.getElementById('summaryFileMsg');
+        msg.style.display = 'block';
+        msg.style.color = 'var(--secondary)';
+        msg.innerText = '⏳ מכין את קובץ ה-Word...';
+
+        try {
+            const d = getDocx();
+
+            const studentName = (document.getElementById('studentName').value || '').trim() || '________________';
+            const studentClass = (document.getElementById('studentClass').value || '').trim() || '____________';
+            const rawDate = document.getElementById('reportDate').value;
+            let reportDateStr;
+            if (rawDate) {
+                const parts = rawDate.split('-');
+                reportDateStr = parts[2] + '/' + parts[1] + '/' + parts[0];
+            } else {
+                reportDateStr = new Date().toLocaleDateString('he-IL');
+            }
+
+            const children = [];
+
+            children.push(H1('דו"ח מעבדה: כא"מ ומתח הדקים של סוללה'));
+            children.push(buildTable(
+                ['שם התלמיד/ה', 'כיתה', 'תאריך'],
+                [[studentName, studentClass, reportDateStr]],
+                [3500, 2000, 2500]
+            ));
+            children.push(P(''));
+            children.push(P_mixed([
+                { text: 'מטרת הניסוי: ', bold: true },
+                { text: 'מציאת הכוח האלקטרו-מניע (כא"מ, ε) וההתנגדות הפנימית (r) של סוללה, באמצעות מדידת מתח ההדקים כפונקציה של הזרם, ובדיקת תקפות המודל V = ε − I·r.' }
+            ], { spacing: { after: 200 } }));
+
+            // לשונית 1
+            buildTab1Content().forEach(c => children.push(c));
+            buildAnswersChildren(['q1_1','q1_2','q1_3']).forEach(c => children.push(c));
+            buildUserSummaryChildren('summary1').forEach(c => children.push(c));
+
+            // לשונית 2 - כולל תמונות הסטאפ
+            buildTab2Content().forEach(c => children.push(c));
+            (await buildSetupImagesChildren()).forEach(c => children.push(c));
+            buildAnswersChildren(['q2_1','q2_2','q2_3']).forEach(c => children.push(c));
+            buildUserSummaryChildren('summary2').forEach(c => children.push(c));
+
+            // לשונית 3 - כולל טבלת הנתונים
+            buildTab3Content().forEach(c => children.push(c));
+            buildDataChildren().forEach(c => children.push(c));
+            buildAnswersChildren(['q3_1','q3_2','q3_3']).forEach(c => children.push(c));
+            buildUserSummaryChildren('summary3').forEach(c => children.push(c));
+
+            // לשונית 4 - כולל הגרפים
+            buildTab4Content().forEach(c => children.push(c));
+            (await buildGraphsChildren()).forEach(c => children.push(c));
+            buildAnswersChildren(['q4_1','q4_2','q4_3']).forEach(c => children.push(c));
+            buildUserSummaryChildren('summary4').forEach(c => children.push(c));
+
+            // לשונית 5 - כולל החישובים
+            buildTab5Content().forEach(c => children.push(c));
+            buildCalculationsChildren().forEach(c => children.push(c));
+            buildAnswersChildren(['q5_1','q5_2','q5_3']).forEach(c => children.push(c));
+            buildUserSummaryChildren('summary5').forEach(c => children.push(c));
+
+            // לשונית 6
+            buildTab6Content().forEach(c => children.push(c));
+            buildAnswersChildren(['q6_1','q6_2','q6_3']).forEach(c => children.push(c));
+            buildUserSummaryChildren('summary6').forEach(c => children.push(c));
+
+            // לשונית 7
+            buildTab7Content().forEach(c => children.push(c));
+            buildAnswersChildren(['q7_1','q7_2','q7_3']).forEach(c => children.push(c));
+            buildUserSummaryChildren('summary7').forEach(c => children.push(c));
+
+            // יצירת המסמך
+            const doc = new d.Document({
+                creator: 'יישומון תדריך מעבדה',
+                title: 'דו"ח מעבדה: כא"מ ומתח הדקים',
+                styles: {
+                    default: {
+                        document: { run: { font: 'Arial', size: 22 } }
+                    }
+                },
+                sections: [{
+                    properties: {
+                        page: {
+                            size: { width: 11906, height: 16838 },  // A4
+                            margin: { top: 1080, right: 1080, bottom: 1080, left: 1080 }
+                        }
+                    },
+                    children: children
+                }]
+            });
+
+            const blob = await d.Packer.toBlob(doc);
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            const safeName = studentName.replace(/[<>:"/\\|?*]/g, '_').trim() || 'תלמיד';
+            a.download = 'דוח_מעבדה_' + safeName + '.docx';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            msg.style.color = 'var(--success)';
+            msg.innerText = '✓ הדו"ח הורד בהצלחה: ' + a.download;
+        } catch (err) {
+            console.error(err);
+            msg.style.color = 'var(--error)';
+            msg.innerText = '✗ שגיאה ביצירת הדו"ח: ' + err.message;
+        }
+    }
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>רשימת מטלות</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:system-ui,sans-serif;background:#f3ede1;color:#211d18;
+    min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:70px 24px 40px}
+  .back{position:fixed;top:18px;right:18px;text-decoration:none;color:#8a3d1d;font-weight:600}
+  h1{font-size:1.6rem;margin-bottom:22px}
+  .box{width:100%;max-width:440px;background:#fbf7ee;border:1.5px solid #d9cdb6;border-radius:18px;padding:22px;box-shadow:0 16px 34px -18px rgba(60,45,25,.3)}
+  .add{display:flex;gap:8px;margin-bottom:18px}
+  input[type=text]{flex:1;font-size:1rem;padding:12px;border:1.5px solid #d9cdb6;border-radius:10px;background:#fff}
+  .add button{border:none;background:#b5532a;color:#fff;border-radius:10px;padding:0 18px;font-size:1.4rem;cursor:pointer}
+  ul{list-style:none}
+  li{display:flex;align-items:center;gap:10px;padding:11px 4px;border-bottom:1px solid #ece3d2}
+  li:last-child{border-bottom:none}
+  li span{flex:1;cursor:pointer}
+  li.done span{text-decoration:line-through;color:#a89a83}
+  .del{border:none;background:none;cursor:pointer;color:#b5532a;font-size:1.1rem}
+  .empty{color:#a89a83;text-align:center;padding:14px}
+</style>
+</head>
+<body>
+<a class="back" href="../index.html">→ חזרה לאינדקס</a>
+<h1>רשימת מטלות</h1>
+<div class="box">
+  <div class="add">
+    <input id="inp" type="text" placeholder="מה צריך לעשות?" onkeydown="if(event.key==='Enter')add()">
+    <button onclick="add()">+</button>
+  </div>
+  <ul id="list"></ul>
+</div>
+<script>
+  let items=[];
+  const list=document.getElementById('list'),inp=document.getElementById('inp');
+  function render(){
+    if(!items.length){list.innerHTML='<div class="empty">אין מטלות עדיין 🌿</div>';return;}
+    list.innerHTML=items.map((it,i)=>
+      `<li class="${it.done?'done':''}">
+         <input type="checkbox" ${it.done?'checked':''} onchange="toggle(${i})">
+         <span onclick="toggle(${i})">${it.text.replace(/[<>&]/g,'')}</span>
+         <button class="del" onclick="remove(${i})">✕</button>
+       </li>`).join('');
+  }
+  function add(){const t=inp.value.trim();if(!t)return;items.push({text:t,done:false});inp.value='';render();}
+  function toggle(i){items[i].done=!items[i].done;render();}
+  function remove(i){items.splice(i,1);render();}
+  render();
+</script>
+</body>
+</html>

@@ -1,0 +1,1770 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>מעבדת פיזיקה - תנועת עגלה במישור משופע</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML" async></script>
+    <script src="https://unpkg.com/docx@8.5.0/build/index.umd.js"></script>
+    <style>
+        :root {
+            --primary: #1e3a5f;
+            --secondary: #2980b9;
+            --accent: #e67e22;
+            --success: #27ae60;
+            --error: #e74c3c;
+            --locked: #95a5a6;
+            --bg: #f4f7f6;
+        }
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background-color: var(--bg);
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        .container {
+            max-width: 1050px;
+            margin: auto;
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: var(--primary);
+            border-bottom: 3px solid var(--secondary);
+            padding-bottom: 12px;
+            font-size: 1.8em;
+        }
+        h2 { color: var(--primary); margin-top: 0; }
+        h3 { color: var(--secondary); }
+
+        /* ניווט */
+        .tabs {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+            background: #eee;
+            border-radius: 10px;
+            padding: 5px;
+            margin-bottom: 25px;
+        }
+        .tab {
+            flex: 1;
+            min-width: 130px;
+            padding: 10px;
+            text-align: center;
+            cursor: pointer;
+            font-weight: bold;
+            border-radius: 8px;
+            transition: 0.3s;
+            margin: 2px;
+            font-size: 0.9em;
+            position: relative;
+        }
+        .tab:hover:not(.locked) { background: #ddd; }
+        .tab.active { background: var(--secondary); color: white; }
+        .tab.locked {
+            color: var(--locked);
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+        .tab.completed::after {
+            content: "✓";
+            position: absolute;
+            top: 2px;
+            left: 5px;
+            color: var(--success);
+            font-weight: bold;
+        }
+        .tab.locked::after {
+            content: "🔒";
+            position: absolute;
+            top: 2px;
+            left: 5px;
+            font-size: 0.8em;
+        }
+
+        /* תוכן */
+        .content {
+            display: none;
+            border-right: 5px solid var(--secondary);
+            padding-right: 20px;
+            animation: fadeIn 0.4s;
+        }
+        .content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .theory { margin-bottom: 20px; font-size: 1.1em; line-height: 1.7; }
+        .example {
+            background: #fff9c4;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #fbc02d;
+            margin: 15px 0;
+        }
+        .important {
+            background: #e8f5e9;
+            border-right: 5px solid var(--success);
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+        .warning {
+            background: #ffebee;
+            border-right: 5px solid var(--error);
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+        .formula {
+            background: #f0f4f8;
+            border: 1px dashed var(--secondary);
+            padding: 15px;
+            text-align: center;
+            font-size: 1.2em;
+            margin: 15px 0;
+            border-radius: 8px;
+        }
+
+        /* שאלות */
+        .quiz {
+            background: #e3f2fd;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            border-right: 4px solid var(--secondary);
+        }
+        .question {
+            font-weight: bold;
+            font-size: 1.05em;
+            margin-bottom: 15px;
+            color: var(--primary);
+        }
+        .option {
+            background: white;
+            border: 2px solid var(--secondary);
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: 0.2s;
+            font-weight: 500;
+        }
+        .option:hover { background: #bbdefb; }
+        .option.correct { background: #c8e6c9; border-color: var(--success); }
+        .option.wrong { background: #ffcdd2; border-color: var(--error); }
+        .feedback {
+            font-weight: bold;
+            margin-top: 10px;
+            display: none;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        /* סקיצות */
+        .sketch-container {
+            text-align: center;
+            margin: 25px 0;
+            background: #fff;
+            padding: 25px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+        }
+        svg { max-width: 100%; height: auto; }
+
+        /* טבלת נתונים */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        .data-table th {
+            background: var(--primary);
+            color: white;
+            padding: 12px;
+            font-size: 1.05em;
+        }
+        .data-table td {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            text-align: center;
+        }
+        .data-table input {
+            width: 90%;
+            padding: 8px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            text-align: center;
+            font-size: 1em;
+            transition: 0.2s;
+        }
+        .data-table input:focus {
+            outline: none;
+            border-color: var(--secondary);
+            background: #f0f8ff;
+        }
+
+        /* כפתור סיום שלב */
+        .complete-section {
+            margin-top: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, #ecf0f1 0%, #d5dbdb 100%);
+            border-radius: 10px;
+            text-align: center;
+            border: 2px dashed var(--secondary);
+        }
+        .complete-btn {
+            background: var(--success);
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            font-size: 1.05em;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.3s;
+            box-shadow: 0 3px 8px rgba(39, 174, 96, 0.3);
+        }
+        .complete-btn:hover {
+            background: #229954;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 12px rgba(39, 174, 96, 0.4);
+        }
+        .complete-btn:disabled {
+            background: var(--locked);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        .complete-msg {
+            display: none;
+            margin-top: 15px;
+            color: var(--success);
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+
+        /* סיכום נתונים */
+        .summary-box {
+            background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+            padding: 25px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border: 2px solid var(--success);
+        }
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(0,0,0,0.08);
+            font-size: 1.05em;
+        }
+        .summary-row:last-child { border-bottom: none; }
+        .summary-label { font-weight: bold; color: var(--primary); }
+        .summary-value { color: var(--accent); font-weight: bold; }
+
+        /* פרוגרס בר */
+        .progress-bar {
+            background: #ddd;
+            height: 8px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            background: linear-gradient(90deg, var(--secondary), var(--success));
+            height: 100%;
+            width: 0%;
+            transition: width 0.5s;
+        }
+
+        ul { line-height: 1.8; }
+
+        /* אזור סיכום חופשי בכל לשונית */
+        .tab-summary {
+            background: #f0f4f8;
+            border: 2px dashed var(--secondary);
+            border-radius: 10px;
+            padding: 18px 20px;
+            margin: 25px 0 15px 0;
+        }
+        .tab-summary > label {
+            display: block;
+            font-weight: bold;
+            color: var(--primary);
+            margin-bottom: 10px;
+            font-size: 1.05em;
+        }
+        .tab-summary textarea {
+            width: 100%;
+            min-height: 110px;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 1em;
+            line-height: 1.6;
+            resize: vertical;
+            box-sizing: border-box;
+            direction: rtl;
+            background: white;
+        }
+        .tab-summary textarea:focus {
+            outline: none;
+            border-color: var(--secondary);
+            box-shadow: 0 0 0 3px rgba(41, 128, 185, 0.15);
+        }
+
+        /* טופס פרטי תלמיד */
+        .student-info {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin: 15px 0;
+            background: white;
+            padding: 14px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+        }
+        .student-info > div {
+            flex: 1;
+            min-width: 180px;
+        }
+        .student-info label {
+            display: block;
+            font-weight: bold;
+            color: var(--primary);
+            font-size: 0.9em;
+            margin-bottom: 5px;
+        }
+        .student-info input {
+            width: 100%;
+            padding: 8px 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 1em;
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>תדריך מעבדה: תנועת עגלה במישור משופע</h1>
+    <p style="text-align:center; color:#666; font-style:italic;">מטרת הניסוי: אישוש קבוע התאוצה הכובדית g באמצעות מדידת תאוצת עגלה במישור משופע</p>
+
+    <div class="progress-bar">
+        <div class="progress-fill" id="progressFill"></div>
+    </div>
+
+    <div class="tabs">
+        <div class="tab active" data-tab="tab1" onclick="openTab(event, 'tab1')">1. רקע תיאורטי</div>
+        <div class="tab" data-tab="tab2" onclick="openTab(event, 'tab2')">2. ניתוח גיאומטרי</div>
+        <div class="tab" data-tab="tab3" onclick="openTab(event, 'tab3')">3. תכנון וציוד</div>
+        <div class="tab" data-tab="tab4" onclick="openTab(event, 'tab4')">4. ביצוע ואיסוף נתונים</div>
+        <div class="tab" data-tab="tab5" onclick="openTab(event, 'tab5')">5. ניתוח גרפי</div>
+        <div class="tab" data-tab="tab6" onclick="openTab(event, 'tab6')">6. שגיאות ומסקנות</div>
+    </div>
+
+    <!-- ===== לשונית 1: רקע תיאורטי ===== -->
+    <div id="tab1" class="content active">
+        <div class="theory">
+            <h2>שלב 1: רקע תיאורטי - חוק ניוטון השני במישור משופע</h2>
+            <p>בניסוי זה נחקור את התנועה של עגלה הנעה במישור משופע חלק. המטרה: לאמת את ערכו של קבוע התאוצה הכובדית \(g \approx 9.8 \, \text{m/s}^2\) באמצעות חוק ניוטון השני.</p>
+        </div>
+
+        <div class="sketch-container">
+            <h3>תרשים כוחות על העגלה</h3>
+            <svg viewBox="0 0 500 320" xmlns="http://www.w3.org/2000/svg">
+                <!-- מישור משופע -->
+                <line x1="50" y1="270" x2="450" y2="270" stroke="#333" stroke-width="2"/>
+                <line x1="50" y1="270" x2="450" y2="120" stroke="var(--primary)" stroke-width="3"/>
+                <line x1="450" y1="270" x2="450" y2="120" stroke="#333" stroke-width="2" stroke-dasharray="5,3"/>
+
+                <!-- זווית -->
+                <path d="M 100,270 A 50,50 0 0 0 95,252" fill="none" stroke="var(--accent)" stroke-width="2"/>
+                <text x="110" y="262" font-size="18" fill="var(--accent)" font-weight="bold">θ</text>
+
+                <!-- העגלה -->
+                <g transform="translate(250, 195) rotate(-20.5)">
+                    <rect x="-30" y="-15" width="60" height="25" fill="var(--secondary)" stroke="#333" stroke-width="2" rx="3"/>
+                    <circle cx="-18" cy="13" r="6" fill="#333"/>
+                    <circle cx="18" cy="13" r="6" fill="#333"/>
+                </g>
+
+                <!-- וקטור משקל -->
+                <line x1="250" y1="195" x2="250" y2="290" stroke="var(--error)" stroke-width="3" marker-end="url(#arrowRed)"/>
+                <text x="255" y="295" font-size="16" fill="var(--error)" font-weight="bold">mg</text>
+
+                <!-- וקטור נורמל -->
+                <line x1="250" y1="195" x2="217" y2="105" stroke="#27ae60" stroke-width="3" marker-end="url(#arrowGreen)"/>
+                <text x="200" y="100" font-size="16" fill="#27ae60" font-weight="bold">N</text>
+
+                <!-- רכיב mg sinθ - לאורך המישור, פונה במורד (כיוון התאוצה) -->
+                <line x1="250" y1="195" x2="175" y2="223" stroke="#8e44ad" stroke-width="3" marker-end="url(#arrowPurple)"/>
+                <text x="100" y="218" font-size="14" fill="#8e44ad" font-weight="bold">mg sinθ</text>
+
+                <!-- תוויות -->
+                <text x="240" y="305" font-size="14" fill="#333">אורך היתר L = 1m</text>
+                <text x="455" y="200" font-size="14" fill="#333">h</text>
+
+                <defs>
+                    <marker id="arrowRed" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                        <path d="M0,0 L0,6 L9,3 z" fill="var(--error)"/>
+                    </marker>
+                    <marker id="arrowGreen" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                        <path d="M0,0 L0,6 L9,3 z" fill="#27ae60"/>
+                    </marker>
+                    <marker id="arrowPurple" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                        <path d="M0,0 L0,6 L9,3 z" fill="#8e44ad"/>
+                    </marker>
+                </defs>
+            </svg>
+        </div>
+
+        <div class="important">
+            <strong>📌 עקרונות מנחים:</strong>
+            <ul>
+                <li><strong>חוק ניוטון השני:</strong> סכום הכוחות שווה למסה כפול תאוצה: \(\Sigma F = m \cdot a\)</li>
+                <li><strong>הכוחות הפועלים על העגלה:</strong> כוח הכובד \(mg\) (מטה), הכוח הנורמלי \(N\) (ניצב למישור).</li>
+                <li><strong>פירוק כוחות:</strong> נוח לפרק את כוח הכובד לרכיב מקביל למישור (\(mg\sin\theta\)) ולרכיב ניצב למישור (\(mg\cos\theta\)).</li>
+                <li><strong>הרכיב הניצב מאוזן:</strong> \(N = mg\cos\theta\) (אין תאוצה ניצבת למישור).</li>
+                <li><strong>הרכיב המקביל מניב את התאוצה:</strong> \(mg\sin\theta = ma\) ולכן \(a = g\sin\theta\).</li>
+            </ul>
+        </div>
+
+        <div class="formula">
+            המשוואה המרכזית של הניסוי: \(\quad a = g\sin\theta\)
+        </div>
+
+        <!-- שאלות -->
+        <div class="quiz">
+            <p class="question">שאלה 1: מדוע אנו מפרקים את כוח הכובד דווקא לאורך המישור ובניצב לו, ולא לאופקי ולאנכי?</p>
+            <div class="option" onclick="checkAns(this, false, 'לא מדויק. הכיוון של הוקטור mg הוא תמיד אנכי כלפי מטה, ללא קשר לבחירת הצירים.')">כי כוח הכובד בעצמו פועל לאורך המישור.</div>
+            <div class="option" onclick="checkAns(this, true, 'מצוין! התנועה כולה היא לאורך המישור, ואין תנועה בניצב לו. בחירת צירים זו פותרת את המשוואות באופן הפשוט ביותר.', 'q1_1')">כי התאוצה היא לאורך המישור בלבד, והניצב למישור מתאזן - בחירה זו מפשטת את המשוואות.</div>
+            <div class="option" onclick="checkAns(this, false, 'לא נכון. הבחירה לא קשורה ליעילות הסנסור אלא לפיזיקה של הבעיה.')">כי הסנסור מודד מהירות רק לאורך המישור.</div>
+            <div class="feedback"></div>
+        </div>
+
+        <div class="quiz">
+            <p class="question">שאלה 2: מה תפקידו של הכוח הנורמלי \(N\) במשוואת התנועה לאורך המישור?</p>
+            <div class="option" onclick="checkAns(this, true, 'נכון! הכוח הנורמלי ניצב למישור ולכן רכיבו לאורך המישור הוא אפס. הוא לא משתתף במשוואת התאוצה לאורך המישור.', 'q1_2')">אין לו תפקיד - הוא ניצב למישור ולכן לא משפיע על המשוואה לאורך המישור.</div>
+            <div class="option" onclick="checkAns(this, false, 'טעות. הכוח הנורמלי ניצב למישור, ולכן לא תורם לתנועה לאורכו.')">הוא מאיט את העגלה ולכן מקטין את התאוצה.</div>
+            <div class="option" onclick="checkAns(this, false, 'לא נכון. הוא ניצב למישור ולא מקדם את התנועה לאורכו.')">הוא הכוח שגורם לתאוצה לאורך המישור.</div>
+            <div class="feedback"></div>
+        </div>
+
+        <div class="quiz">
+            <p class="question">שאלה 3: לפי המשוואה \(a = g\sin\theta\), מה צפוי לקרות לתאוצה כאשר נגדיל את זווית השיפוע?</p>
+            <div class="option" onclick="checkAns(this, false, 'טעות. ככל ש-θ גדל, גם sinθ גדל ולכן גם התאוצה.')">התאוצה תקטן כי המישור תלול יותר.</div>
+            <div class="option" onclick="checkAns(this, true, 'מדויק! כאשר \\(\\theta \\to 90°\\), \\(\\sin\\theta \\to 1\\) והתאוצה שואפת ל-g (נפילה חופשית).', 'q1_3')">התאוצה תגדל ותתקרב ל-g כאשר הזווית מתקרבת ל-90°.</div>
+            <div class="option" onclick="checkAns(this, false, 'לא. התאוצה תלויה רק בזווית ובקבוע g, לא במסה.')">התאוצה תלויה גם במסת העגלה.</div>
+            <div class="feedback"></div>
+        </div>
+
+        <div class="tab-summary">
+            <label for="summary1">📝 סיכום הלשונית / ניתוח ממצאים (טקסט חופשי):</label>
+            <textarea id="summary1" placeholder="כאן ניתן לרשום את הסיכום שלך לשלב זה — הבנות מרכזיות, נוסחאות חשובות, או כל דבר שתרצה להוסיף לדו&quot;ח. הטקסט ייכלל בקובץ הדו&quot;ח."></textarea>
+        </div>
+
+        <!-- כפתור סיום -->
+        <div class="complete-section">
+            <p>לאחר קריאת הרקע ומענה על שאלות ההבנה, רשום את הנקודות העיקריות בדו"ח שלך.</p>
+            <button class="complete-btn" id="btn1" onclick="completeStage(1)">✓ סיימתי, הבנתי ורשמתי בדו"ח</button>
+            <div class="complete-msg" id="msg1">השלב הושלם בהצלחה! ניתן לעבור לשלב הבא 🎉</div>
+        </div>
+    </div>
+
+    <!-- ===== לשונית 2: ניתוח גיאומטרי ===== -->
+    <div id="tab2" class="content">
+        <div class="theory">
+            <h2>שלב 2: הניתוח הגיאומטרי - מהזווית לגובה</h2>
+            <p>בניסוי שלנו ננצל את העובדה שהיתר של המישור הוא בדיוק 1 מטר כדי לקבל קשר ליניארי <strong>מדויק</strong> בין התאוצה לגובה המישור - ללא צורך בקירוב כלשהו. הבנה זו היא קריטית לדו"ח.</p>
+        </div>
+
+        <div class="sketch-container">
+            <h3>הגדרת המשתנים הגיאומטריים</h3>
+            <svg viewBox="0 0 500 280" xmlns="http://www.w3.org/2000/svg">
+                <!-- משולש: היתר הוא הצלע המשופעת באורך 1 מטר -->
+                <line x1="80" y1="240" x2="430" y2="240" stroke="#333" stroke-width="3"/>
+                <line x1="80" y1="240" x2="430" y2="100" stroke="var(--secondary)" stroke-width="4"/>
+                <line x1="430" y1="240" x2="430" y2="100" stroke="var(--accent)" stroke-width="3"/>
+
+                <!-- תיוגים -->
+                <text x="240" y="265" font-size="14" fill="#333">ניצב אופקי</text>
+                <text x="445" y="180" font-size="16" fill="var(--accent)" font-weight="bold">h</text>
+                <text x="200" y="155" font-size="16" fill="var(--secondary)" font-weight="bold">L = 1 מטר (היתר)</text>
+
+                <!-- זווית -->
+                <path d="M 130,240 A 50,50 0 0 0 125,220" fill="none" stroke="#8e44ad" stroke-width="2"/>
+                <text x="140" y="232" font-size="18" fill="#8e44ad" font-weight="bold">θ</text>
+
+                <!-- סימון זווית ישרה -->
+                <rect x="415" y="225" width="15" height="15" fill="none" stroke="#333" stroke-width="2"/>
+            </svg>
+        </div>
+
+        <div class="important">
+            <strong>📌 עקרונות מנחים:</strong>
+            <ul>
+                <li><strong>מצב הניסוי:</strong> אורך <strong>היתר</strong> של המשולש (הצלע המשופעת עליה זזה העגלה) קבוע ושווה ל-1 מטר. גובה המישור (h) הוא הניצב האנכי שאותו נשנה.</li>
+                <li><strong>הקשר הטריגונומטרי המדויק:</strong> \(\sin\theta = \dfrac{h}{L} = \dfrac{h}{1} = h\) (כאשר h נמדד במטרים).</li>
+                <li><strong>שים לב - קשר מדויק, לא קירוב!</strong> מאחר שהיתר הוא בדיוק 1 מטר, מתקיים \(\sin\theta = h\) <strong>בדיוק</strong> - ללא צורך בקירוב כלשהו.</li>
+                <li><strong>מסקנה:</strong> נציב במשוואת התנועה \(a = g\sin\theta\) ונקבל: \(a = g \cdot h\) - <strong>זוהי משוואה מדויקת</strong>.</li>
+            </ul>
+        </div>
+
+        <div class="formula">
+            המשוואה הסופית של הניסוי (מדויקת): \(\quad a = g \cdot h\)
+        </div>
+
+        <div class="example">
+            <strong>דגש חשוב:</strong> בדו"ח עליך להראות בפירוט את הגזירה הזו - התחלה מחוק ניוטון השני, פירוק הכוחות, קבלת \(a = g\sin\theta\), ולבסוף השימוש בעובדה ש-\(L = 1\,m\) ולכן \(\sin\theta = h\), שמוביל למשוואה המדויקת \(a = g \cdot h\). אל תוותר על אף שלב!
+        </div>
+
+        <!-- שאלות -->
+        <div class="quiz">
+            <p class="question">שאלה 1: מדוע מתקיים \(\sin\theta = h\) כאשר אורך היתר הוא 1 מטר?</p>
+            <div class="option" onclick="checkAns(this, true, 'נכון! ההגדרה הטריגונומטרית של סינוס: יחס בין הניצב הנגדי (h) ליתר (L). היחס הוא h/L = h/1 = h. זהו שוויון מדויק - לא קירוב!', 'q2_1')">כי לפי הגדרת הסינוס: היחס בין הניצב הנגדי ליתר = h/L = h/1 = h.</div>
+            <div class="option" onclick="checkAns(this, false, 'לא נכון. טנגנס משתמש ביחס בין שני הניצבים, לא בין ניצב ליתר.')">כי לפי הגדרת הטנגנס: היחס בין שני הניצבים = h.</div>
+            <div class="option" onclick="checkAns(this, false, 'טעות. ללא היתר = 1m, היחס לא היה מתפשט לערך פשוט.')">זה נכון תמיד, ללא קשר לאורך היתר.</div>
+            <div class="feedback"></div>
+        </div>
+
+        <div class="quiz">
+            <p class="question">שאלה 2: מה היה קורה אילו במקום היתר היה הניצב האופקי באורך 1 מטר?</p>
+            <div class="option" onclick="checkAns(this, true, 'מצוין! במקרה כזה היה מתקיים \\(\\tan\\theta = h\\) (ולא \\(\\sin\\theta = h\\)). כדי לקבל את \\(a = g \\cdot h\\) היה צורך בקירוב \\(\\sin\\theta \\approx \\tan\\theta\\) - תקף רק לזוויות קטנות.', 'q2_2')">היה מתקיים tan θ = h ולא sin θ = h. ניסוח \(a = g \cdot h\) היה דורש קירוב לזוויות קטנות.</div>
+            <div class="option" onclick="checkAns(this, false, 'לא. במקרה הזה היחס היה משתנה - הוא תלוי באיזו צלע באורך מטר.')">היה אותו דבר בדיוק - לא משנה איזה צלע במשולש באורך מטר.</div>
+            <div class="option" onclick="checkAns(this, false, 'לא נכון - אם הניצב האופקי = מטר אז tan θ = h, לא 1/h.')">היה מתקיים sin θ = 1/h.</div>
+            <div class="feedback"></div>
+        </div>
+
+        <div class="quiz">
+            <p class="question">שאלה 3: אם נשרטט גרף של \(a\) כפונקציה של \(h\), מה אנו מצפים שיהיה שיפוע הגרף?</p>
+            <div class="option" onclick="checkAns(this, false, 'לא. מסת העגלה מצטמצמת במשוואה כי היא מופיעה בשני האגפים של חוק ניוטון.')">מסת העגלה m.</div>
+            <div class="option" onclick="checkAns(this, true, 'מצוין! לפי \\(a = g \\cdot h\\), השיפוע צפוי להיות g, כלומר בקירוב 9.8 m/s². זו בעצם המטרה של הניסוי - לאשש את ערך g!', 'q2_3')">קבוע התאוצה הכובדית g, בקירוב 9.8 m/s².</div>
+            <div class="option" onclick="checkAns(this, false, 'לא. ערך זה אינו רלוונטי לגרף a(h).')">אורך היתר L.</div>
+            <div class="feedback"></div>
+        </div>
+
+        <div class="tab-summary">
+            <label for="summary2">📝 סיכום הלשונית / ניתוח ממצאים (טקסט חופשי):</label>
+            <textarea id="summary2" placeholder="כאן ניתן לרשום את הסיכום שלך לשלב זה — הבנות מרכזיות, גזירת המשוואה, או כל דבר שתרצה להוסיף לדו&quot;ח."></textarea>
+        </div>
+
+        <div class="complete-section">
+            <p>ודא שהבנת את הקשר הגיאומטרי וכי גזרת אותו במלואו בדו"ח.</p>
+            <button class="complete-btn" id="btn2" onclick="completeStage(2)">✓ סיימתי, הבנתי ורשמתי בדו"ח</button>
+            <div class="complete-msg" id="msg2">השלב הושלם בהצלחה! ניתן לעבור לשלב הבא 🎉</div>
+        </div>
+    </div>
+
+    <!-- ===== לשונית 3: תכנון וציוד ===== -->
+    <div id="tab3" class="content">
+        <div class="theory">
+            <h2>שלב 3: תכנון הניסוי וזיהוי הציוד</h2>
+            <p>לפני הביצוע, יש להכיר את הציוד ולתכנן את שיטת איסוף הנתונים. שלב זה כולל הבחנה בין משתנה תלוי, בלתי תלוי ובידוד משתנים.</p>
+        </div>
+
+        <div class="important">
+            <strong>📌 הציוד הנדרש:</strong>
+            <ul>
+                <li><strong>מישור משופע מתכוונן:</strong> אורך היתר (הצלע המשופעת) קבוע על 1 מטר; הגובה (h) ניתן לשינוי.</li>
+                <li><strong>עגלה:</strong> בעלת מיסבים איכותיים למזעור החיכוך.</li>
+                <li><strong>סנסור מהירות:</strong> מודד את המהירות הרגעית של העגלה לאורך התנועה.</li>
+                <li><strong>סרגל / מד גובה:</strong> למדידה מדויקת של h.</li>
+                <li><strong>מחשב עם Excel:</strong> ליצירת ישר רגרסיה וחישוב השיפוע.</li>
+            </ul>
+        </div>
+
+        <div class="example">
+            <strong>זיהוי המשתנים בניסוי:</strong>
+            <ul>
+                <li><strong>משתנה בלתי תלוי:</strong> גובה המישור h (אנו שולטים בו).</li>
+                <li><strong>משתנה תלוי:</strong> תאוצת העגלה a (תוצאה של h).</li>
+                <li><strong>משתנים מבודדים (קבועים):</strong> אורך היתר (1m), מסת העגלה, סוג המשטח.</li>
+            </ul>
+        </div>
+
+        <div class="warning">
+            <strong>⚠️ נקודות לבדיקה לפני ההפעלה:</strong>
+            <ul>
+                <li><strong>השולחן מאוזן ואינו נטוי:</strong> זוהי הבדיקה החשובה ביותר! שיפוע של השולחן יוסיף או יחסיר מזווית המישור הרצויה ויטה את התוצאה. אם זוהה שיפוע - ניתן לתקן זאת על ידי סיבוב השולחן עד למצב מאוזן.</li>
+                <li>שהסנסור ממוקם נכון ובאופן שיקלוט את כל מסלול העגלה.</li>
+                <li>שהמישור יציב ולא רועד בעת השחרור.</li>
+                <li>שהעגלה תקנית עם גלגלים תקינים. <em>אין צורך לדאוג לחיכוך - בעגלת מעבדה תקנית החיכוך זניח.</em></li>
+            </ul>
+        </div>
+
+        <!-- שאלות -->
+        <div class="quiz">
+            <p class="question">שאלה 1: מדוע חשוב לוודא שהשולחן עליו ממוקם המישור המשופע אינו נטוי?</p>
+            <div class="option" onclick="checkAns(this, true, 'נכון! שיפוע של השולחן יוסיף או יחסיר מזווית המישור האמיתית, וכך הגובה h הנמדד לא יתאים לזווית בפועל. הפתרון פשוט - סיבוב השולחן עד למצב מאוזן.', 'q3_1')">שיפוע השולחן יוסיף או יחסיר מזווית המישור האמיתית ויעוות את הקשר בין h ל-θ. ניתן לתקן ע"י סיבוב השולחן.</div>
+            <div class="option" onclick="checkAns(this, false, 'לא. הסנסור פועל באופן יחסי למסלול העגלה ולא מושפע מהאופקיות של השולחן בצורה ישירה.')">כי הסנסור לא מסוגל למדוד מהירות על שולחן נטוי.</div>
+            <div class="option" onclick="checkAns(this, false, 'לא רלוונטי. נקודת השחרור אינה משפיעה על התאוצה (שהיא הגודל הנמדד) - היא קבועה לאורך המישור.')">כדי שהעגלה תוכל להישחרר תמיד מאותה נקודת התחלה.</div>
+            <div class="feedback"></div>
+        </div>
+
+        <div class="quiz">
+            <p class="question">שאלה 2: מדוע אנו מודדים מהירות בכמה נקודות ולא רק אחת?</p>
+            <div class="option" onclick="checkAns(this, false, 'לא. תאוצה במישור משופע אידיאלי היא אכן קבועה, אז המדידה לא נועדה לעקוב אחרי שינויי תאוצה אלא לחשב אותה.')">כי התאוצה משתנה משמעותית לאורך המישור.</div>
+            <div class="option" onclick="checkAns(this, true, 'מצוין! באמצעות שיפוע גרף v(t) או הנוסחה \\(a = (v_2 - v_1)/\\Delta t\\), נחשב את התאוצה. ככל שיש יותר נקודות, חישוב התאוצה מדויק יותר.', 'q3_2')">כדי לחשב את התאוצה מתוך השינוי במהירות לאורך זמן, ולשפר את דיוק החישוב.</div>
+            <div class="option" onclick="checkAns(this, false, 'לא נכון. החיכוך לא נמדד דרך המהירות אלא נגזר משגיאות בתוצאה.')">כדי למדוד את כוח החיכוך.</div>
+            <div class="feedback"></div>
+        </div>
+
+        <div class="quiz">
+            <p class="question">שאלה 3: למה בוחרים בכוונה גבהים שונים ולא רק חוזרים על אותו שיפוע מספר פעמים?</p>
+            <div class="option" onclick="checkAns(this, false, 'לא נכון. מטרת הניסוי היא בנייה של גרף a(h) - לכך נדרשים גבהים שונים.')">כדי שלא יישחקו רכיבי המערכת.</div>
+            <div class="option" onclick="checkAns(this, true, 'בדיוק! כדי לקבל את הגרף a(h) ולחשב את שיפועו (=g), נדרשות נקודות מדידה בערכים שונים של h. רק כך ניתן לאשש את הקשר הליניארי.', 'q3_3')">כדי לקבל מספר נקודות על הגרף a כפונקציה של h, וכך לחשב את שיפוע הקו ולאשש את הקשר הליניארי.</div>
+            <div class="option" onclick="checkAns(this, false, 'לא. מסת העגלה לא משתנה במהלך הניסוי - היא קבועה.')">כי בכל גובה משתנה מסת העגלה.</div>
+            <div class="feedback"></div>
+        </div>
+
+        <!-- ===== העלאת תמונות מערכת הניסוי ===== -->
+        <div class="complete-section" style="border-color: var(--accent); background: linear-gradient(135deg, #fff5e6 0%, #ffe0b3 100%); margin-top: 25px;">
+            <h3 style="margin-top:0; color:var(--accent);">📷 צילום מערכת הניסוי</h3>
+            <p>ניתן לצלם את מערכת הניסוי שהקמת ולצרף את התמונות כאן. התמונות יופיעו בדו"ח תחת חלק תכנון הציוד, ויספקו תיעוד חזותי של הסטאפ. ניתן להעלות כמה תמונות (זוויות שונות, פירוט המשטח, מיקום הסנסור וכו').</p>
+            <input type="file" id="setupUpload" accept="image/*" multiple onchange="handleSetupUpload(event)"
+                   style="display:inline-block; padding:10px; background:white; border:2px dashed var(--accent); border-radius:8px; cursor:pointer; max-width:100%;">
+            <div id="setupGallery" style="display:flex; flex-wrap:wrap; gap:12px; justify-content:center; margin-top:18px;"></div>
+        </div>
+
+        <div class="tab-summary">
+            <label for="summary3">📝 סיכום הלשונית / ניתוח ממצאים (טקסט חופשי):</label>
+            <textarea id="summary3" placeholder="כאן ניתן לרשום את הסיכום שלך לשלב זה — תיאור הציוד, זיהוי המשתנים, או כל דבר שתרצה להוסיף לדו&quot;ח."></textarea>
+        </div>
+
+        <div class="complete-section">
+            <p>ודא שהכרת את כל הציוד וזיהית את המשתנים בדו"ח שלך.</p>
+            <button class="complete-btn" id="btn3" onclick="completeStage(3)">✓ סיימתי, הבנתי ורשמתי בדו"ח</button>
+            <div class="complete-msg" id="msg3">השלב הושלם בהצלחה! ניתן לעבור לשלב הבא 🎉</div>
+        </div>
+    </div>
+
+    <!-- ===== לשונית 4: ביצוע ואיסוף נתונים ===== -->
+    <div id="tab4" class="content">
+        <div class="theory">
+            <h2>שלב 4: ביצוע הניסוי ואיסוף נתונים</h2>
+            <p>זה השלב המעשי. נבצע 5 מדידות בגבהים שונים, ובכל מדידה נחשב את התאוצה מתוך נתוני הסנסור.</p>
+        </div>
+
+        <div class="important">
+            <strong>📌 הוראות ביצוע:</strong>
+            <ul>
+                <li>הגדר את גובה המישור ל-h<sub>1</sub> (התחל בערך נמוך, כ-0.05 מטר).</li>
+                <li>שחרר את העגלה ממנוחה.</li>
+                <li>הסנסור מספק שני גרפים: גרף מהירות לפי זמן <strong>v(t)</strong> וגרף תאוצה לפי זמן <strong>a(t)</strong>.</li>
+                <li><strong>אופן חישוב התאוצה:</strong> חשב את התאוצה <strong>משיפוע גרף המהירות v(t)</strong>, ולא מקריאת התאוצה הישירה של הסנסור.</li>
+                <li>חזור על התהליך עבור 5 גבהים שונים בטווח של 0.05–0.30 מטר בערך.</li>
+                <li>הזן את הנתונים בטבלה למטה.</li>
+            </ul>
+        </div>
+
+        <div class="warning">
+            <strong>⚠️ למה להשתמש דווקא בשיפוע גרף המהירות, ולא בקריאת התאוצה הישירה?</strong>
+            <p>הסנסור אכן מספק גם גרף תאוצה ישיר, אך גרף זה אינו אחיד - הוא מתנודד ורועש בגלל רגישותו לרעשי מדידה ולשינויים זעירים במהירות. לעומת זאת, גרף המהירות v(t) הוא <strong>קו ישר חלק כמעט מושלם</strong> (כי התאוצה במישור משופע אידיאלי קבועה), ולכן השיפוע שלו נותן ערך תאוצה מדויק ואמין הרבה יותר.</p>
+        </div>
+
+        <div class="example">
+            <strong>טיפ למדידה מדויקת:</strong> בצע 2-3 מדידות בכל גובה וחשב ממוצע. הזן בטבלה את הערך הממוצע. כך תקטין שגיאות אקראיות.
+        </div>
+
+        <h3 style="text-align:center; color:var(--primary);">טבלת הנתונים</h3>
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>מדידה #</th>
+                    <th>גובה h (מטר)</th>
+                    <th>תאוצה a (m/s²)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>1</td>
+                    <td><input type="number" step="0.001" id="h1" placeholder="0.05" oninput="checkDataComplete()"></td>
+                    <td><input type="number" step="0.01" id="a1" placeholder="0.49" oninput="checkDataComplete()"></td>
+                </tr>
+                <tr>
+                    <td>2</td>
+                    <td><input type="number" step="0.001" id="h2" placeholder="0.10" oninput="checkDataComplete()"></td>
+                    <td><input type="number" step="0.01" id="a2" placeholder="0.98" oninput="checkDataComplete()"></td>
+                </tr>
+                <tr>
+                    <td>3</td>
+                    <td><input type="number" step="0.001" id="h3" placeholder="0.15" oninput="checkDataComplete()"></td>
+                    <td><input type="number" step="0.01" id="a3" placeholder="1.45" oninput="checkDataComplete()"></td>
+                </tr>
+                <tr>
+                    <td>4</td>
+                    <td><input type="number" step="0.001" id="h4" placeholder="0.20" oninput="checkDataComplete()"></td>
+                    <td><input type="number" step="0.01" id="a4" placeholder="1.92" oninput="checkDataComplete()"></td>
+                </tr>
+                <tr>
+                    <td>5</td>
+                    <td><input type="number" step="0.001" id="h5" placeholder="0.25" oninput="checkDataComplete()"></td>
+                    <td><input type="number" step="0.01" id="a5" placeholder="2.40" oninput="checkDataComplete()"></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div id="dataPreview" style="display:none;" class="summary-box">
+            <h3 style="margin-top:0;">📊 סיכום ראשוני של הנתונים</h3>
+            <div id="dataPreviewContent"></div>
+        </div>
+
+        <!-- שאלות -->
+        <div class="quiz">
+            <p class="question">שאלה 1: מדוע התאוצה אמורה לגדול ככל ש-h גדל?</p>
+            <div class="option" onclick="checkAns(this, true, 'נכון! לפי \\(a = g \\cdot h\\), קיים יחס ישר בין התאוצה לגובה. ככל שהמישור תלול יותר, הרכיב של כוח הכובד לאורך המישור גדול יותר.', 'q4_1')">כי לפי המשוואה התיאורטית \(a = g \cdot h\), קיים קשר ישר בין התאוצה לגובה.</div>
+            <div class="option" onclick="checkAns(this, false, 'לא. החיכוך אמור להישאר דומה (תלוי במשקל ובמשטח, לא בעיקר בגובה).')">כי החיכוך פוחת בגובה גדול.</div>
+            <div class="option" onclick="checkAns(this, false, 'לא נכון - מסת העגלה לא משתנה כשמשנים את הגובה.')">כי מסת העגלה גדלה.</div>
+            <div class="feedback"></div>
+        </div>
+
+        <div class="quiz">
+            <p class="question">שאלה 2: כיצד נחשב את התאוצה מתוך מדידות הסנסור (מהירות לאורך הזמן)?</p>
+            <div class="option" onclick="checkAns(this, false, 'לא נכון. ממוצע המהירות נותן מהירות, לא תאוצה.')">נחשב את ממוצע המהירויות.</div>
+            <div class="option" onclick="checkAns(this, true, 'מדויק! התאוצה היא הנגזרת של המהירות, ובמקרה של תאוצה קבועה הגרף v(t) הוא ישר חלק. השיפוע שלו נותן ערך תאוצה מדויק - יותר מאשר ממוצע גרף התאוצה הישיר של הסנסור (שהוא רועש).', 'q4_2')">נשתמש בשיפוע גרף המהירות כפונקציה של הזמן (v(t)) - שיטה זו מדויקת יותר מקריאת התאוצה הישירה של הסנסור.</div>
+            <div class="option" onclick="checkAns(this, false, 'לא. נפח אינו רלוונטי לחישוב תאוצה.')">נחלק את הנפח במשקל.</div>
+            <div class="feedback"></div>
+        </div>
+
+        <div class="quiz">
+            <p class="question">שאלה 3: מה היתרון של מדידה ב-5 גבהים שונים על פני מדידה ב-2 גבהים בלבד?</p>
+            <div class="option" onclick="checkAns(this, true, 'מצוין! יותר נקודות = ישר רגרסיה אמין יותר, סטטיסטיקה משופרת ויכולת לזהות חריגות. שני נקודות לבדן מוגדרות תמיד ישר - גם אם הקשר אינו ליניארי.', 'q4_3')">5 נקודות מאפשרות בדיקת ליניאריות אמיתית, מקטינות את ההשפעה של נקודה חריגה ומחזקות את האמינות הסטטיסטית.</div>
+            <div class="option" onclick="checkAns(this, false, 'לא נכון. מדויק מדעית - ככל שיש יותר נקודות, התוצאה אמינה יותר.')">אין יתרון - שתי נקודות מספיקות תמיד.</div>
+            <div class="option" onclick="checkAns(this, false, 'לא רלוונטי - הסנסור עובד באותה רמת דיוק בכל מדידה.')">כי הסנסור מודד יותר טוב בגבהים מסוימים.</div>
+            <div class="feedback"></div>
+        </div>
+
+        <div class="tab-summary">
+            <label for="summary4">📝 סיכום הלשונית / ניתוח ממצאים (טקסט חופשי):</label>
+            <textarea id="summary4" placeholder="כאן ניתן לרשום את הסיכום שלך לשלב זה — תצפיות בזמן המדידה, הערות על הנתונים, או כל דבר שתרצה להוסיף לדו&quot;ח."></textarea>
+        </div>
+
+        <div class="complete-section">
+            <p id="completionInstr">יש למלא את כל 5 שורות הטבלה לפני המעבר לשלב הבא.</p>
+            <button class="complete-btn" id="btn4" onclick="completeStage(4)" disabled>✓ סיימתי, הבנתי ורשמתי בדו"ח</button>
+            <div class="complete-msg" id="msg4">הנתונים נאספו בהצלחה! ניתן לעבור לניתוח 🎉</div>
+        </div>
+    </div>
+
+    <!-- ===== לשונית 5: ניתוח גרפי ===== -->
+    <div id="tab5" class="content">
+        <div class="theory">
+            <h2>שלב 5: ניתוח גרפי - בניית גרף a(h) ורגרסיה ליניארית</h2>
+            <p>כעת ניקח את הנתונים שאספנו וניצור גרף של תאוצה כפונקציה של גובה. נשתמש ב-Excel לבניית קו רגרסיה ליניארית ולחישוב השיפוע.</p>
+        </div>
+
+        <div id="userDataDisplay" class="summary-box">
+            <h3 style="margin-top:0;">📊 הנתונים שאספת</h3>
+            <div id="userDataContent"></div>
+        </div>
+
+        <div class="important">
+            <strong>📌 שלבי הניתוח ב-Excel:</strong>
+            <ul>
+                <li>הזן את הנתונים בעמודה A (גבהים h) ובעמודה B (תאוצות a).</li>
+                <li>סמן את שתי העמודות וצור גרף פיזור (Scatter Plot).</li>
+                <li>הוסף קו רגרסיה (Trendline) ובחר באפשרות "ליניארי".</li>
+                <li>סמן את האפשרות: "הצג משוואה בגרף".</li>
+                <li>השיפוע במשוואה הוא ערך g שקיבלת מהניסוי.</li>
+            </ul>
+        </div>
+
+        <div class="formula">
+            השיפוע המתקבל בגרף הוא ערך g הניסויי
+            <br>ערך תיאורטי צפוי: \(g \approx 9.8 \, \text{m/s}^2\)
+        </div>
+
+        <div class="example">
+            <strong>חישוב סטיה מהערך התיאורטי:</strong>
+            <br>\(\text{שגיאה יחסית} = \dfrac{|g_{\text{ניסויי}} - g_{\text{תיאורטי}}|}{g_{\text{תיאורטי}}} \times 100\%\)
+            <br>שגיאה מתחת ל-5% נחשבת לתוצאה מצוינת בניסויי תלמידים.
+        </div>
+
+        <!-- שאלות -->
+        <div class="quiz">
+            <p class="question">שאלה 1: לפי המשוואה התיאורטית \(a = g \cdot h\), מה צפויה להיות צורת הגרף a כפונקציה של h?</p>
+            <div class="option" onclick="checkAns(this, true, 'נכון! זוהי משוואה ליניארית מהצורה \\(y = m \\cdot x\\), כאשר השיפוע m = g והקו עובר דרך הראשית (כי כש-h=0 גם a=0).', 'q5_1')">קו ישר העובר דרך ראשית הצירים, עם שיפוע השווה ל-g (≈9.8).</div>
+            <div class="option" onclick="checkAns(this, false, 'לא נכון. המשוואה \\(a = g \\cdot h\\) ליניארית, לא ריבועית.')">פרבולה הפותחת מעלה.</div>
+            <div class="option" onclick="checkAns(this, false, 'לא נכון. הקו צפוי לעבור דרך הראשית - לא להיות מעוקל אקספוננציאלית.')">עקומה אקספוננציאלית עולה.</div>
+            <div class="feedback"></div>
+        </div>
+
+        <div class="quiz">
+            <p class="question">שאלה 2: מה אמורה להיות נקודת החיתוך עם ציר ה-Y בגרף a(h) באופן תיאורטי?</p>
+            <div class="option" onclick="checkAns(this, true, 'מצוין! לפי \\(a = g \\cdot h\\), כאשר h=0 גם a=0. כלומר, על מישור אופקי לא תהיה תאוצה. זה הגיוני - אין רכיב לכוח הכובד לאורך מישור אופקי.', 'q5_2')">אפס - כי כאשר h=0 (מישור אופקי), אין תאוצה.</div>
+            <div class="option" onclick="checkAns(this, false, 'לא. כשהמישור אופקי (h=0), אין רכיב לכוח הכובד לאורכו ולכן אין תאוצה.')">9.8 m/s² - כי זה ערך g.</div>
+            <div class="option" onclick="checkAns(this, false, 'לא נכון - תיאורטית הקו אמור לעבור בראשית.')">תלוי במסת העגלה.</div>
+            <div class="feedback"></div>
+        </div>
+
+        <div class="quiz">
+            <p class="question">שאלה 3: אם השיפוע שקיבלת הוא 9.2 m/s² במקום 9.8 m/s², מה זה אומר?</p>
+            <div class="option" onclick="checkAns(this, false, 'לא. הניסוי הצליח באופן סביר - שגיאה של ~6% היא נורמלית בניסויי תלמידים.')">הניסוי נכשל לחלוטין.</div>
+            <div class="option" onclick="checkAns(this, true, 'נכון! שגיאה של ~6% היא תוצאה סבירה מאוד. הסטייה כלפי מטה אופיינית - חלוקת אנרגיה לסיבוב הגלגלים, אי-אופקיות אפשרית של השולחן, ושגיאות מדידה אקראיות - כולם תורמים לסטייה כלפי מטה.', 'q5_3')">תוצאה סבירה - שגיאה של ~6% נובעת מחלוקת אנרגיה לסיבוב הגלגלים, אי-אופקיות אפשרית של השולחן ושגיאות מדידה אקראיות. יש לציין זאת בדיון.</div>
+            <div class="option" onclick="checkAns(this, false, 'לא. ערך g משתנה מעט בין מקומות שונים על כדור הארץ, אבל לא מ-9.8 ל-9.2.')">קבוע g משתנה מאוד בין מקומות.</div>
+            <div class="feedback"></div>
+        </div>
+
+        <!-- ===== העלאת צילומי גרפים ===== -->
+        <div class="complete-section" style="border-color: var(--accent); background: linear-gradient(135deg, #fff5e6 0%, #ffe0b3 100%); margin-top: 25px;">
+            <h3 style="margin-top:0; color:var(--accent);">📸 צירוף צילומי הגרפים שהכנת</h3>
+            <p>לאחר בניית הגרף ב-Excel, ניתן לצרף כאן את צילומי הגרפים (גרף a(h), קו הרגרסיה, או כל גרף נוסף). ניתן לבחור כמה תמונות בבת אחת. הגרפים יצורפו לדו"ח ה-Word.</p>
+            <input type="file" id="graphUpload" accept="image/*" multiple onchange="handleGraphUpload(event)"
+                   style="display:inline-block; padding:10px; background:white; border:2px dashed var(--accent); border-radius:8px; cursor:pointer; max-width:100%;">
+            <div id="graphGallery" style="display:flex; flex-wrap:wrap; gap:12px; justify-content:center; margin-top:18px;"></div>
+        </div>
+
+        <div class="tab-summary">
+            <label for="summary5">📝 סיכום הלשונית / ניתוח ממצאים (טקסט חופשי):</label>
+            <textarea id="summary5" placeholder="כאן ניתן לרשום את ניתוח הגרף — שיפוע שהתקבל, השוואה לערך התיאורטי, חיתוך עם הצירים, או כל דבר שתרצה להוסיף לדו&quot;ח."></textarea>
+        </div>
+
+        <div class="complete-section">
+            <p>בנה את הגרף ב-Excel, הוסף קו רגרסיה וצרף את הצילום והניתוח לדו"ח.</p>
+            <button class="complete-btn" id="btn5" onclick="completeStage(5)">✓ סיימתי, הבנתי ורשמתי בדו"ח</button>
+            <div class="complete-msg" id="msg5">השלב הושלם בהצלחה! נמשיך לדיון 🎉</div>
+        </div>
+    </div>
+
+    <!-- ===== לשונית 6: שגיאות ומסקנות ===== -->
+    <div id="tab6" class="content">
+        <div class="theory">
+            <h2>שלב 6: דיון בשגיאות מדידה ומסקנות</h2>
+            <p>השלב האחרון הוא הדיון - לבחון מה גרם לסטיות מהערך התיאורטי, ולסכם את ממצאי הניסוי.</p>
+        </div>
+
+        <div id="finalSummary" class="summary-box">
+            <h3 style="margin-top:0;">📈 סיכום התוצאות שלך</h3>
+            <div id="finalSummaryContent"></div>
+        </div>
+
+        <div class="important">
+            <strong>📌 גורמי שגיאה אפשריים בניסוי - יש לדון בהם בדו"ח:</strong>
+            <ul>
+                <li><strong>חלוקת אנרגיה לסיבוב הגלגלים:</strong> זוהי השגיאה המערכתית העיקרית! מאחר שהעגלה נעה על גלגלים, חלק מהאנרגיה ה"מסופקת" על ידי כוח הכובד מתחלק בין שתי תנועות - התקדמות העגלה לאורך המישור <em>וגם</em> סיבוב הגלגלים סביב צירם. מאחר שלא כל האנרגיה הולכת לתנועה לאורך המישור, התאוצה האמיתית מעט קטנה מ-\(g\sin\theta\) הצפוי. השפעה זו זניחה יחסית (מסת הגלגלים קטנה בהשוואה למסת העגלה), אך בהחלט קיימת ויכולה לתרום לסטייה.</li>
+                <li><strong>שיפוע השולחן:</strong> אם השולחן עליו ממוקם המישור אינו מאוזן לחלוטין, זווית המישור האמיתית שונה מזו שחושבה לפי h.</li>
+                <li><strong>שגיאות מדידה במכשירים:</strong> דיוק הסנסור (מהירות), דיוק הסרגל בקריאת הגובה h.</li>
+                <li><strong>שגיאת מיקום הסנסור:</strong> אם הסנסור לא ממוקם בדיוק לאורך מסלול העגלה - סטייה במדידת המהירות.</li>
+                <li><strong>שגיאות אקראיות במדידה:</strong> רעש בקריאת הסנסור, חוסר דיוק זעיר בהזנת הנתונים, פעימות במישור.</li>
+                <li><strong>שינויים גיאוגרפיים בערך g:</strong> קבוע g משתנה מ-9.78 עד 9.83 m/s² בנקודות שונות על כדור הארץ. בארץ ישראל הערך הוא בקירוב 9.80 m/s².</li>
+            </ul>
+        </div>
+
+        <div class="example">
+            <strong>סוגי שגיאות:</strong>
+            <ul>
+                <li><strong>שגיאות מערכתיות:</strong> חלוקת אנרגיה לסיבוב הגלגלים, שיפוע אפשרי של השולחן - תמיד באותו כיוון. בדרך כלל מקטינות את ערך g הנמדד.</li>
+                <li><strong>שגיאות אקראיות:</strong> רעש בסנסור, חוסר דיוק זעיר במדידת הגובה - מתקזזות יחסית עם מספר רב של מדידות.</li>
+            </ul>
+        </div>
+
+        <div class="example" style="background:#e8f5e9; border-color: var(--success);">
+            <strong>💡 הערה חשובה לדו"ח:</strong> שים לב שהמשוואה \(a = g \cdot h\) שלנו היא <strong>מדויקת</strong> (לא קירוב!), זאת מאחר שהיתר של המשולש הוא בדיוק 1 מטר ולכן \(\sin\theta = h\) ללא צורך בקירוב כלשהו. זהו יתרון משמעותי של מערך הניסוי - הוא חוסך גורם שגיאה שכיח שמופיע כשבוחרים את הניצב האופקי כמטר במקום היתר.
+        </div>
+
+        <div class="warning">
+            <strong>📝 חובה לכלול בדו"ח:</strong>
+            <ul>
+                <li>השוואה של ערך g הניסויי לערך התיאורטי (9.8 m/s²) וחישוב שגיאה יחסית.</li>
+                <li>פירוט של 3 לפחות מקורות שגיאה אפשריים והשפעתם על התוצאה.</li>
+                <li>הצעות לשיפור הניסוי - איך אפשר להקטין את השגיאה?</li>
+                <li>מסקנה ברורה: האם הניסוי אישש את ערך g התיאורטי?</li>
+            </ul>
+        </div>
+
+        <!-- שאלות -->
+        <div class="quiz">
+            <p class="question">שאלה 1: כיצד חלוקת האנרגיה לסיבוב הגלגלים משפיעה על ערך g שיתקבל מהשיפוע?</p>
+            <div class="option" onclick="checkAns(this, true, 'מדויק! חלק מאנרגיית הכובד הולך לסיבוב הגלגלים במקום להאצת מרכז המסה של העגלה. כתוצאה מכך התאוצה הנמדדת קטנה מעט מ-g·h הצפוי, והשיפוע (g הנמדד) יוצא קטן מ-9.8.', 'q6_1')">השיפוע הנמדד יוצא קטן מ-9.8, מאחר שחלק מאנרגיית הכובד הולך לסיבוב הגלגלים במקום להאצת מרכז המסה.</div>
+            <div class="option" onclick="checkAns(this, false, 'לא נכון. חלוקת האנרגיה משפיעה מערכתית על כל הנקודות.')">חלוקת האנרגיה לא משפיעה על השיפוע.</div>
+            <div class="option" onclick="checkAns(this, false, 'לא. הכיוון הפוך - חלוקת האנרגיה מקטינה את השיפוע ולא מגדילה אותו.')">השיפוע יוצא גדול מ-9.8 בגלל סיבוב הגלגלים.</div>
+            <div class="feedback"></div>
+        </div>
+
+        <div class="quiz">
+            <p class="question">שאלה 2: מהי שגיאה אקראית, וכיצד ניתן להקטין את השפעתה?</p>
+            <div class="option" onclick="checkAns(this, true, 'נכון! ביצוע מספר מדידות וחישוב ממוצע הוא הדרך הקלאסית להקטין שגיאות אקראיות. הן מתקזזות ככל שמספר המדידות גדל.', 'q6_2')">שגיאה לא צפויה שמשתנה ממדידה למדידה. ניתן להקטין על ידי ביצוע מספר רב של מדידות וחישוב ממוצע.</div>
+            <div class="option" onclick="checkAns(this, false, 'לא. שגיאה מערכתית היא קבועה ובאותו כיוון - חזרות לא יבטלו אותה.')">שגיאה קבועה שניתן לבטל ע"י חזרות רבות.</div>
+            <div class="option" onclick="checkAns(this, false, 'לא נכון - שגיאות אקראיות הן חלק מובנה מכל מדידה.')">שגיאה שלא ניתנת לזיהוי או הקטנה.</div>
+            <div class="feedback"></div>
+        </div>
+
+        <div class="quiz">
+            <p class="question">שאלה 3: מהי המסקנה העיקרית הצפויה מהניסוי אם הוא בוצע כראוי?</p>
+            <div class="option" onclick="checkAns(this, false, 'לא נכון - הניסוי דווקא תומך בחוקי הפיזיקה הקלאסית.')">חוקי ניוטון אינם נכונים במישור משופע.</div>
+            <div class="option" onclick="checkAns(this, true, 'מצוין! זו בדיוק מטרת הניסוי - לאשש את ערך g באמצעות מדידה עקיפה דרך תנועה במישור משופע, תוך הוכחת הקשר \\(a = g \\sin\\theta\\).', 'q6_3')">הניסוי מאשש את הקשר \(a = g\sin\theta\) ומספק אומדן ניסויי לערך g התואם לערך התיאורטי בתחום השגיאה.</div>
+            <div class="option" onclick="checkAns(this, false, 'לא. הניסוי מתמקד בתאוצה ובקבוע g, לא במסת העגלה.')">מסת העגלה משפיעה ישירות על g.</div>
+            <div class="feedback"></div>
+        </div>
+
+        <div class="tab-summary">
+            <label for="summary6">📝 סיכום הלשונית / דיון בשגיאות ומסקנות (טקסט חופשי):</label>
+            <textarea id="summary6" style="min-height:160px;" placeholder="כאן ניתן לרשום את הדיון המלא בשגיאות והמסקנות הסופיות של הניסוי — מקורות שגיאה, הצעות לשיפור, מסקנה לגבי אישוש g, וכל דבר נוסף לדו&quot;ח."></textarea>
+        </div>
+
+        <div class="complete-section">
+            <p>סיכום הניסוי, השוואה לערך התיאורטי, דיון בשגיאות והצעות לשיפור - הכל בדו"ח שלך.</p>
+            <button class="complete-btn" id="btn6" onclick="completeStage(6)">✓ סיימתי, הבנתי ורשמתי בדו"ח</button>
+            <div class="complete-msg" id="msg6">🎓 ברכות! השלמת בהצלחה את כל שלבי תדריך המעבדה! 🎉</div>
+        </div>
+
+        <!-- ===== הורדת קובץ סיכום ===== -->
+        <div class="complete-section" style="border-color: var(--success);">
+            <h3 style="margin-top:0; color:var(--success);">📄 קובץ דו"ח מלא (Word / docx)</h3>
+            <p>הדו"ח יכלול: תקציר של כל לשונית, השאלות והתשובות שבחרת, הטקסט החופשי שכתבת בכל לשונית, טבלת הנתונים, חישובי הרגרסיה, וצילומי הגרפים שצירפת. הקובץ ניתן לעריכה ב-Word, Google Docs ו-LibreOffice.</p>
+
+            <div class="student-info">
+                <div>
+                    <label for="studentName">שם התלמיד/ה:</label>
+                    <input type="text" id="studentName" placeholder="שם מלא">
+                </div>
+                <div>
+                    <label for="studentClass">כיתה:</label>
+                    <input type="text" id="studentClass" placeholder="לדוגמה: י'3">
+                </div>
+                <div>
+                    <label for="reportDate">תאריך:</label>
+                    <input type="date" id="reportDate">
+                </div>
+            </div>
+
+            <button class="complete-btn" onclick="downloadDocxReport()">⬇️ הורד דו"ח Word (.docx)</button>
+            <p id="summaryFileMsg" style="display:none; margin-top:14px; color:var(--success); font-weight:bold; font-size:1.05em;"></p>
+        </div>
+    </div>
+</div>
+
+<script>
+    const totalStages = 6;
+    const completedStages = new Set([1]); // הלשונית הראשונה פתוחה כברירת מחדל
+
+    function openTab(evt, tabName) {
+        const contents = document.getElementsByClassName("content");
+        for (let i = 0; i < contents.length; i++) contents[i].classList.remove('active');
+
+        const tabs = document.getElementsByClassName("tab");
+        for (let i = 0; i < tabs.length; i++) tabs[i].classList.remove('active');
+
+        document.getElementById(tabName).classList.add('active');
+        evt.currentTarget.classList.add('active');
+
+        // עדכון תצוגת נתונים אם נכנסים לשלב 5 או 6
+        if (tabName === 'tab5') displayUserData('userDataContent');
+        if (tabName === 'tab6') displayFinalSummary();
+
+        if (window.MathJax) MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
+    }
+
+    function checkAns(el, isCorrect, message, qid) {
+        const questionContainer = el.closest('.quiz');
+        const options = questionContainer.getElementsByClassName('option');
+        const feedback = questionContainer.querySelector('.feedback');
+
+        for (let opt of options) opt.className = 'option';
+        feedback.style.display = 'block';
+        feedback.innerText = message;
+
+        if (isCorrect) {
+            el.className = 'option correct';
+            feedback.style.backgroundColor = '#d4edda';
+            feedback.style.color = '#155724';
+            feedback.style.border = '1px solid #c3e6cb';
+        } else {
+            el.className = 'option wrong';
+            feedback.style.backgroundColor = '#f8d7da';
+            feedback.style.color = '#721c24';
+            feedback.style.border = '1px solid #f5c6cb';
+        }
+
+        // שמירת התשובה של המשתמש לדו"ח
+        if (qid) {
+            if (!window.userAnswers) window.userAnswers = {};
+            const qText = questionContainer.querySelector('.question').innerText.trim();
+            window.userAnswers[qid] = {
+                question: qText,
+                chosen: el.innerText.trim(),
+                isCorrect: isCorrect
+            };
+        }
+
+        if (window.MathJax) MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
+    }
+
+    function completeStage(stage) {
+        completedStages.add(stage);
+        const tabEl = document.querySelector(`.tab[data-tab="tab${stage}"]`);
+        tabEl.classList.add('completed');
+
+        const btn = document.getElementById(`btn${stage}`);
+        btn.disabled = true;
+        btn.style.background = 'var(--locked)';
+        btn.innerText = '✓ הושלם';
+
+        document.getElementById(`msg${stage}`).style.display = 'block';
+
+        updateProgress();
+    }
+
+    function updateProgress() {
+        const percent = (completedStages.size / totalStages) * 100;
+        document.getElementById('progressFill').style.width = percent + '%';
+    }
+
+    function checkDataComplete() {
+        let allFilled = true;
+        let validData = [];
+        for (let i = 1; i <= 5; i++) {
+            const h = document.getElementById(`h${i}`).value;
+            const a = document.getElementById(`a${i}`).value;
+            if (h === '' || a === '') {
+                allFilled = false;
+            } else {
+                validData.push({ h: parseFloat(h), a: parseFloat(a) });
+            }
+        }
+
+        const btn = document.getElementById('btn4');
+        const instr = document.getElementById('completionInstr');
+        if (allFilled) {
+            btn.disabled = false;
+            instr.innerText = '✓ כל הנתונים הוזנו - ניתן לסיים את השלב.';
+            instr.style.color = 'var(--success)';
+            showDataPreview(validData);
+        } else {
+            btn.disabled = true;
+            instr.innerText = `יש למלא את כל 5 שורות הטבלה (${validData.length}/5 הושלמו).`;
+            instr.style.color = '';
+            document.getElementById('dataPreview').style.display = 'none';
+        }
+    }
+
+    function showDataPreview(data) {
+        const previewBox = document.getElementById('dataPreview');
+        const content = document.getElementById('dataPreviewContent');
+
+        // חישוב שיפוע (יחס a/h ממוצע)
+        const ratios = data.map(d => d.a / d.h);
+        const avgRatio = ratios.reduce((s, r) => s + r, 0) / ratios.length;
+
+        // שיפוע באמצעות רגרסיה ליניארית (least squares)
+        const n = data.length;
+        const sumX = data.reduce((s, d) => s + d.h, 0);
+        const sumY = data.reduce((s, d) => s + d.a, 0);
+        const sumXY = data.reduce((s, d) => s + d.h * d.a, 0);
+        const sumXX = data.reduce((s, d) => s + d.h * d.h, 0);
+        const slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
+        const intercept = (sumY - slope * sumX) / n;
+
+        const errorPercent = Math.abs(slope - 9.8) / 9.8 * 100;
+
+        let html = '<div class="summary-row"><span class="summary-label">מספר מדידות:</span><span class="summary-value">' + n + '</span></div>';
+        html += '<div class="summary-row"><span class="summary-label">יחס ממוצע a/h:</span><span class="summary-value">' + avgRatio.toFixed(2) + '</span></div>';
+        html += '<div class="summary-row"><span class="summary-label">שיפוע מרגרסיה ליניארית (g ניסויי):</span><span class="summary-value">' + slope.toFixed(2) + ' m/s²</span></div>';
+        html += '<div class="summary-row"><span class="summary-label">חיתוך עם ציר Y (תיאורטית 0):</span><span class="summary-value">' + intercept.toFixed(3) + '</span></div>';
+        html += '<div class="summary-row"><span class="summary-label">סטייה מ-9.8 m/s²:</span><span class="summary-value">' + errorPercent.toFixed(1) + '%</span></div>';
+
+        content.innerHTML = html;
+        previewBox.style.display = 'block';
+    }
+
+    function getCollectedData() {
+        let data = [];
+        for (let i = 1; i <= 5; i++) {
+            const h = document.getElementById(`h${i}`).value;
+            const a = document.getElementById(`a${i}`).value;
+            if (h !== '' && a !== '') {
+                data.push({ h: parseFloat(h), a: parseFloat(a) });
+            }
+        }
+        return data;
+    }
+
+    function displayUserData(elementId) {
+        const data = getCollectedData();
+        const content = document.getElementById(elementId);
+        if (data.length === 0) {
+            content.innerHTML = '<p style="color:#999;">לא הוזנו נתונים בשלב הביצוע.</p>';
+            return;
+        }
+
+        let html = '<table style="width:100%; border-collapse:collapse;"><tr style="background:var(--primary); color:white;"><th style="padding:8px;">#</th><th style="padding:8px;">h (m)</th><th style="padding:8px;">a (m/s²)</th><th style="padding:8px;">a/h</th></tr>';
+        data.forEach((d, i) => {
+            html += `<tr><td style="padding:8px; text-align:center; border-bottom:1px solid #ddd;">${i+1}</td><td style="padding:8px; text-align:center; border-bottom:1px solid #ddd;">${d.h.toFixed(3)}</td><td style="padding:8px; text-align:center; border-bottom:1px solid #ddd;">${d.a.toFixed(2)}</td><td style="padding:8px; text-align:center; border-bottom:1px solid #ddd;">${(d.a/d.h).toFixed(2)}</td></tr>`;
+        });
+        html += '</table>';
+        content.innerHTML = html;
+    }
+
+    function displayFinalSummary() {
+        const data = getCollectedData();
+        const content = document.getElementById('finalSummaryContent');
+        if (data.length === 0) {
+            content.innerHTML = '<p style="color:#999;">לא הוזנו נתונים.</p>';
+            return;
+        }
+
+        // חישוב שיפוע ברגרסיה ליניארית
+        const n = data.length;
+        const sumX = data.reduce((s, d) => s + d.h, 0);
+        const sumY = data.reduce((s, d) => s + d.a, 0);
+        const sumXY = data.reduce((s, d) => s + d.h * d.a, 0);
+        const sumXX = data.reduce((s, d) => s + d.h * d.h, 0);
+        const slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
+
+        const errorPercent = Math.abs(slope - 9.8) / 9.8 * 100;
+        let conclusion = '';
+        if (errorPercent < 3) conclusion = '🎯 מצוין! דיוק גבוה במיוחד - הניסוי אישש את ערך g באופן מובהק.';
+        else if (errorPercent < 7) conclusion = '✅ תוצאה טובה מאוד - בתחום הסביר לניסוי תלמידים.';
+        else if (errorPercent < 15) conclusion = '👍 תוצאה סבירה - יש לדון במקורות השגיאה בדו"ח.';
+        else conclusion = '⚠️ הסטייה גדולה - בדוק שוב את הנתונים והדיון בשגיאות.';
+
+        let html = '<div class="summary-row"><span class="summary-label">ערך g שהתקבל בניסוי:</span><span class="summary-value">' + slope.toFixed(2) + ' m/s²</span></div>';
+        html += '<div class="summary-row"><span class="summary-label">ערך g תיאורטי:</span><span class="summary-value">9.80 m/s²</span></div>';
+        html += '<div class="summary-row"><span class="summary-label">שגיאה יחסית:</span><span class="summary-value">' + errorPercent.toFixed(1) + '%</span></div>';
+        html += '<div style="margin-top:15px; padding:12px; background:white; border-radius:5px; font-weight:bold; text-align:center;">' + conclusion + '</div>';
+
+        content.innerHTML = html;
+    }
+
+    /* ===== העלאת צילומי גרפים ===== */
+    window.graphImages = [];
+
+    function handleGraphUpload(event) {
+        const files = event.target.files;
+        for (const file of files) {
+            if (!file.type.startsWith('image/')) continue;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                window.graphImages.push({ name: file.name, dataUrl: e.target.result, caption: '' });
+                renderGraphGallery();
+            };
+            reader.readAsDataURL(file);
+        }
+        event.target.value = '';  // מאפשר העלאה חוזרת של אותו קובץ
+    }
+
+    function renderGraphGallery() {
+        const gallery = document.getElementById('graphGallery');
+        gallery.innerHTML = '';
+        window.graphImages.forEach((img, idx) => {
+            const block = document.createElement('div');
+            block.style.cssText = 'background:white; border:1px solid #ddd; border-radius:8px; padding:10px; width:200px; text-align:center; box-shadow:0 2px 6px rgba(0,0,0,0.08);';
+            block.innerHTML =
+                '<img src="' + img.dataUrl + '" style="max-width:100%; max-height:140px; border-radius:5px;">' +
+                '<input type="text" placeholder="כותרת לגרף (אופציונלי)" value="' + (img.caption || '') + '" ' +
+                'oninput="window.graphImages[' + idx + '].caption = this.value" ' +
+                'style="width:100%; margin-top:8px; padding:6px; border:1px solid #ddd; border-radius:4px; font-size:0.9em; text-align:center;">' +
+                '<button onclick="removeGraph(' + idx + ')" ' +
+                'style="margin-top:6px; background:var(--error); color:white; border:none; padding:5px 12px; border-radius:5px; cursor:pointer; font-size:0.85em;">הסר</button>';
+            gallery.appendChild(block);
+        });
+    }
+
+    function removeGraph(idx) {
+        window.graphImages.splice(idx, 1);
+        renderGraphGallery();
+    }
+
+    /* ===== העלאת תמונות מערכת הניסוי ===== */
+    window.setupImages = [];
+
+    function handleSetupUpload(event) {
+        const files = event.target.files;
+        for (const file of files) {
+            if (!file.type.startsWith('image/')) continue;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                window.setupImages.push({ name: file.name, dataUrl: e.target.result, caption: '' });
+                renderSetupGallery();
+            };
+            reader.readAsDataURL(file);
+        }
+        event.target.value = '';
+    }
+
+    function renderSetupGallery() {
+        const gallery = document.getElementById('setupGallery');
+        gallery.innerHTML = '';
+        window.setupImages.forEach((img, idx) => {
+            const block = document.createElement('div');
+            block.style.cssText = 'background:white; border:1px solid #ddd; border-radius:8px; padding:10px; width:200px; text-align:center; box-shadow:0 2px 6px rgba(0,0,0,0.08);';
+            block.innerHTML =
+                '<img src="' + img.dataUrl + '" style="max-width:100%; max-height:140px; border-radius:5px;">' +
+                '<input type="text" placeholder="כותרת לתמונה (אופציונלי)" value="' + (img.caption || '') + '" ' +
+                'oninput="window.setupImages[' + idx + '].caption = this.value" ' +
+                'style="width:100%; margin-top:8px; padding:6px; border:1px solid #ddd; border-radius:4px; font-size:0.9em; text-align:center;">' +
+                '<button onclick="removeSetupImage(' + idx + ')" ' +
+                'style="margin-top:6px; background:var(--error); color:white; border:none; padding:5px 12px; border-radius:5px; cursor:pointer; font-size:0.85em;">הסר</button>';
+            gallery.appendChild(block);
+        });
+    }
+
+    function removeSetupImage(idx) {
+        window.setupImages.splice(idx, 1);
+        renderSetupGallery();
+    }
+
+    /* ===== יצירת דו"ח docx מלא באמצעות docx.js ===== */
+    function escapeText(s) { return String(s == null ? '' : s); }
+
+    // ----- בונים מסמך עם docx.js, פתיחת shortcuts -----
+    function getDocx() {
+        if (typeof window.docx === 'undefined') {
+            throw new Error('ספריית docx לא נטענה. בדוק את חיבור האינטרנט.');
+        }
+        return window.docx;
+    }
+
+    // יצירת פסקה עברית RTL
+    function P(text, opts) {
+        opts = opts || {};
+        const d = getDocx();
+        const run = new d.TextRun({
+            text: escapeText(text),
+            rightToLeft: true,
+            bold: !!opts.bold,
+            italics: !!opts.italics,
+            size: opts.size,
+            color: opts.color,
+            font: opts.font || 'Arial'
+        });
+        return new d.Paragraph({
+            bidirectional: true,
+            alignment: opts.align || d.AlignmentType.START,
+            spacing: opts.spacing || { after: 120 },
+            indent: opts.indent,
+            heading: opts.heading,
+            shading: opts.shading,
+            border: opts.border,
+            children: [run]
+        });
+    }
+
+    // פסקה עם מספר רכיבי טקסט (לדוגמה: טקסט רגיל + הדגשה)
+    function P_mixed(parts, opts) {
+        opts = opts || {};
+        const d = getDocx();
+        const runs = parts.map(p => new d.TextRun({
+            text: escapeText(p.text),
+            rightToLeft: true,
+            bold: !!p.bold,
+            italics: !!p.italics,
+            color: p.color,
+            size: p.size,
+            font: 'Arial'
+        }));
+        return new d.Paragraph({
+            bidirectional: true,
+            alignment: opts.align || d.AlignmentType.START,
+            spacing: opts.spacing || { after: 120 },
+            children: runs
+        });
+    }
+
+    // כותרת ראשית של דו"ח
+    function H1(text) {
+        const d = getDocx();
+        return P(text, {
+            bold: true, size: 36, color: '1e3a5f',
+            align: d.AlignmentType.CENTER,
+            spacing: { before: 200, after: 240 }
+        });
+    }
+
+    // כותרת לשלב
+    function H2(text) {
+        const d = getDocx();
+        return P(text, {
+            bold: true, size: 28, color: '1e3a5f',
+            spacing: { before: 280, after: 140 },
+            border: { bottom: { style: d.BorderStyle.SINGLE, size: 8, color: '2980b9', space: 4 } }
+        });
+    }
+
+    // תת-כותרת
+    function H3(text) {
+        return P(text, {
+            bold: true, size: 24, color: '2980b9',
+            spacing: { before: 200, after: 100 }
+        });
+    }
+
+    // פריט ברשימת תבליטים
+    function bullet(text) {
+        return P('• ' + text, { spacing: { after: 60 }, indent: { start: 360 } });
+    }
+
+    // פסקת נוסחה ממורכזת בתוך מסגרת
+    function formula(text) {
+        const d = getDocx();
+        return P(text, {
+            bold: true, size: 26, color: '1e3a5f',
+            align: d.AlignmentType.CENTER,
+            shading: { fill: 'F0F4F8', type: d.ShadingType.CLEAR },
+            border: {
+                top: { style: d.BorderStyle.DASHED, size: 6, color: '2980b9', space: 4 },
+                bottom: { style: d.BorderStyle.DASHED, size: 6, color: '2980b9', space: 4 },
+                left: { style: d.BorderStyle.DASHED, size: 6, color: '2980b9', space: 4 },
+                right: { style: d.BorderStyle.DASHED, size: 6, color: '2980b9', space: 4 }
+            },
+            spacing: { before: 140, after: 200 }
+        });
+    }
+
+    // תא בטבלה
+    function tcell(text, opts) {
+        opts = opts || {};
+        const d = getDocx();
+        const cellBorder = { style: d.BorderStyle.SINGLE, size: 4, color: 'AAAAAA' };
+        return new d.TableCell({
+            width: { size: opts.width || 2000, type: d.WidthType.DXA },
+            borders: { top: cellBorder, bottom: cellBorder, left: cellBorder, right: cellBorder },
+            shading: opts.shading ? { fill: opts.shading, type: d.ShadingType.CLEAR } : undefined,
+            margins: { top: 80, bottom: 80, left: 100, right: 100 },
+            children: [new d.Paragraph({
+                bidirectional: true,
+                alignment: d.AlignmentType.CENTER,
+                children: [new d.TextRun({
+                    text: escapeText(text),
+                    rightToLeft: true,
+                    bold: !!opts.bold,
+                    color: opts.color,
+                    font: 'Arial'
+                })]
+            })]
+        });
+    }
+
+    // טבלה כללית: headers וסטים של שורות
+    function buildTable(headers, rows, colWidths) {
+        const d = getDocx();
+        colWidths = colWidths || headers.map(() => 2000);
+        const totalWidth = colWidths.reduce((s, w) => s + w, 0);
+        const headerCells = headers.map((h, i) =>
+            tcell(h, { width: colWidths[i], bold: true, shading: '1e3a5f', color: 'FFFFFF' }));
+        const dataRows = rows.map(r => new d.TableRow({
+            children: r.map((c, i) => tcell(c, { width: colWidths[i] }))
+        }));
+        return new d.Table({
+            width: { size: totalWidth, type: d.WidthType.DXA },
+            columnWidths: colWidths,
+            rows: [new d.TableRow({ children: headerCells, tableHeader: true })].concat(dataRows)
+        });
+    }
+
+    // המרת dataURL ל-Uint8Array עבור הטמעת תמונה
+    function dataUrlToBytes(dataUrl) {
+        const base64 = dataUrl.split(',')[1];
+        const binary = atob(base64);
+        const bytes = new Uint8Array(binary.length);
+        for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+        return bytes;
+    }
+
+    function getImageType(dataUrl) {
+        const m = dataUrl.match(/^data:image\/(\w+)/);
+        if (!m) return 'png';
+        const t = m[1].toLowerCase();
+        // docx.js תומך ב-png, jpg, gif, bmp
+        if (t === 'jpeg') return 'jpg';
+        if (['png', 'jpg', 'gif', 'bmp'].includes(t)) return t;
+        return 'png';
+    }
+
+    // מחזיר promise עם מימדי תמונה
+    function getImageDims(dataUrl) {
+        return new Promise((resolve) => {
+            const img = new Image();
+            img.onload = () => resolve({ w: img.naturalWidth, h: img.naturalHeight });
+            img.onerror = () => resolve({ w: 480, h: 320 });
+            img.src = dataUrl;
+        });
+    }
+
+    // בונה רכיב תמונה לדו"ח, מותאם לרוחב מסמך מקסימלי
+    async function buildImageParagraph(graphImg) {
+        const d = getDocx();
+        const dims = await getImageDims(graphImg.dataUrl);
+        const maxW = 480;
+        const ratio = dims.h / dims.w;
+        const w = Math.min(maxW, dims.w);
+        const h = Math.round(w * ratio);
+        const children = [];
+        children.push(new d.Paragraph({
+            alignment: d.AlignmentType.CENTER,
+            spacing: { before: 120 },
+            children: [new d.ImageRun({
+                data: dataUrlToBytes(graphImg.dataUrl),
+                transformation: { width: w, height: h },
+                type: getImageType(graphImg.dataUrl)
+            })]
+        }));
+        children.push(P(graphImg.caption || graphImg.name, {
+            bold: true, color: '1e3a5f', align: d.AlignmentType.CENTER,
+            spacing: { after: 200 }
+        }));
+        return children;
+    }
+
+    // ----- תוכן הלשוניות, מובנה כמערכים -----
+    function buildTab1Content() {
+        return [
+            H2('שלב 1: רקע תיאורטי — חוק ניוטון השני במישור משופע'),
+            P('בניסוי זה נחקור את התנועה של עגלה הנעה במישור משופע חלק. המטרה: לאמת את ערכו של קבוע התאוצה הכובדית g ≈ 9.8 m/s² באמצעות חוק ניוטון השני.'),
+            P('עקרונות מנחים:', { bold: true, spacing: { before: 140, after: 80 } }),
+            bullet('חוק ניוטון השני: ΣF = m · a'),
+            bullet('הכוחות הפועלים על העגלה: כוח הכובד mg (מטה), הכוח הנורמלי N (ניצב למישור).'),
+            bullet('פירוק כוחות: נוח לפרק את כוח הכובד לרכיב מקביל למישור (mg·sinθ) ולרכיב ניצב למישור (mg·cosθ).'),
+            bullet('הרכיב הניצב מאוזן: N = mg·cosθ (אין תאוצה ניצבת למישור).'),
+            bullet('הרכיב המקביל מניב את התאוצה: mg·sinθ = m·a, ולכן a = g·sinθ.'),
+            formula('המשוואה המרכזית של הניסוי:    a = g · sinθ')
+        ];
+    }
+
+    function buildTab2Content() {
+        return [
+            H2('שלב 2: ניתוח גיאומטרי — מהזווית לגובה'),
+            P('בניסוי שלנו ננצל את העובדה שהיתר של המישור הוא בדיוק 1 מטר כדי לקבל קשר ליניארי מדויק בין התאוצה לגובה המישור — ללא צורך בקירוב כלשהו.'),
+            P('עקרונות מנחים:', { bold: true, spacing: { before: 140, after: 80 } }),
+            bullet('אורך היתר של המשולש (הצלע המשופעת עליה זזה העגלה) קבוע ושווה ל-1 מטר. גובה המישור (h) הוא הניצב האנכי שאותו נשנה.'),
+            bullet('הקשר הטריגונומטרי המדויק: sinθ = h/L = h/1 = h (כאשר h נמדד במטרים).'),
+            bullet('קשר מדויק, לא קירוב! מאחר שהיתר הוא בדיוק 1 מטר, מתקיים sinθ = h בדיוק.'),
+            bullet('מסקנה: נציב במשוואה a = g·sinθ ונקבל a = g · h — זוהי משוואה מדויקת.'),
+            formula('המשוואה הסופית (מדויקת):    a = g · h')
+        ];
+    }
+
+    function buildTab3Content() {
+        return [
+            H2('שלב 3: תכנון הניסוי וזיהוי הציוד'),
+            P('הציוד הנדרש:', { bold: true, spacing: { before: 140, after: 80 } }),
+            bullet('מישור משופע מתכוונן — אורך היתר קבוע על 1 מטר; הגובה h ניתן לשינוי.'),
+            bullet('עגלה בעלת מיסבים איכותיים למזעור החיכוך.'),
+            bullet('סנסור מהירות — מודד את המהירות הרגעית של העגלה לאורך התנועה.'),
+            bullet('סרגל / מד גובה — למדידה מדויקת של h.'),
+            bullet('מחשב עם Excel — ליצירת ישר רגרסיה וחישוב השיפוע.'),
+            P('זיהוי המשתנים בניסוי:', { bold: true, spacing: { before: 140, after: 80 } }),
+            bullet('משתנה בלתי תלוי: גובה המישור h.'),
+            bullet('משתנה תלוי: תאוצת העגלה a.'),
+            bullet('משתנים מבודדים (קבועים): אורך היתר (1m), מסת העגלה, סוג המשטח.'),
+            P('נקודות חשובות לפני ההפעלה: לוודא שהשולחן מאוזן (השפעה ישירה על הזווית האמיתית), שהסנסור ממוקם נכון לאורך מסלול העגלה, ושהמישור יציב ולא רועד בעת השחרור.', { spacing: { before: 140 } })
+        ];
+    }
+
+    function buildTab4Content() {
+        return [
+            H2('שלב 4: ביצוע הניסוי ואיסוף נתונים'),
+            P('הביצוע: 5 מדידות בגבהים שונים (בטווח 0.05–0.30 מטר). בכל גובה משחררים את העגלה ממנוחה ומחשבים את התאוצה משיפוע גרף המהירות v(t), ולא מקריאת התאוצה הישירה של הסנסור (שהיא רועשת יותר).'),
+            P('מומלץ לבצע 2-3 מדידות בכל גובה ולחשב ממוצע, כדי להקטין שגיאות אקראיות.')
+        ];
+    }
+
+    function buildTab5Content() {
+        return [
+            H2('שלב 5: ניתוח גרפי — בניית גרף a(h) ורגרסיה ליניארית'),
+            P('בונים גרף של תאוצה a כפונקציה של גובה h, ומוסיפים קו רגרסיה ליניארית ב-Excel. השיפוע המתקבל הוא ערך g הניסויי, שאמור להיות קרוב ל-9.8 m/s².'),
+            P('חישוב סטיה מהערך התיאורטי:', { bold: true, spacing: { before: 140, after: 60 } }),
+            P('שגיאה יחסית = |g_ניסויי − 9.8| / 9.8 × 100%', { align: getDocx().AlignmentType.CENTER, italics: true }),
+            P('שגיאה מתחת ל-5% נחשבת לתוצאה מצוינת בניסויי תלמידים.')
+        ];
+    }
+
+    function buildTab6Content() {
+        return [
+            H2('שלב 6: דיון בשגיאות מדידה ומסקנות'),
+            P('גורמי שגיאה אפשריים:', { bold: true, spacing: { before: 140, after: 80 } }),
+            bullet('חלוקת אנרגיה לסיבוב הגלגלים — חלק מאנרגיית הכובד הולך לסיבוב הגלגלים במקום להאצה. גורם לכך שהשיפוע המתקבל קטן מעט מ-9.8.'),
+            bullet('שיפוע השולחן — שולחן לא מאוזן משנה את זווית המישור האמיתית.'),
+            bullet('שגיאות מדידה במכשירים — דיוק הסנסור, דיוק הסרגל.'),
+            bullet('שגיאת מיקום הסנסור — אם הסנסור לא ממוקם בדיוק לאורך המסלול.'),
+            bullet('שגיאות אקראיות — רעש בקריאת הסנסור, חוסר דיוק בהזנת הנתונים.'),
+            bullet('שינויים גיאוגרפיים ב-g — בארץ ישראל הערך בקירוב 9.80 m/s².'),
+            P('סוגי שגיאות:', { bold: true, spacing: { before: 140, after: 80 } }),
+            bullet('מערכתיות (חלוקת אנרגיה לגלגלים, שיפוע אפשרי של השולחן — תמיד באותו כיוון).'),
+            bullet('אקראיות (רעש בסנסור, חוסר דיוק זעיר — מתקזזות עם מספר רב של מדידות).'),
+            P('הערה חשובה: המשוואה a = g·h שלנו היא מדויקת (לא קירוב!) — מאחר שהיתר הוא בדיוק 1 מטר ולכן sinθ = h ללא צורך בקירוב כלשהו.',
+              { bold: false, italics: true, color: '155724', shading: { fill: 'E8F5E9', type: getDocx().ShadingType.CLEAR },
+                border: { left: { style: getDocx().BorderStyle.SINGLE, size: 24, color: '27AE60', space: 4 } },
+                spacing: { before: 200, after: 120 } })
+        ];
+    }
+
+    // ----- בנאי תשובות התלמיד -----
+    function buildAnswersChildren(qids) {
+        const d = getDocx();
+        const answers = window.userAnswers || {};
+        const out = [H3('שאלות הבנה')];
+        qids.forEach((qid, idx) => {
+            const a = answers[qid];
+            if (a) {
+                out.push(P_mixed([
+                    { text: 'שאלה ' + (idx+1) + ': ', bold: true, color: '1e3a5f' },
+                    { text: a.question }
+                ], { spacing: { before: 100, after: 40 } }));
+                const mark = a.isCorrect ? '✓ ' : '✗ ';
+                const color = a.isCorrect ? '27AE60' : 'C0392B';
+                out.push(P_mixed([
+                    { text: mark + 'תשובה שנבחרה: ', bold: true, color: color },
+                    { text: a.chosen }
+                ], { spacing: { after: 80 }, indent: { start: 200 } }));
+            } else {
+                out.push(P('שאלה ' + (idx+1) + ': לא נענתה ביישומון.',
+                    { italics: true, color: '888888', spacing: { before: 80, after: 60 } }));
+            }
+        });
+        return out;
+    }
+
+    // ----- בנאי הסיכום החופשי של התלמיד -----
+    function buildUserSummaryChildren(summaryId) {
+        const d = getDocx();
+        const el = document.getElementById(summaryId);
+        const text = el ? el.value.trim() : '';
+        const out = [H3('סיכום וניתוח של התלמיד/ה')];
+        if (text) {
+            const paragraphs = text.split(/\n+/).filter(p => p.trim());
+            paragraphs.forEach(p => {
+                out.push(P(p, {
+                    shading: { fill: 'FAFAFA', type: d.ShadingType.CLEAR },
+                    border: { left: { style: d.BorderStyle.SINGLE, size: 12, color: '2980b9', space: 4 } },
+                    spacing: { after: 100 }
+                }));
+            });
+        } else {
+            out.push(P('(לא נכתב סיכום ללשונית זו)', { italics: true, color: '888888' }));
+        }
+        return out;
+    }
+
+    // ----- בנאי טבלת הנתונים -----
+    function buildDataChildren() {
+        const d = getDocx();
+        const data = getCollectedData();
+        const out = [H3('טבלת הנתונים שנמדדו')];
+        if (data.length > 0) {
+            const headers = ['מדידה #', 'גובה h (m)', 'תאוצה a (m/s²)', 'יחס a/h'];
+            const rows = data.map((d, i) => [
+                String(i + 1), d.h.toFixed(3), d.a.toFixed(2), (d.a / d.h).toFixed(2)
+            ]);
+            out.push(buildTable(headers, rows, [1800, 2200, 2200, 1800]));
+            out.push(P(''));
+        } else {
+            out.push(P('לא הוזנו נתונים בטבלה.', { color: 'C0392B', italics: true }));
+        }
+        return out;
+    }
+
+    // ----- בנאי תוצאות הרגרסיה -----
+    function buildRegressionChildren() {
+        const d = getDocx();
+        const data = getCollectedData();
+        const out = [];
+        if (data.length >= 2) {
+            const n = data.length;
+            const sumX = data.reduce((s, d) => s + d.h, 0);
+            const sumY = data.reduce((s, d) => s + d.a, 0);
+            const sumXY = data.reduce((s, d) => s + d.h * d.a, 0);
+            const sumXX = data.reduce((s, d) => s + d.h * d.h, 0);
+            const slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
+            const intercept = (sumY - slope * sumX) / n;
+            const errorPercent = Math.abs(slope - 9.8) / 9.8 * 100;
+
+            out.push(H3('תוצאות הרגרסיה הליניארית a(h)'));
+            out.push(buildTable(
+                ['גודל מחושב', 'ערך'],
+                [
+                    ['שיפוע הגרף = g ניסויי', slope.toFixed(3) + ' m/s²'],
+                    ['חיתוך עם ציר Y (תיאורטית 0)', intercept.toFixed(4)],
+                    ['ערך תיאורטי של g', '9.80 m/s²'],
+                    ['שגיאה יחסית', errorPercent.toFixed(1) + '%']
+                ],
+                [4500, 3500]
+            ));
+            out.push(P(''));
+
+            let conclusion;
+            if (errorPercent < 3) conclusion = 'דיוק גבוה במיוחד — הניסוי אישש את ערך g באופן מובהק.';
+            else if (errorPercent < 7) conclusion = 'תוצאה טובה מאוד — בתחום הסביר לניסוי תלמידים.';
+            else if (errorPercent < 15) conclusion = 'תוצאה סבירה — יש לדון במקורות השגיאה.';
+            else conclusion = 'הסטייה גדולה — מומלץ לבדוק שוב את הנתונים והדיון בשגיאות.';
+            out.push(P(conclusion, {
+                bold: true, color: '155724',
+                shading: { fill: 'E8F5E9', type: d.ShadingType.CLEAR },
+                border: { left: { style: d.BorderStyle.SINGLE, size: 24, color: '27AE60', space: 4 } },
+                spacing: { before: 100, after: 120 }
+            }));
+        } else if (data.length > 0) {
+            out.push(P('נדרשות לפחות 2 נקודות מדידה לחישוב רגרסיה.', { color: 'C0392B', italics: true }));
+        }
+        return out;
+    }
+
+    // ----- בנאי צילומי הגרפים -----
+    async function buildGraphsChildren() {
+        const out = [H3('צילומי הגרפים שצורפו')];
+        if (window.graphImages && window.graphImages.length) {
+            for (const img of window.graphImages) {
+                const children = await buildImageParagraph(img);
+                children.forEach(c => out.push(c));
+            }
+        } else {
+            out.push(P('לא צורפו צילומי גרפים.', { color: 'C0392B', italics: true }));
+        }
+        return out;
+    }
+
+    // ----- בנאי תרשים מערכת הניסוי -----
+    async function buildSetupImagesChildren() {
+        const out = [H3('תרשים / צילום מערכת הניסוי')];
+        if (window.setupImages && window.setupImages.length) {
+            for (const img of window.setupImages) {
+                const children = await buildImageParagraph(img);
+                children.forEach(c => out.push(c));
+            }
+        } else {
+            out.push(P('לא צורפו צילומים של מערכת הניסוי.', { color: 'C0392B', italics: true }));
+        }
+        return out;
+    }
+
+    // ----- הפונקציה הראשית: הורדת הדו"ח -----
+    async function downloadDocxReport() {
+        const msg = document.getElementById('summaryFileMsg');
+        msg.style.display = 'block';
+        msg.style.color = 'var(--secondary)';
+        msg.innerText = '⏳ מכין את קובץ ה-Word...';
+
+        try {
+            const d = getDocx();
+
+            // איסוף פרטי תלמיד
+            const studentName = (document.getElementById('studentName').value || '').trim() || '________________';
+            const studentClass = (document.getElementById('studentClass').value || '').trim() || '____________';
+            let reportDate = document.getElementById('reportDate').value;
+            let reportDateStr;
+            if (reportDate) {
+                const parts = reportDate.split('-');
+                reportDateStr = parts[2] + '/' + parts[1] + '/' + parts[0];
+            } else {
+                reportDateStr = new Date().toLocaleDateString('he-IL');
+            }
+
+            // בניית רשימת ה-children של המסמך
+            const children = [];
+
+            // כותרת ראשית
+            children.push(H1('דו"ח מעבדה: תנועת עגלה במישור משופע'));
+
+            // טבלת פרטי תלמיד
+            children.push(buildTable(
+                ['שם התלמיד/ה', 'כיתה', 'תאריך'],
+                [[studentName, studentClass, reportDateStr]],
+                [3500, 2000, 2500]
+            ));
+            children.push(P(''));
+
+            // מטרת הניסוי
+            children.push(P_mixed([
+                { text: 'מטרת הניסוי: ', bold: true },
+                { text: 'אישוש קבוע התאוצה הכובדית g באמצעות מדידת תאוצת עגלה במישור משופע.' }
+            ], { spacing: { after: 200 } }));
+
+            // ----- לשונית 1 -----
+            buildTab1Content().forEach(c => children.push(c));
+            buildAnswersChildren(['q1_1', 'q1_2', 'q1_3']).forEach(c => children.push(c));
+            buildUserSummaryChildren('summary1').forEach(c => children.push(c));
+
+            // ----- לשונית 2 -----
+            buildTab2Content().forEach(c => children.push(c));
+            buildAnswersChildren(['q2_1', 'q2_2', 'q2_3']).forEach(c => children.push(c));
+            buildUserSummaryChildren('summary2').forEach(c => children.push(c));
+
+            // ----- לשונית 3 -----
+            buildTab3Content().forEach(c => children.push(c));
+            (await buildSetupImagesChildren()).forEach(c => children.push(c));
+            buildAnswersChildren(['q3_1', 'q3_2', 'q3_3']).forEach(c => children.push(c));
+            buildUserSummaryChildren('summary3').forEach(c => children.push(c));
+
+            // ----- לשונית 4 -----
+            buildTab4Content().forEach(c => children.push(c));
+            buildDataChildren().forEach(c => children.push(c));
+            buildAnswersChildren(['q4_1', 'q4_2', 'q4_3']).forEach(c => children.push(c));
+            buildUserSummaryChildren('summary4').forEach(c => children.push(c));
+
+            // ----- לשונית 5 -----
+            buildTab5Content().forEach(c => children.push(c));
+            buildRegressionChildren().forEach(c => children.push(c));
+            (await buildGraphsChildren()).forEach(c => children.push(c));
+            buildAnswersChildren(['q5_1', 'q5_2', 'q5_3']).forEach(c => children.push(c));
+            buildUserSummaryChildren('summary5').forEach(c => children.push(c));
+
+            // ----- לשונית 6 -----
+            buildTab6Content().forEach(c => children.push(c));
+            buildAnswersChildren(['q6_1', 'q6_2', 'q6_3']).forEach(c => children.push(c));
+            buildUserSummaryChildren('summary6').forEach(c => children.push(c));
+
+            // הערת סיום
+            children.push(P('— סוף הדו"ח —', {
+                italics: true, color: '888888',
+                align: d.AlignmentType.CENTER,
+                spacing: { before: 300, after: 100 }
+            }));
+            children.push(P('הופק על-ידי יישומון התדריך בתאריך ' + new Date().toLocaleString('he-IL'), {
+                italics: true, color: '888888',
+                align: d.AlignmentType.CENTER, size: 18
+            }));
+
+            // יצירת המסמך
+            const doc = new d.Document({
+                creator: 'יישומון תדריך מעבדה',
+                title: 'דו"ח מעבדה: מישור משופע',
+                styles: {
+                    default: { document: { run: { font: 'Arial', size: 22 } } }
+                },
+                sections: [{
+                    properties: {
+                        page: {
+                            size: { width: 11906, height: 16838 }, // A4
+                            margin: { top: 1080, right: 1080, bottom: 1080, left: 1080 }
+                        }
+                    },
+                    children: children
+                }]
+            });
+
+            const blob = await d.Packer.toBlob(doc);
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'דוח_מעבדה_מישור_משופע.docx';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            msg.style.color = 'var(--success)';
+            msg.innerText = '✓ דו"ח Word הופק והורד בהצלחה.';
+        } catch (err) {
+            console.error('שגיאה ביצירת ה-docx:', err);
+            msg.style.color = 'var(--error)';
+            msg.innerText = '⚠️ שגיאה ביצירת קובץ ה-Word: ' + (err.message || err);
+        }
+    }
+
+    // התחלה
+    updateProgress();
+</script>
+
+</body>
+</html>
