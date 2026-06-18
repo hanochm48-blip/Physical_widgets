@@ -1,137 +1,543 @@
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>אוסף היישומונים שלי</title>
-    <style>
-        /* עיצוב בסיסי ונקי */
-        body {
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background-color: #f4f7f6;
-            color: #333;
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ארגז הכלים והיישומונים שלי</title>
 
-        header {
-            text-align: center;
-            margin-bottom: 40px;
-        }
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Suez+One&family=Heebo:wght@400;500;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 
-        h1 {
-            color: #2c3e50;
-            margin-bottom: 10px;
-        }
+<style>
+  :root{
+    --paper:#F2F5FA;
+    --grid:rgba(27,42,74,.055);
+    --grid-major:rgba(27,42,74,.085);
+    --ink:#1B2A4A;
+    --ink-soft:#62718D;
+    --accent:#E8503A;
+    --accent-soft:rgba(232,80,58,.12);
+    --card:#FFFFFF;
+    --line:rgba(27,42,74,.13);
+  }
 
-        p {
-            color: #7f8c8d;
-        }
+  *{box-sizing:border-box}
 
-        /* עיצוב רשימת היישומונים */
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            width: 100%;
-            max-width: 800px;
-        }
+  html{ -webkit-text-size-adjust:100% }
 
-        /* עיצוב כרטיסייה לכל יישומון */
-        .card {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-            text-align: center;
-            text-decoration: none;
-            color: inherit;
-            transition: transform 0.2s, box-shadow 0.2s;
-            border: 1px solid #e2e8f0;
-        }
+  body{
+    font-family:"Heebo",system-ui,-apple-system,"Segoe UI",sans-serif;
+    color:var(--ink);
+    margin:0;
+    padding:clamp(22px,5vw,64px) 20px 80px;
+    line-height:1.5;
+    background-color:var(--paper);
+    background-image:
+      linear-gradient(var(--grid-major) 1.3px,transparent 1.3px),
+      linear-gradient(90deg,var(--grid-major) 1.3px,transparent 1.3px),
+      linear-gradient(var(--grid) 1px,transparent 1px),
+      linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+    background-size:130px 130px,130px 130px,26px 26px,26px 26px;
+    background-position:center top;
+  }
 
-        /* אפקט מעבר עכבר */
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
-            border-color: #3498db;
-        }
+  .wrap{max-width:880px;margin:0 auto}
 
-        .card h2 {
-            margin: 0 0 10px 0;
-            color: #2980b9;
-            font-size: 1.5rem;
-        }
+  /* ---------- Header ---------- */
+  header{
+    margin-bottom:clamp(34px,6vw,58px);
+  }
+  .eyebrow{
+    font-family:"Space Mono",monospace;
+    font-size:.78rem;
+    letter-spacing:.12em;
+    color:var(--accent);
+    margin:0 0 14px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .eyebrow::before{
+    content:"";
+    width:34px;height:2px;background:var(--accent);
+    display:inline-block;
+  }
+  h1{
+    font-family:"Suez One",Georgia,serif;
+    font-weight:400;
+    font-size:clamp(2.1rem,6.4vw,3.4rem);
+    line-height:1.05;
+    margin:0;
+    color:var(--ink);
+    position:relative;
+    display:inline-block;
+  }
+  /* hand-sketched marker underline under the title */
+  .h1-mark{
+    display:block;
+    width:min(280px,70%);
+    height:13px;
+    margin-top:6px;
+    color:var(--accent);
+  }
+  .sub{
+    color:var(--ink-soft);
+    font-size:1.02rem;
+    max-width:46ch;
+    margin:18px 0 0;
+  }
+  .count{
+    font-family:"Space Mono",monospace;
+    font-size:.8rem;
+    color:var(--ink-soft);
+    margin-top:22px;
+    padding-top:16px;
+    border-top:1px solid var(--line);
+    letter-spacing:.05em;
+  }
+  .count b{color:var(--ink)}
 
-        .card p {
-            margin: 0;
-            font-size: 0.9rem;
-        }
-    </style>
+  /* ---------- Grid ---------- */
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(230px,1fr));
+    gap:18px;
+  }
+
+  /* ---------- Card ---------- */
+  .card{
+    position:relative;
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:7px;
+    padding:24px 22px 26px;
+    text-decoration:none;
+    color:inherit;
+    display:flex;
+    flex-direction:column;
+    align-items:flex-start;
+    gap:4px;
+    overflow:hidden;
+    transition:transform .22s ease,box-shadow .22s ease,border-color .22s ease;
+    opacity:0;
+    transform:translateY(14px);
+    animation:rise .5s ease forwards;
+  }
+  .card::after{ /* corner fold accent */
+    content:"";
+    position:absolute;
+    inset-inline-end:0;top:0;
+    width:0;height:0;
+    border-style:solid;
+    border-width:0 0 18px 18px;
+    border-color:transparent transparent transparent var(--accent-soft);
+    transition:border-color .22s ease;
+  }
+  .card:hover{
+    transform:translateY(-5px);
+    border-color:var(--accent);
+    box-shadow:0 14px 28px -14px rgba(27,42,74,.4);
+  }
+  .card:hover::after{
+    border-inline-start-color:var(--accent);
+  }
+  .card:focus-visible{
+    outline:2.5px solid var(--accent);
+    outline-offset:3px;
+  }
+
+  .card__num{
+    font-family:"Space Mono",monospace;
+    font-size:.74rem;
+    color:var(--ink-soft);
+    letter-spacing:.05em;
+    transition:color .22s ease;
+  }
+  .card:hover .card__num{color:var(--accent)}
+
+  .card__icon{
+    width:64px;height:64px;
+    margin:8px 0 14px;
+    color:var(--ink);
+    transition:transform .25s ease;
+  }
+  .card:hover .card__icon{transform:scale(1.07) translateY(-2px)}
+
+  .card__cat{
+    font-size:.74rem;
+    font-weight:500;
+    letter-spacing:.08em;
+    color:var(--accent);
+    margin-bottom:3px;
+  }
+  .card__title{
+    font-family:"Heebo",sans-serif;
+    font-weight:700;
+    font-size:1.16rem;
+    line-height:1.25;
+    margin:0;
+    color:var(--ink);
+  }
+
+  /* ---------- SVG icon styling ---------- */
+  .ico{width:100%;height:100%;fill:none;stroke:currentColor;
+       stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  .ico .hl{stroke:var(--accent);stroke-width:2.3;transition:stroke-width .22s ease}
+  .ico .fill-hl{fill:var(--accent);stroke:none;opacity:.9}
+  .card:hover .ico .hl{stroke-width:3}
+
+  /* ---------- Folders toggle ---------- */
+  .toolbar{margin-top:20px}
+  .btn-folders{
+    font-family:"Space Mono",monospace;
+    font-size:.82rem;letter-spacing:.04em;
+    color:var(--ink);background:var(--card);
+    border:1px solid var(--line);border-radius:6px;
+    padding:9px 16px;cursor:pointer;
+    display:inline-flex;align-items:center;gap:9px;
+    transition:border-color .2s ease,color .2s ease;
+  }
+  .btn-folders:hover{border-color:var(--accent);color:var(--accent)}
+  .btn-folders:focus-visible{outline:2.5px solid var(--accent);outline-offset:3px}
+  .btn-folders .chev{transition:transform .25s ease}
+  .btn-folders[aria-expanded="true"] .chev{transform:rotate(180deg)}
+
+  .folders{
+    overflow:hidden;max-height:0;opacity:0;margin:0;
+    transition:max-height .32s ease,opacity .25s ease,margin .32s ease;
+  }
+  .folders.open{max-height:720px;opacity:1;margin:18px 0 36px}
+  .folders__inner{
+    border:1px solid var(--line);border-radius:7px;
+    background:var(--card);padding:8px;
+  }
+  .folders__head{
+    font-family:"Space Mono",monospace;
+    font-size:.72rem;color:var(--ink-soft);letter-spacing:.06em;
+    padding:8px 10px 10px;border-bottom:1px dashed var(--line);
+  }
+  .frow{
+    display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;
+    padding:9px 10px;border-radius:5px;
+    text-decoration:none;color:inherit;
+    transition:background .15s ease;
+  }
+  .frow:hover{background:var(--accent-soft)}
+  .frow:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+  .frow code{
+    font-family:"Space Mono",monospace;font-size:.82rem;
+    color:var(--accent);direction:ltr;white-space:nowrap;
+  }
+  .frow span{color:var(--ink-soft);font-size:.92rem}
+  .frow .badge{
+    font-family:"Space Mono",monospace;font-style:normal;
+    font-size:.66rem;color:var(--accent);
+    border:1px solid var(--accent);border-radius:4px;
+    padding:1px 7px;margin-inline-start:auto;white-space:nowrap;
+  }
+  .folders__loading{
+    font-family:"Space Mono",monospace;font-size:.8rem;
+    color:var(--ink-soft);padding:14px 10px;
+  }
+
+  /* ---------- Motion / a11y ---------- */
+  @keyframes rise{to{opacity:1;transform:translateY(0)}}
+  .card:nth-child(1){animation-delay:.04s}
+  .card:nth-child(2){animation-delay:.09s}
+  .card:nth-child(3){animation-delay:.14s}
+  .card:nth-child(4){animation-delay:.19s}
+  .card:nth-child(5){animation-delay:.24s}
+  .card:nth-child(6){animation-delay:.29s}
+  .card:nth-child(7){animation-delay:.34s}
+  .card:nth-child(8){animation-delay:.39s}
+  .card:nth-child(9){animation-delay:.44s}
+
+  @media (prefers-reduced-motion:reduce){
+    .card{animation:none;opacity:1;transform:none;transition:border-color .2s ease}
+    .folders{transition:none}
+    .card:hover{transform:none}
+    .card:hover .card__icon{transform:none}
+  }
+</style>
 </head>
 <body>
+<div class="wrap">
 
-    <header>
-        <h1>ארגז הכלים והיישומונים שלי</h1>
-        <p>ריכוז של כל הפרויקטים והיישומים שבניתי במקום אחד</p>
-    </header>
+  <header>
+    <p class="eyebrow">אוסף סימולציות לפיזיקה</p>
+    <h1>ארגז הכלים והיישומונים שלי
+      <svg class="h1-mark" viewBox="0 0 280 13" preserveAspectRatio="none" aria-hidden="true">
+        <path d="M2 8 C 60 3, 120 11, 180 6 S 250 3, 278 7" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round"/>
+      </svg>
+    </h1>
+    <p class="sub">ריכוז של כל הסימולציות והיישומים האינטראקטיביים שבניתי — במקום אחד, נגישים בלחיצה.</p>
+    <p class="count"><b>09</b> יישומונים&nbsp;&nbsp;·&nbsp;&nbsp;מכניקה · חשמל · קינמטיקה · מעבדה</p>
 
-    <main class="grid">
-        
-        <!-- יישומון 1 -->
-        <a href="./energy/" class="card">
-            <h2>משפט עבודה אנרגיה</h2>
-        </a>
+    <div class="toolbar">
+      <button id="foldersBtn" class="btn-folders" type="button" aria-expanded="false" aria-controls="folders">
+        <span>הצג את כל התיקיות</span>
+        <svg class="chev" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+    </div>
+  </header>
 
-        <!-- יישומון 2 -->
-        <a href="./mishor/" class="card">
-            <h2>🎮 מישור משופע</h2>
-        </a>
+  <section class="folders" id="folders" aria-label="רשימת תיקיות">
+    <div class="folders__inner">
+      <div class="folders__head" id="foldersHead">// רשימת תיקיות</div>
+      <div id="foldersList"></div>
+    </div>
+  </section>
 
-        <!-- יישומון 2 -->
-        <a href="./newton-crable/" class="card">
-            <h2>🎮 עריסת ניוטון</h2>
-        </a>
-		
-        <!-- יישומון 2 -->
-        <a href="./equipotential/" class="card">
-            <h2>🎮 שדה חשמלי</h2>
-        </a>
-		
-        <!-- יישומון 2 -->
-        <a href="./accident/" class="card">
-            <h2>🎮 שימור תנע</h2>
-        </a>
-		
-        <!-- יישומון 2 -->
-        <a href="./graphing/" class="card">
-            <h2>🎮 סרטוט קו מגמה</h2>
-        </a>
-		
-        <!-- יישומון 2 -->
-        <a href="./Laboratory_Briefings/" class="card">
-            <h2>🎮 תדריכי מעבדה</h2>
-        </a>
-		
-        <!-- יישומון 2 -->
-        <a href="./momentum/" class="card">
-            <h2>🎮 תנועת רכבל (קינימטיקה)
-			</h2>
-        </a>
-		
-		
-        <!-- יישומון 2 -->
-        <a href="./elevator/" class="card">
-            <h2>🎮 מד משקל על מעלית
-			</h2>
-        </a>
-		
-        <!-- כאן אפשר להוסיף עוד כרטיסיות בעתיד לפי אותו מבנה -->
+  <main class="grid">
 
-    </main>
+    <!-- 01 משפט עבודה אנרגיה -->
+    <a href="./energy/" class="card">
+      <span class="card__num">01</span>
+      <div class="card__icon">
+        <svg class="ico" viewBox="0 0 64 64" aria-hidden="true">
+          <line x1="6" y1="50" x2="58" y2="50"/>
+          <line x1="10" y1="50" x2="6" y2="54"/><line x1="18" y1="50" x2="14" y2="54"/>
+          <line x1="26" y1="50" x2="22" y2="54"/><line x1="34" y1="50" x2="30" y2="54"/>
+          <rect x="12" y="32.5" width="17" height="17" rx="1.5"/>
+          <g class="hl">
+            <line x1="33" y1="41" x2="52" y2="41"/>
+            <polyline points="47,36.5 52,41 47,45.5"/>
+          </g>
+        </svg>
+      </div>
+      <span class="card__cat">אנרגיה</span>
+      <h2 class="card__title">משפט עבודה–אנרגיה</h2>
+    </a>
 
+    <!-- 02 מישור משופע -->
+    <a href="./mishor/" class="card">
+      <span class="card__num">02</span>
+      <div class="card__icon">
+        <svg class="ico" viewBox="0 0 64 64" aria-hidden="true">
+          <path d="M8 52 H56 V20 Z"/>
+          <rect x="-7" y="-7" width="14" height="14" rx="1.5" transform="translate(31,37) rotate(-34)"/>
+          <g class="hl">
+            <line x1="29" y1="41" x2="19" y2="47.7"/>
+            <polyline points="24,45.5 19,47.7 21.2,42.8"/>
+          </g>
+        </svg>
+      </div>
+      <span class="card__cat">מכניקה</span>
+      <h2 class="card__title">מישור משופע</h2>
+    </a>
+
+    <!-- 03 עריסת ניוטון -->
+    <a href="./newton-crable/" class="card">
+      <span class="card__num">03</span>
+      <div class="card__icon">
+        <svg class="ico" viewBox="0 0 64 64" aria-hidden="true">
+          <line x1="10" y1="52" x2="54" y2="52"/>
+          <path d="M14 52 V14 H50 V52"/>
+          <line x1="31" y1="14" x2="31" y2="38"/><circle cx="31" cy="41.4" r="3.4"/>
+          <line x1="38" y1="14" x2="38" y2="38"/><circle cx="38" cy="41.4" r="3.4"/>
+          <line x1="45" y1="14" x2="45" y2="38"/><circle cx="45" cy="41.4" r="3.4"/>
+          <g class="hl">
+            <line x1="24" y1="14" x2="15" y2="30"/><circle cx="13.7" cy="32.2" r="3.4"/>
+          </g>
+        </svg>
+      </div>
+      <span class="card__cat">תנע ואנרגיה</span>
+      <h2 class="card__title">עריסת ניוטון</h2>
+    </a>
+
+    <!-- 04 שדה חשמלי -->
+    <a href="./equipotential/" class="card">
+      <span class="card__num">04</span>
+      <div class="card__icon">
+        <svg class="ico" viewBox="0 0 64 64" aria-hidden="true">
+          <g class="hl">
+            <path d="M22 27 C 28 11, 36 11, 42 27"/>
+            <path d="M22 37 C 28 53, 36 53, 42 37"/>
+            <line x1="26" y1="32" x2="38" y2="32"/>
+          </g>
+          <circle cx="22" cy="32" r="5"/>
+          <line x1="22" y1="29.5" x2="22" y2="34.5"/><line x1="19.5" y1="32" x2="24.5" y2="32"/>
+          <circle cx="42" cy="32" r="5"/>
+          <line x1="39.5" y1="32" x2="44.5" y2="32"/>
+        </svg>
+      </div>
+      <span class="card__cat">חשמל</span>
+      <h2 class="card__title">שדה חשמלי</h2>
+    </a>
+
+    <!-- 05 שימור תנע -->
+    <a href="./accident/" class="card">
+      <span class="card__num">05</span>
+      <div class="card__icon">
+        <svg class="ico" viewBox="0 0 64 64" aria-hidden="true">
+          <circle cx="18" cy="42" r="8"/>
+          <circle cx="46" cy="42" r="8"/>
+          <g class="hl">
+            <line x1="11" y1="24" x2="25" y2="24"/><polyline points="21,20.5 25,24 21,27.5"/>
+            <line x1="53" y1="24" x2="39" y2="24"/><polyline points="43,20.5 39,24 43,27.5"/>
+          </g>
+        </svg>
+      </div>
+      <span class="card__cat">תנע</span>
+      <h2 class="card__title">שימור תנע</h2>
+    </a>
+
+    <!-- 06 סרטוט קו מגמה -->
+    <a href="./graphing/" class="card">
+      <span class="card__num">06</span>
+      <div class="card__icon">
+        <svg class="ico" viewBox="0 0 64 64" aria-hidden="true">
+          <polyline points="12,8 12,54 58,54"/>
+          <line class="hl" x1="16" y1="49" x2="55" y2="15"/>
+          <circle cx="19" cy="46" r="1.8"/><circle cx="26" cy="43" r="1.8"/>
+          <circle cx="32" cy="40" r="1.8"/><circle cx="38" cy="31" r="1.8"/>
+          <circle cx="44" cy="27" r="1.8"/><circle cx="50" cy="20" r="1.8"/>
+        </svg>
+      </div>
+      <span class="card__cat">ניתוח נתונים</span>
+      <h2 class="card__title">סרטוט קו מגמה</h2>
+    </a>
+
+    <!-- 07 תדריכי מעבדה -->
+    <a href="./Laboratory_Briefings/" class="card">
+      <span class="card__num">07</span>
+      <div class="card__icon">
+        <svg class="ico" viewBox="0 0 64 64" aria-hidden="true">
+          <line x1="26" y1="10" x2="38" y2="10"/>
+          <line x1="27.5" y1="16" x2="36.5" y2="16"/>
+          <path d="M28 10 L21 44 Q19 52 27 52 H37 Q45 52 43 44 L36 10"/>
+          <path class="fill-hl" d="M23.2 38 H40.8 L42.1 44 Q43.4 50 37 50 H27 Q20.6 50 21.9 44 Z"/>
+          <circle cx="29" cy="44" r="1.3" fill="#fff" stroke="none"/>
+          <circle cx="35" cy="46" r="1" fill="#fff" stroke="none"/>
+        </svg>
+      </div>
+      <span class="card__cat">מעבדה</span>
+      <h2 class="card__title">תדריכי מעבדה</h2>
+    </a>
+
+    <!-- 08 תנועת רכבל (קינמטיקה) -->
+    <a href="./momentum/" class="card">
+      <span class="card__num">08</span>
+      <div class="card__icon">
+        <svg class="ico" viewBox="0 0 64 64" aria-hidden="true">
+          <line x1="7" y1="20" x2="57" y2="13"/>
+          <path d="M30 18.5 L33.5 24"/>
+          <path d="M28 17.5 a3 3 0 0 0 6 -.8" />
+          <rect x="22" y="30" width="20" height="15" rx="2.5"/>
+          <line x1="27" y1="35" x2="27" y2="40"/><line x1="37" y1="35" x2="37" y2="40"/>
+          <g class="hl">
+            <line x1="40" y1="15.5" x2="53" y2="13.7"/>
+            <polyline points="49,11.4 53,13.7 49.8,17"/>
+          </g>
+        </svg>
+      </div>
+      <span class="card__cat">קינמטיקה</span>
+      <h2 class="card__title">תנועת רכבל</h2>
+    </a>
+
+    <!-- 09 מד משקל על מעלית -->
+    <a href="./elevator/" class="card">
+      <span class="card__num">09</span>
+      <div class="card__icon">
+        <svg class="ico" viewBox="0 0 64 64" aria-hidden="true">
+          <line x1="30" y1="4" x2="30" y2="10"/>
+          <rect x="16" y="10" width="28" height="46" rx="2"/>
+          <circle cx="30" cy="24" r="3.5"/>
+          <path d="M30 27.5 V38 M30 31 L25 36 M30 31 L35 36"/>
+          <line x1="23" y1="46" x2="37" y2="46"/>
+          <g class="hl">
+            <line x1="51" y1="46" x2="51" y2="22"/>
+            <polyline points="47,26 51,22 55,26"/>
+          </g>
+        </svg>
+      </div>
+      <span class="card__cat">דינמיקה</span>
+      <h2 class="card__title">מד משקל במעלית</h2>
+    </a>
+
+  </main>
+</div>
+
+<script>
+(function(){
+  /* ===== מלא כאן את פרטי המאגר שלך ב-GitHub ===== */
+  var GH = {
+    owner: "hanochm48-blip",   /* שם המשתמש או הארגון ב-GitHub */
+    repo:  "Physical_widgets", /* שם המאגר */
+    path:  ""              /* השאר ריק אם index.html נמצא בשורש המאגר */
+    /* branch: "main"      // אופציונלי: הברנץ' לקריאה (ברירת מחדל = הראשי) */
+  };
+  /* ============================================== */
+
+  var btn   = document.getElementById('foldersBtn');
+  var panel = document.getElementById('folders');
+  var list  = document.getElementById('foldersList');
+  var head  = document.getElementById('foldersHead');
+  var label = btn.querySelector('span');
+  var cards = Array.prototype.slice.call(document.querySelectorAll('main.grid .card'));
+
+  /* מיפוי slug של תיקייה -> כותרת עברית מתוך הכרטיסים שבדף */
+  var titleBySlug = {};
+  cards.forEach(function(a){
+    var slug = a.getAttribute('href').replace(/^\.?\//,'').replace(/\/+$/,'').toLowerCase();
+    titleBySlug[slug] = a.querySelector('.card__title').textContent.trim();
+  });
+
+  function setHead(n, src){ head.textContent = '// ' + n + ' תיקיות · ' + src; }
+
+  function row(name, title, isNew){
+    var href  = './' + name + '/';
+    var ttl   = title ? '<span>' + title + '</span>' : '';
+    var badge = isNew ? '<em class="badge">טרם נוסף לדף</em>' : '';
+    return '<a class="frow" href="' + href + '"><code>' + href + '</code>' + ttl + badge + '</a>';
+  }
+
+  function renderFromCards(note){
+    list.innerHTML = cards.map(function(a){
+      var href  = a.getAttribute('href');
+      var title = a.querySelector('.card__title').textContent.trim();
+      return '<a class="frow" href="' + href + '"><code>' + href + '</code><span>' + title + '</span></a>';
+    }).join('');
+    setHead(cards.length, note || 'מקור: הדף');
+  }
+
+  var loaded = false;
+  function load(){
+    if (loaded) return; loaded = true;
+
+    if (GH.owner === 'USERNAME' || GH.repo === 'REPO-NAME'){
+      renderFromCards('מקור: הדף'); return;   /* טרם הוגדר מאגר — מציג את הכרטיסים */
+    }
+
+    list.innerHTML = '<div class="folders__loading">טוען מ-GitHub…</div>';
+    var url = 'https://api.github.com/repos/' + GH.owner + '/' + GH.repo +
+              '/contents/' + (GH.path || '') + (GH.branch ? '?ref=' + GH.branch : '');
+
+    fetch(url, { headers: { 'Accept': 'application/vnd.github+json' } })
+      .then(function(r){ if(!r.ok) throw new Error(r.status); return r.json(); })
+      .then(function(items){
+        var dirs = items
+          .filter(function(it){ return it.type === 'dir' && it.name.charAt(0) !== '.'; })
+          .map(function(it){ return it.name; })
+          .sort(function(a,b){ return a.localeCompare(b); });
+        if (!dirs.length){ renderFromCards(); return; }
+        list.innerHTML = dirs.map(function(name){
+          var title = titleBySlug[name.toLowerCase()];
+          return row(name, title, !title);
+        }).join('');
+        setHead(dirs.length, 'מקור: GitHub');
+      })
+      .catch(function(){ renderFromCards('מקור: הדף · טעינת GitHub נכשלה'); });
+  }
+
+  btn.addEventListener('click', function(){
+    load();
+    var open = panel.classList.toggle('open');
+    btn.setAttribute('aria-expanded', open);
+    label.textContent = open ? 'הסתר תיקיות' : 'הצג את כל התיקיות';
+  });
+})();
+</script>
 </body>
 </html>

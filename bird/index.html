@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>סימולציית תנועת רכבל</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700&family=Heebo:wght@400;500;600&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0d2733; --teal:#2c6e8f; --teal-light:#5ba3c4; --teal-pale:#d6e6ee;
+    --cabin:#e0502e; --cabin-dark:#b83d1f; --bg:#eef3f6; --panel:#ffffff;
+    --grid:#cdd9e0; --muted:#5f7785; --pos:#2c6e8f; --neg:#e0502e; --line:#dfe8ed;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{background:var(--bg);color:var(--ink);font-family:'Heebo',sans-serif;line-height:1.5;-webkit-font-smoothing:antialiased;padding:clamp(14px,3vw,34px);}
+  .wrap{max-width:1040px;margin:0 auto;}
+  header h1{font-family:'Rubik',sans-serif;font-weight:700;font-size:clamp(1.5rem,4vw,2.2rem);margin:0 0 6px;letter-spacing:-.01em;}
+  header p{margin:0;color:var(--muted);font-size:.98rem;max-width:66ch;}
+  .accent{color:var(--cabin);}
+  .stage{margin-top:22px;display:flex;flex-direction:column;gap:16px;}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:16px;box-shadow:0 1px 2px rgba(13,39,51,.04),0 8px 24px rgba(13,39,51,.05);overflow:hidden;}
+  .panel-pad{padding:clamp(12px,2.2vw,20px);}
+  .ltr{direction:ltr;}
+  svg{display:block;width:100%;height:auto;}
+
+  .readouts{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
+  .stat{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px 14px;box-shadow:0 1px 2px rgba(13,39,51,.04);}
+  .stat .lbl{font-size:.74rem;font-weight:600;color:var(--muted);letter-spacing:.02em;display:flex;align-items:baseline;gap:5px;}
+  .stat .lbl .unit{font-weight:500;opacity:.8;}
+  .stat .val{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:clamp(1.3rem,3.2vw,1.7rem);margin-top:2px;direction:ltr;text-align:right;font-variant-numeric:tabular-nums;}
+  .stat[data-k="v"] .val{color:var(--vcol,var(--ink));}
+  .stat[data-k="x"] .val{color:var(--teal);}
+  .stat[data-k="a"] .val{color:var(--cabin);}
+
+  .graphs{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  .graph-title{font-family:'Rubik',sans-serif;font-weight:600;font-size:.95rem;margin:0 0 4px;padding:0 4px;text-align:right;}
+
+  .phase{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:12px 16px;border-radius:14px;background:linear-gradient(90deg,var(--teal-pale),#fff);border:1px solid var(--line);}
+  .phase .dot{width:11px;height:11px;border-radius:50%;background:var(--teal);flex:none;}
+  .phase .txt{font-weight:600;font-size:1.02rem;}
+  .phase .sub{color:var(--muted);font-weight:400;font-size:.9rem;font-family:'JetBrains Mono',monospace;}
+
+  /* editor */
+  .editor h3{font-family:'Rubik',sans-serif;font-weight:600;font-size:1.05rem;margin:0 0 6px;}
+  .hint{color:var(--muted);font-size:.86rem;margin:0 0 14px;}
+  .presets{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;}
+  .presets button{background:#f1f5f7;border:1px solid var(--line);color:var(--ink);padding:8px 13px;border-radius:10px;font-size:.88rem;cursor:pointer;}
+  .presets button:hover{background:var(--teal-pale);}
+  .x0row{display:flex;align-items:center;gap:10px;margin-bottom:16px;color:var(--muted);font-weight:600;font-size:.9rem;}
+  .ptable{display:flex;flex-direction:column;gap:8px;margin-bottom:12px;}
+  .prow{display:flex;align-items:center;gap:10px;}
+  .pidx{width:22px;height:22px;border-radius:50%;background:var(--teal-pale);color:var(--teal);font-weight:700;font-size:.8rem;display:flex;align-items:center;justify-content:center;flex:none;font-family:'JetBrains Mono',monospace;}
+  .pfield{display:flex;align-items:center;gap:6px;}
+  .pflbl{font-family:'JetBrains Mono',monospace;color:var(--muted);font-size:.85rem;}
+  .pin{font-family:'JetBrains Mono',monospace;width:78px;padding:7px 8px;border:1px solid var(--line);border-radius:9px;font-size:.92rem;background:#fff;color:var(--ink);text-align:left;direction:ltr;}
+  .pin:disabled{background:#f1f5f7;color:var(--muted);}
+  .pin:focus{outline:2px solid var(--teal-light);border-color:var(--teal-light);}
+  .pdel{margin-inline-start:auto;width:30px;height:30px;border-radius:9px;background:#fbeae5;color:var(--cabin-dark);font-size:1.2rem;line-height:1;border:1px solid #f3d3c8;cursor:pointer;}
+  .pdel:hover:not(:disabled){background:#f7d8cd;}
+  .pdel:disabled{opacity:.4;cursor:not-allowed;}
+  .addbtn{background:var(--teal);color:#fff;padding:9px 16px;border-radius:10px;font-size:.9rem;border:none;cursor:pointer;font-weight:600;}
+  .addbtn:hover{background:#235a76;}
+  .total{margin-top:14px;color:var(--muted);font-size:.86rem;font-family:'JetBrains Mono',monospace;}
+
+  button{font-family:'Heebo',sans-serif;font-weight:600;border:none;border-radius:11px;transition:transform .08s ease,background .15s ease;}
+  button:active{transform:translateY(1px);}
+  .controls{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:14px 16px;}
+  .btn-play{background:var(--cabin);color:#fff;padding:11px 22px;display:flex;align-items:center;gap:9px;cursor:pointer;box-shadow:0 4px 12px rgba(224,80,46,.28);font-size:.95rem;}
+  .btn-play:hover{background:var(--cabin-dark);}
+  .btn-ghost{background:#f1f5f7;color:var(--ink);padding:11px 16px;border:1px solid var(--line);cursor:pointer;font-size:.95rem;}
+  .btn-ghost:hover{background:#e7eef1;}
+  .seg{display:inline-flex;background:#f1f5f7;border:1px solid var(--line);border-radius:11px;overflow:hidden;}
+  .seg button{background:transparent;color:var(--muted);padding:9px 14px;border-radius:0;cursor:pointer;font-variant-numeric:tabular-nums;}
+  .seg button.on{background:var(--teal);color:#fff;}
+  .spacer{flex:1;min-width:8px;}
+  .scrubrow{display:flex;align-items:center;gap:14px;padding:4px 16px 16px;}
+  .scrubrow .t-read{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:1.05rem;color:var(--ink);white-space:nowrap;direction:ltr;font-variant-numeric:tabular-nums;}
+  input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:6px;background:linear-gradient(90deg,var(--teal) var(--fill,0%),var(--line) var(--fill,0%));border-radius:999px;direction:ltr;cursor:pointer;}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:var(--cabin);border:3px solid #fff;box-shadow:0 1px 5px rgba(13,39,51,.3);}
+  input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;background:var(--cabin);border:3px solid #fff;box-shadow:0 1px 5px rgba(13,39,51,.3);}
+  .chk{display:flex;align-items:center;gap:7px;color:var(--muted);font-weight:600;font-size:.9rem;cursor:pointer;user-select:none;}
+  .chk input{width:17px;height:17px;accent-color:var(--teal);cursor:pointer;}
+
+  @media (max-width:720px){
+    .readouts{grid-template-columns:repeat(2,1fr);}
+    .graphs{grid-template-columns:1fr;}
+    .btn-play{flex:1;justify-content:center;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>סימולציית תנועת רכבל <span class="accent">·</span> גרף מהירות עריך</h1>
+    <p>הזינו פרופיל מהירות משלכם — גררו את הנקודות על גרף ה‑v(t), הקליקו עליו כדי להוסיף נקודה, או הקלידו ערכים מדויקים בטבלה. גרף המיקום ותנועת הרכבל מחושבים אוטומטית. נקודת ההתחלה: <b id="x0lbl">x = 0</b>.</p>
+  </header>
+
+  <div class="stage">
+
+    <div class="panel panel-pad">
+      <div class="ltr"><svg id="scene" viewBox="0 0 800 300" role="img" aria-label="רכבל על כבל משופע"></svg></div>
+    </div>
+
+    <div class="phase">
+      <span class="dot" id="phaseDot"></span>
+      <span class="txt" id="phaseTxt">מוכן</span>
+      <span class="sub" id="phaseSub"></span>
+    </div>
+
+    <div class="readouts">
+      <div class="stat" data-k="t"><div class="lbl">זמן <span class="unit">t [s]</span></div><div class="val" id="rT">0.00</div></div>
+      <div class="stat" data-k="v"><div class="lbl">מהירות <span class="unit">v [m/s]</span></div><div class="val" id="rV">0.0</div></div>
+      <div class="stat" data-k="x"><div class="lbl">מיקום <span class="unit">x [m]</span></div><div class="val" id="rX">0.0</div></div>
+      <div class="stat" data-k="a"><div class="lbl">תאוצה <span class="unit">a [m/s²]</span></div><div class="val" id="rA">0.0</div></div>
+    </div>
+
+    <div class="graphs">
+      <div class="panel panel-pad">
+        <h3 class="graph-title">מהירות לעומת זמן · v(t) <span style="color:var(--muted);font-weight:400">— ניתן לעריכה</span></h3>
+        <div class="ltr"><svg id="gv" viewBox="0 0 460 300" role="img" aria-label="גרף מהירות זמן עריך"></svg></div>
+      </div>
+      <div class="panel panel-pad">
+        <h3 class="graph-title">מיקום לעומת זמן · x(t) <span style="color:var(--muted);font-weight:400">— מחושב</span></h3>
+        <div class="ltr"><svg id="gx" viewBox="0 0 460 300" role="img" aria-label="גרף מיקום זמן"></svg></div>
+      </div>
+    </div>
+
+    <div class="panel panel-pad editor">
+      <h3>עריכת פרופיל המהירות</h3>
+      <p class="hint">כל נקודה היא זוג (זמן, מהירות). בין נקודות המהירות משתנה באופן ליניארי (תאוצה קבועה). הנקודה הראשונה קבועה ב‑t = 0.</p>
+      <div class="presets" id="presets"></div>
+      <div class="x0row">
+        <span>מיקום התחלתי x₀ [m]:</span>
+        <input class="pin" id="x0in" type="number" step="0.5" value="0">
+      </div>
+      <div class="ptable" id="ptable"></div>
+      <button class="addbtn" id="addBtn">+ הוסף נקודה</button>
+      <div class="total" id="total"></div>
+    </div>
+
+    <div class="panel">
+      <div class="controls">
+        <button class="btn-play" id="playBtn" aria-label="הפעל">
+          <svg id="playIcon" width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M3 2l11 6-11 6z"/></svg>
+          <span id="playLbl">הפעלה</span>
+        </button>
+        <button class="btn-ghost" id="resetBtn">איפוס</button>
+        <div class="seg" id="speedSeg">
+          <button data-s="0.5">0.5×</button>
+          <button data-s="1" class="on">1×</button>
+          <button data-s="2">2×</button>
+        </div>
+        <div class="spacer"></div>
+        <label class="chk"><input type="checkbox" id="loopChk"> חזרה בלולאה</label>
+      </div>
+      <div class="scrubrow">
+        <span class="t-read" id="scrubRead">0.00 s</span>
+        <input type="range" id="scrub" min="0" max="10" step="0.01" value="0" aria-label="גרירת זמן">
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+"use strict";
+(function(){
+  const NS="http://www.w3.org/2000/svg";
+  const M={l:48,r:16,t:16,b:40,W:460,H:300};
+  const RING={"var(--teal)":"rgba(44,110,143,.18)","var(--cabin)":"rgba(224,80,46,.18)","var(--ink)":"rgba(13,39,51,.16)"};
+  const PRESETS={
+    "רכבל מקורי":[[0,12],[6,-6],[10,-6]],
+    "האטה לעצירה":[[0,10],[5,0],[8,0]],
+    "האצה־שיוט־בלימה":[[0,0],[3,9],[7,9],[10,0]],
+    "הלוך ושוב":[[0,8],[4,-8],[8,8],[12,0]]
+  };
+
+  function el(tag,a){const e=document.createElementNS(NS,tag);for(const k in a)e.setAttribute(k,a[k]);return e;}
+  function scale(d0,d1,r0,r1){return v=>r0+(v-d0)/((d1-d0)||1)*(r1-r0);}
+  function niceNum(x,round){if(x<=0)return 1;const exp=Math.floor(Math.log10(x));const f=x/Math.pow(10,exp);let nf;
+    if(round){nf=f<1.5?1:f<3?2:f<7?5:10;}else{nf=f<=1?1:f<=2?2:f<=5?5:10;}return nf*Math.pow(10,exp);}
+  function niceBounds(min,max,ticks){if(!isFinite(min)||!isFinite(max))return{lo:0,hi:1,step:1};
+    if(min===max){min-=1;max+=1;}const range=niceNum(max-min,false);const step=niceNum(range/(ticks-1),true);
+    return{lo:Math.floor(min/step)*step,hi:Math.ceil(max/step)*step,step};}
+  function nf(v,dp){let s=+(+v).toFixed(dp);if(Object.is(s,-0))s=0;return s.toFixed(dp);}
+  function fmtTick(v){let s=+(+v).toFixed(2);if(Object.is(s,-0))s=0;return String(s);}
+
+  /* ---------- State ---------- */
+  let points=PRESETS["רכבל מקורי"].map(p=>({t:p[0],v:p[1]}));
+  let x0=0, cumX=[0], vMin=0,vMax=0, xMinReal=0,xMaxReal=0, xMinP=0,xMaxP=1;
+  let tBounds={lo:0,hi:10,step:1}, vBounds={lo:-8,hi:14,step:2}, xBounds={lo:0,hi:1,step:1};
+  let gv=null, gx=null;
+  let dragging=false, dragIndex=-1, justDragged=false;
+  let simTime=0, playing=false, speed=1, lastTs=null;
+
+  /* ---------- Physics ---------- */
+  function tEnd(){return points[points.length-1].t;}
+  function vAt(t){const P=points;if(t<=P[0].t)return P[0].v;if(t>=P[P.length-1].t)return P[P.length-1].v;
+    for(let i=0;i<P.length-1;i++){if(t>=P[i].t&&t<=P[i+1].t){const f=(t-P[i].t)/((P[i+1].t-P[i].t)||1);return P[i].v+f*(P[i+1].v-P[i].v);}}return P[P.length-1].v;}
+  function buildCum(){cumX=[x0];for(let i=0;i<points.length-1;i++){const dt=points[i+1].t-points[i].t;cumX.push(cumX[i]+0.5*(points[i].v+points[i+1].v)*dt);}}
+  function xAt(t){const P=points;if(t<=P[0].t)return cumX[0]+P[0].v*(t-P[0].t);const L=P.length-1;if(t>=P[L].t)return cumX[L]+P[L].v*(t-P[L].t);
+    for(let i=0;i<P.length-1;i++){if(t>=P[i].t&&t<=P[i+1].t){const dt=t-P[i].t;const slope=(P[i+1].v-P[i].v)/((P[i+1].t-P[i].t)||1);return cumX[i]+P[i].v*dt+0.5*slope*dt*dt;}}return cumX[L];}
+  function aAt(t){const P=points;for(let i=0;i<P.length-1;i++){if(t>=P[i].t&&t<P[i+1].t)return(P[i+1].v-P[i].v)/((P[i+1].t-P[i].t)||1);}return 0;}
+
+  /* ---------- Axes ---------- */
+  function drawAxes(svg,tB,yB,yLabel){
+    svg.innerHTML="";
+    const px=scale(tB.lo,tB.hi,M.l,M.W-M.r), py=scale(yB.lo,yB.hi,M.H-M.b,M.t);
+    for(let t=tB.lo;t<=tB.hi+1e-9;t+=tB.step){
+      svg.appendChild(el("line",{x1:px(t),y1:M.t,x2:px(t),y2:M.H-M.b,stroke:"var(--grid)","stroke-width":.8,opacity:.5}));
+      if(Math.abs(t-tB.lo)>1e-9){const tx=el("text",{x:px(t),y:M.H-M.b+15,"text-anchor":"middle","font-size":10.5,fill:"var(--muted)","font-family":"'JetBrains Mono',monospace"});tx.textContent=fmtTick(t);svg.appendChild(tx);}
+    }
+    for(let y=yB.lo;y<=yB.hi+1e-9;y+=yB.step){
+      svg.appendChild(el("line",{x1:M.l,y1:py(y),x2:M.W-M.r,y2:py(y),stroke:"var(--grid)","stroke-width":.8,opacity:.5}));
+      const ty=el("text",{x:M.l-7,y:py(y)+4,"text-anchor":"end","font-size":10.5,fill:"var(--muted)","font-family":"'JetBrains Mono',monospace"});ty.textContent=fmtTick(y);svg.appendChild(ty);
+    }
+    if(yB.lo<0&&yB.hi>0)svg.appendChild(el("line",{x1:M.l,y1:py(0),x2:M.W-M.r,y2:py(0),stroke:"var(--ink)","stroke-width":1.4,opacity:.85}));
+    svg.appendChild(el("line",{x1:M.l,y1:M.t,x2:M.l,y2:M.H-M.b,stroke:"var(--ink)","stroke-width":1.4}));
+    const xt=el("text",{x:(M.l+M.W-M.r)/2,y:M.H-5,"text-anchor":"middle","font-size":12,fill:"var(--ink)","font-weight":600,"font-family":"'Rubik',sans-serif"});xt.textContent="t [s]";svg.appendChild(xt);
+    const yc=(M.t+M.H-M.b)/2;
+    const yt=el("text",{x:13,y:yc,"text-anchor":"middle","font-size":12,fill:"var(--ink)","font-weight":600,"font-family":"'Rubik',sans-serif",transform:`rotate(-90 13 ${yc})`});yt.textContent=yLabel;svg.appendChild(yt);
+    return{px,py};
+  }
+
+  function drawV(){
+    const sc=drawAxes(gvEl,tBounds,vBounds,"v [m/s]");
+    let d="";points.forEach((p,i)=>{d+=(i?"L":"M")+sc.px(p.t).toFixed(2)+" "+sc.py(p.v).toFixed(2)+" ";});
+    gvEl.appendChild(el("path",{d,fill:"none",stroke:"var(--teal)","stroke-width":3,"stroke-linejoin":"round","stroke-linecap":"round"}));
+    const rect=el("rect",{x:M.l,y:M.t,width:M.W-M.r-M.l,height:M.H-M.b-M.t,fill:"transparent"});rect.style.cursor="copy";rect.addEventListener("click",onPlotClick);gvEl.appendChild(rect);
+    points.forEach((p,i)=>{
+      const h=el("circle",{cx:sc.px(p.t),cy:sc.py(p.v),r:7,fill:"var(--cabin)",stroke:"#fff","stroke-width":2.5});
+      h.style.cursor="grab";h.dataset.i=i;h.addEventListener("pointerdown",onHandleDown);h.addEventListener("dblclick",ev=>{ev.preventDefault();removePoint(i);});
+      const tt=el("title",{});tt.textContent=`t=${fmtTick(p.t)} s, v=${fmtTick(p.v)} m/s — גרירה להזזה, לחיצה כפולה למחיקה`;h.appendChild(tt);
+      gvEl.appendChild(h);
+    });
+    const guide=el("line",{x1:sc.px(0),y1:M.t,x2:sc.px(0),y2:M.H-M.b,stroke:"var(--cabin)","stroke-width":1.1,opacity:.45});gvEl.appendChild(guide);
+    const dot=el("circle",{r:5.5,fill:"var(--ink)",stroke:"#fff","stroke-width":2});gvEl.appendChild(dot);
+    gv={px:sc.px,py:sc.py,dot,guide};
+  }
+
+  function drawX(){
+    const sc=drawAxes(gxEl,tBounds,xBounds,"x [m]");
+    let d="";const N=260,T=tEnd();for(let i=0;i<=N;i++){const t=(i/N)*T;d+=(i?"L":"M")+sc.px(t).toFixed(2)+" "+sc.py(xAt(t)).toFixed(2)+" ";}
+    gxEl.appendChild(el("path",{d,fill:"none",stroke:"var(--teal)","stroke-width":3,"stroke-linejoin":"round","stroke-linecap":"round"}));
+    const guide=el("line",{x1:sc.px(0),y1:M.t,x2:sc.px(0),y2:M.H-M.b,stroke:"var(--cabin)","stroke-width":1.1,opacity:.45});gxEl.appendChild(guide);
+    const dot=el("circle",{r:5.5,fill:"var(--ink)",stroke:"#fff","stroke-width":2});gxEl.appendChild(dot);
+    gx={px:sc.px,py:sc.py,dot,guide};
+  }
+
+  /* ---------- Scene ---------- */
+  const scene=document.getElementById("scene");
+  const A={x:80,y:212}, B={x:720,y:78};
+  let normal;
+  let cabinG, posTicks;
+  function fracX(x){return(x-xMinP)/((xMaxP-xMinP)||1);}
+  function cablePt(f){return{x:A.x+f*(B.x-A.x),y:A.y+f*(B.y-A.y)};}
+  (function buildScene(){
+    const defs=el("defs",{});const grad=el("linearGradient",{id:"sky",x1:0,y1:0,x2:0,y2:1});
+    grad.appendChild(el("stop",{offset:"0%","stop-color":"#eaf3f8"}));grad.appendChild(el("stop",{offset:"100%","stop-color":"#f6fafb"}));
+    defs.appendChild(grad);scene.appendChild(defs);
+    scene.appendChild(el("rect",{x:0,y:0,width:800,height:300,fill:"url(#sky)"}));
+    scene.appendChild(el("path",{d:"M0 250 L150 150 L300 230 L470 120 L640 235 L800 160 L800 300 L0 300 Z",fill:"#dde9ef"}));
+    scene.appendChild(el("path",{d:"M0 270 L220 200 L420 265 L600 195 L800 255 L800 300 L0 300 Z",fill:"#cfe0e8"}));
+    scene.appendChild(el("rect",{x:0,y:284,width:800,height:16,fill:"#bcd2dc"}));
+    function pylon(p){scene.appendChild(el("line",{x1:p.x,y1:p.y,x2:p.x,y2:288,stroke:"#7d96a3","stroke-width":6,"stroke-linecap":"round"}));
+      scene.appendChild(el("line",{x1:p.x-18,y1:p.y+10,x2:p.x+18,y2:p.y+10,stroke:"#7d96a3","stroke-width":5,"stroke-linecap":"round"}));
+      scene.appendChild(el("circle",{cx:p.x,cy:p.y,r:5,fill:"#5f7785"}));}
+    pylon(A);pylon(B);
+    scene.appendChild(el("line",{x1:A.x,y1:A.y,x2:B.x,y2:B.y,stroke:"var(--ink)","stroke-width":2.4}));
+    const nx=(B.y-A.y), ny=-(B.x-A.x), len=Math.hypot(nx,ny), ux=nx/len, uy=ny/len;
+    normal={ux,uy,sign:uy>0?1:-1};
+    posTicks=el("g",{id:"posTicks"});scene.appendChild(posTicks);
+    const g=el("g",{id:"cabinG"});
+    g.appendChild(el("line",{x1:0,y1:0,x2:0,y2:34,stroke:"#54606a","stroke-width":3}));
+    g.appendChild(el("rect",{x:-7,y:-6,width:14,height:9,rx:2,fill:"#54606a"}));
+    g.appendChild(el("rect",{x:-26,y:34,width:52,height:36,rx:7,fill:"var(--cabin)",stroke:"var(--cabin-dark)","stroke-width":2}));
+    g.appendChild(el("rect",{x:-19,y:41,width:38,height:15,rx:3,fill:"#fce6df",opacity:.92}));
+    g.appendChild(el("line",{x1:0,y1:41,x2:0,y2:56,stroke:"var(--cabin-dark)","stroke-width":1.4,opacity:.5}));
+    scene.appendChild(g);cabinG=g;
+  })();
+
+  function drawCabinScale(){
+    posTicks.innerHTML="";
+    const b=niceBounds(xMinReal,xMaxReal,6);
+    for(let xp=b.lo;xp<=b.hi+1e-9;xp+=b.step){
+      if(xp<xMinReal-1e-9||xp>xMaxReal+1e-9)continue;
+      const p=cablePt(fracX(xp)),{ux,uy,sign}=normal;
+      const t0={x:p.x+ux*5*sign,y:p.y+uy*5*sign},t1={x:p.x+ux*11*sign,y:p.y+uy*11*sign};
+      posTicks.appendChild(el("line",{x1:t0.x,y1:t0.y,x2:t1.x,y2:t1.y,stroke:"var(--muted)","stroke-width":1.3,opacity:.7}));
+      const lab=el("text",{x:t1.x+ux*9*sign,y:t1.y+uy*9*sign+4,"text-anchor":"middle","font-size":10.5,fill:"var(--muted)","font-family":"'JetBrains Mono',monospace"});lab.textContent=fmtTick(xp);posTicks.appendChild(lab);
+    }
+    if(0>=xMinReal-1e-9&&0<=xMaxReal+1e-9){
+      const p=cablePt(fracX(0));
+      posTicks.appendChild(el("circle",{cx:p.x,cy:p.y,r:3.5,fill:"var(--teal)"}));
+      const sl=el("text",{x:p.x,y:p.y-12,"text-anchor":"middle","font-size":10.5,fill:"var(--teal)","font-weight":700,"font-family":"'Rubik',sans-serif"});sl.textContent="0";posTicks.appendChild(sl);
+    }
+  }
+
+  /* ---------- Status text ---------- */
+  function statusInfo(t){
+    const v=vAt(t),a=aAt(t);
+    const sub=`v = ${nf(v,1)} m/s · a = ${nf(a,1)} m/s²`;
+    if(Math.abs(v)<0.05)return["במנוחה",sub,"var(--ink)"];
+    const dir=v>0?"קדימה":"אחורה",col=v>0?"var(--teal)":"var(--cabin)";
+    let trend;if(Math.abs(a)<0.05)trend="במהירות קבועה";else if(a*v>0)trend="ומאיץ";else trend="ומאט";
+    return["נע "+dir+" "+trend,sub,col];
+  }
+
+  /* ---------- DOM ---------- */
+  const gvEl=document.getElementById("gv"), gxEl=document.getElementById("gx");
+  const rT=document.getElementById("rT"),rV=document.getElementById("rV"),rX=document.getElementById("rX"),rA=document.getElementById("rA");
+  const statV=document.querySelector('.stat[data-k="v"]');
+  const phaseTxt=document.getElementById("phaseTxt"),phaseSub=document.getElementById("phaseSub"),phaseDot=document.getElementById("phaseDot");
+  const scrub=document.getElementById("scrub"),scrubRead=document.getElementById("scrubRead");
+  const playBtn=document.getElementById("playBtn"),playLbl=document.getElementById("playLbl"),playIcon=document.getElementById("playIcon");
+  const resetBtn=document.getElementById("resetBtn"),loopChk=document.getElementById("loopChk");
+  const tableEl=document.getElementById("ptable"),totalEl=document.getElementById("total"),addBtn=document.getElementById("addBtn");
+  const x0in=document.getElementById("x0in"),x0lbl=document.getElementById("x0lbl"),presetsEl=document.getElementById("presets");
+
+  /* ---------- Render (per frame) ---------- */
+  function render(t){
+    const v=vAt(t),x=xAt(t),a=aAt(t);
+    rT.textContent=t.toFixed(2);rV.textContent=nf(v,1);rX.textContent=nf(x,1);rA.textContent=nf(a,1);
+    statV.style.setProperty("--vcol",v>0.05?"var(--pos)":(v<-0.05?"var(--neg)":"var(--ink)"));
+    const[pt,ps,pc]=statusInfo(t);phaseTxt.textContent=pt;phaseSub.textContent=ps;phaseDot.style.background=pc;phaseDot.style.boxShadow="0 0 0 4px "+(RING[pc]||"rgba(44,110,143,.15)");
+    if(gv){const cx=gv.px(t),cy=gv.py(v);gv.dot.setAttribute("cx",cx);gv.dot.setAttribute("cy",cy);gv.guide.setAttribute("x1",cx);gv.guide.setAttribute("x2",cx);}
+    if(gx){const cx=gx.px(t),cy=gx.py(x);gx.dot.setAttribute("cx",cx);gx.dot.setAttribute("cy",cy);gx.guide.setAttribute("x1",cx);gx.guide.setAttribute("x2",cx);}
+    const p=cablePt(fracX(x));const tilt=Math.max(-18,Math.min(18,a*2.0));
+    cabinG.setAttribute("transform",`translate(${p.x.toFixed(2)},${p.y.toFixed(2)}) rotate(${tilt.toFixed(2)})`);
+    const T=tEnd()||1;scrub.value=t;scrub.style.setProperty("--fill",(t/T*100)+"%");scrubRead.textContent=t.toFixed(2)+" s";
+  }
+
+  /* ---------- Rebuild everything from data ---------- */
+  function rebuildAll(){
+    points=points.filter(p=>isFinite(p.t)&&isFinite(p.v));
+    if(points.length<2)points=[{t:0,v:0},{t:5,v:0}];
+    points.sort((a,b)=>a.t-b.t);points[0].t=0;
+    for(let i=1;i<points.length;i++){if(points[i].t<=points[i-1].t)points[i].t=+(points[i-1].t+0.1).toFixed(2);}
+    buildCum();
+    vMin=Math.min(...points.map(p=>p.v));vMax=Math.max(...points.map(p=>p.v));
+    const T=tEnd();let lo=Infinity,hi=-Infinity;
+    for(let i=0;i<=400;i++){const xx=xAt((i/400)*T);if(xx<lo)lo=xx;if(xx>hi)hi=xx;}
+    xMinReal=lo;xMaxReal=hi;xBounds=niceBounds(Math.min(0,lo),Math.max(0,hi),7);
+    if(!dragging){tBounds=niceBounds(0,T,7);vBounds=niceBounds(Math.min(0,vMin),Math.max(0,vMax),7);}
+    let pad=(hi-lo)*0.08;if(pad<0.5)pad=0.5;xMinP=lo-pad;xMaxP=hi+pad;
+    scrub.max=T;scrub.step=Math.max(0.01,+(T/1000).toFixed(3));if(simTime>T)simTime=T;
+    drawV();drawX();drawCabinScale();buildTable();
+    totalEl.textContent=`משך התנועה: ${fmtTick(T)} s · טווח מיקום: ${fmtTick(lo)} … ${fmtTick(hi)} m`;
+    render(simTime);
+  }
+
+  /* ---------- Editor table ---------- */
+  function buildTable(){
+    tableEl.innerHTML="";
+    points.forEach((p,i)=>{
+      const row=document.createElement("div");row.className="prow";
+      const idx=document.createElement("span");idx.className="pidx";idx.textContent=i+1;
+      const tw=document.createElement("label");tw.className="pfield";
+      const tl=document.createElement("span");tl.className="pflbl";tl.textContent="t";
+      const tin=document.createElement("input");tin.type="number";tin.step="0.1";tin.className="pin";tin.value=p.t;
+      if(i===0){tin.disabled=true;tin.title="קבוע ב‑t=0";}
+      tin.addEventListener("change",()=>{let n=parseFloat(tin.value);if(isNaN(n))n=p.t;points[i].t=Math.max(0,n);rebuildAll();});
+      tw.append(tl,tin);
+      const vw=document.createElement("label");vw.className="pfield";
+      const vl=document.createElement("span");vl.className="pflbl";vl.textContent="v";
+      const vin=document.createElement("input");vin.type="number";vin.step="0.1";vin.className="pin";vin.value=p.v;
+      vin.addEventListener("change",()=>{let n=parseFloat(vin.value);if(isNaN(n))n=p.v;points[i].v=n;rebuildAll();});
+      vw.append(vl,vin);
+      const del=document.createElement("button");del.className="pdel";del.textContent="×";del.title="מחק נקודה";del.disabled=points.length<=2;
+      del.addEventListener("click",()=>removePoint(i));
+      row.append(idx,tw,vw,del);tableEl.appendChild(row);
+    });
+  }
+  function removePoint(i){if(points.length<=2)return;points.splice(i,1);points[0].t=0;rebuildAll();}
+
+  /* ---------- Drag handles ---------- */
+  function getLocal(e){const r=gvEl.getBoundingClientRect();return{x:(e.clientX-r.left)/r.width*M.W,y:(e.clientY-r.top)/r.height*M.H};}
+  function invT(x){return tBounds.lo+(x-M.l)/((M.W-M.r)-M.l)*(tBounds.hi-tBounds.lo);}
+  function invV(y){return vBounds.lo+((M.H-M.b)-y)/((M.H-M.b)-M.t)*(vBounds.hi-vBounds.lo);}
+  function onHandleDown(e){e.preventDefault();dragIndex=+e.currentTarget.dataset.i;dragging=true;
+    try{gvEl.setPointerCapture(e.pointerId);}catch(_){}
+    gvEl.addEventListener("pointermove",onDragMove);gvEl.addEventListener("pointerup",onDragUp);gvEl.addEventListener("pointercancel",onDragUp);}
+  function onDragMove(e){
+    if(!dragging)return;const loc=getLocal(e);let t=invT(loc.x),v=invV(loc.y);const P=points;
+    if(dragIndex===0){t=0;}else{const lo=P[dragIndex-1].t+0.05;const hi=(dragIndex<P.length-1)?P[dragIndex+1].t-0.05:Math.max(lo+0.05,120);t=Math.max(lo,Math.min(hi,t));}
+    v=Math.max(-200,Math.min(200,v));P[dragIndex].t=+t.toFixed(2);P[dragIndex].v=+v.toFixed(2);
+    buildCum();
+    const T=tEnd();let mn=Infinity,mx=-Infinity;for(let i=0;i<=300;i++){const xx=xAt((i/300)*T);if(xx<mn)mn=xx;if(xx>mx)mx=xx;}
+    xMinReal=mn;xMaxReal=mx;let pad=(mx-mn)*0.08;if(pad<0.5)pad=0.5;xMinP=mn-pad;xMaxP=mx+pad;xBounds=niceBounds(Math.min(0,mn),Math.max(0,mx),7);
+    drawV();drawX();drawCabinScale();buildTable();render(simTime);
+  }
+  function onDragUp(e){dragging=false;dragIndex=-1;
+    gvEl.removeEventListener("pointermove",onDragMove);gvEl.removeEventListener("pointerup",onDragUp);gvEl.removeEventListener("pointercancel",onDragUp);
+    try{gvEl.releasePointerCapture(e.pointerId);}catch(_){}
+    justDragged=true;setTimeout(()=>justDragged=false,60);rebuildAll();}
+  function onPlotClick(e){
+    if(justDragged)return;const loc=getLocal(e);let t=+invT(loc.x).toFixed(1),v=+invV(loc.y).toFixed(1);
+    if(t<=0)return;if(points.some(p=>Math.abs(p.t-t)<0.15))return;
+    points.push({t,v});rebuildAll();
+  }
+
+  /* ---------- Controls ---------- */
+  function setPlaying(on){playing=on;playLbl.textContent=on?"השהיה":"הפעלה";
+    playIcon.innerHTML=on?'<rect x="3" y="2" width="4" height="12" rx="1"/><rect x="9" y="2" width="4" height="12" rx="1"/>':'<path d="M3 2l11 6-11 6z"/>';
+    if(on){lastTs=null;requestAnimationFrame(loop);}}
+  function loop(ts){if(!playing)return;if(lastTs==null)lastTs=ts;const dt=(ts-lastTs)/1000;lastTs=ts;const T=tEnd();
+    simTime+=dt*speed;if(simTime>=T){if(loopChk.checked){simTime=0;}else{simTime=T;render(simTime);setPlaying(false);return;}}render(simTime);requestAnimationFrame(loop);}
+  playBtn.addEventListener("click",()=>{if(!playing&&simTime>=tEnd())simTime=0;setPlaying(!playing);});
+  resetBtn.addEventListener("click",()=>{setPlaying(false);simTime=0;render(0);});
+  scrub.addEventListener("input",()=>{setPlaying(false);simTime=parseFloat(scrub.value);render(simTime);});
+  document.getElementById("speedSeg").addEventListener("click",e=>{const b=e.target.closest("button[data-s]");if(!b)return;speed=parseFloat(b.dataset.s);[...e.currentTarget.children].forEach(c=>c.classList.toggle("on",c===b));});
+  document.addEventListener("keydown",e=>{if(e.code==="Space"&&e.target.tagName!=="INPUT"){e.preventDefault();playBtn.click();}});
+  addBtn.addEventListener("click",()=>{const T=tEnd();points.push({t:+(T+1).toFixed(1),v:0});rebuildAll();});
+  x0in.addEventListener("change",()=>{let n=parseFloat(x0in.value);if(isNaN(n))n=0;x0=n;x0lbl.textContent="x = "+nf(x0,1);setPlaying(false);simTime=0;rebuildAll();});
+
+  Object.keys(PRESETS).forEach(name=>{
+    const b=document.createElement("button");b.textContent=name;
+    b.addEventListener("click",()=>{points=PRESETS[name].map(p=>({t:p[0],v:p[1]}));setPlaying(false);simTime=0;rebuildAll();});
+    presetsEl.appendChild(b);
+  });
+
+  rebuildAll();
+})();
+</script>
+</body>
+</html>
