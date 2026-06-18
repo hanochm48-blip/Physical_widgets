@@ -5,354 +5,510 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>סימולטור משקל במעלית</title>
     <style>
+        * { box-sizing: border-box; }
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Segoe UI', Arial, sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
             margin: 0;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #6a3093 100%);
         }
         .container {
-            background: white;
+            background: rgba(255,255,255,0.97);
             padding: 30px;
-            border-radius: 20px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
             text-align: center;
-            max-width: 500px;
+            max-width: 720px;
+            width: 100%;
         }
         h1 {
-            color: #333;
-            margin-bottom: 20px;
+            color: #2d3748;
+            margin: 0 0 25px;
+            font-size: 28px;
         }
+        .main-layout {
+            display: flex;
+            gap: 30px;
+            justify-content: center;
+            align-items: stretch;
+            flex-wrap: wrap;
+        }
+        /* ===== פיר המעלית ===== */
         .elevator-shaft {
             width: 300px;
-            height: 400px;
-            background: #e0e0e0;
-            border: 3px solid #333;
-            border-radius: 10px;
-            margin: 20px auto;
+            height: 460px;
+            background: linear-gradient(180deg, #d8dde3 0%, #c3cad2 100%);
+            border: 4px solid #2d3748;
+            border-radius: 12px;
             position: relative;
             overflow: hidden;
+            box-shadow: inset 0 0 30px rgba(0,0,0,0.25);
+        }
+        /* קווי קומות */
+        .floor-line {
+            position: absolute;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: rgba(45,55,72,0.25);
+        }
+        .floor-label {
+            position: absolute;
+            left: 6px;
+            font-size: 13px;
+            font-weight: bold;
+            color: #4a5568;
+            background: rgba(255,255,255,0.6);
+            padding: 1px 6px;
+            border-radius: 4px;
         }
         .elevator {
-            width: 280px;
-            height: 120px;
-            background: linear-gradient(180deg, #4a5568 0%, #2d3748 100%);
-            border: 2px solid #1a202c;
-            border-radius: 5px;
+            width: 230px;
+            height: 150px;
+            background: linear-gradient(180deg, #5a6678 0%, #2d3748 100%);
+            border: 3px solid #1a202c;
+            border-radius: 8px;
             position: absolute;
-            left: 10px;
-            top: 280px;
+            left: 50%;
+            margin-left: -115px;
+            top: 248px;
             transition: top 6s ease-in-out;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+            z-index: 5;
         }
-        .person {
-            width: 40px;
-            height: 80px;
-            margin: 20px auto 0;
-            position: relative;
-        }
-        .head {
-            width: 30px;
-            height: 30px;
-            background: #ffd5a3;
-            border-radius: 50%;
-            margin: 0 auto;
-            border: 2px solid #333;
-        }
-        .body {
-            width: 35px;
-            height: 45px;
-            background: #3498db;
-            margin: 2px auto;
-            border-radius: 5px;
-            border: 2px solid #333;
-        }
-        .floor-indicator {
+        /* דלתות המעלית */
+        .elevator::before, .elevator::after {
+            content: '';
             position: absolute;
-            top: 10px;
-            right: 10px;
-            background: #000;
-            color: #0f0;
-            padding: 10px 20px;
-            border-radius: 5px;
-            font-size: 24px;
-            font-weight: bold;
-            font-family: 'Courier New', monospace;
-            z-index: 10;
+            top: 8px;
+            bottom: 8px;
+            width: 6px;
+            background: rgba(0,0,0,0.3);
         }
+        .elevator::before { left: 50%; margin-left: -3px; }
+        /* כבל */
         .cable {
             position: absolute;
-            width: 4px;
-            background: repeating-linear-gradient(
-                0deg,
-                #555 0px,
-                #555 8px,
-                #777 8px,
-                #777 16px
-            );
+            width: 6px;
+            background: repeating-linear-gradient(0deg,#444 0px,#444 6px,#888 6px,#888 12px);
             left: 50%;
             transform: translateX(-50%);
             top: 0;
-            height: 280px;
+            height: 248px;
             transition: height 6s ease-in-out;
-            border-radius: 2px;
-        }
-        .scale {
-            width: 60px;
-            height: 10px;
-            background: #555;
-            margin: 0 auto;
             border-radius: 3px;
+            z-index: 4;
+        }
+        .cable-hook {
+            position: absolute;
+            top: -2px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 18px;
+            height: 10px;
+            background: #2d3748;
+            border-radius: 0 0 6px 6px;
+            z-index: 4;
+        }
+        /* ===== הדמות ===== */
+        .person {
+            width: 50px;
+            position: absolute;
+            top: 18px;
+            left: 50%;
+            margin-left: -25px;
+        }
+        .head {
+            width: 26px; height: 26px;
+            background: radial-gradient(circle at 35% 35%, #ffe0b8, #f0c088);
+            border-radius: 50%;
+            margin: 0 auto;
+            border: 2px solid #c89456;
+        }
+        .body {
+            width: 34px; height: 46px;
+            background: linear-gradient(180deg,#4299e1,#2b6cb0);
+            margin: -2px auto 0;
+            border-radius: 8px 8px 4px 4px;
+            border: 2px solid #2c5282;
+        }
+        .legs {
+            display: flex; justify-content: center; gap: 4px; margin-top: -2px;
+        }
+        .leg { width: 10px; height: 18px; background: #2d3748; border-radius: 0 0 3px 3px; }
+        /* משקל פיזי */
+        .scale-platform {
+            width: 70px; height: 16px;
+            background: linear-gradient(180deg,#a0aec0,#718096);
+            margin: 2px auto 0;
+            border-radius: 4px;
+            border: 2px solid #4a5568;
             position: relative;
         }
-        .scale::after {
-            content: '';
-            width: 55px;
-            height: 8px;
-            background: #888;
-            position: absolute;
-            top: 1px;
-            left: 2.5px;
-            border-radius: 2px;
+        .scale-platform::after {
+            content:''; position:absolute; left:50%; top:50%;
+            width:8px; height:8px; transform:translate(-50%,-50%);
+            background:#2d3748; border-radius:50%;
         }
-        .weight-display {
-            background: #1a202c;
-            color: #4ade80;
-            padding: 15px;
-            border-radius: 10px;
-            font-size: 32px;
+        .floor-indicator {
+            position: absolute;
+            top: 12px; right: 12px;
+            background: #0a0a0a;
+            color: #39ff14;
+            padding: 8px 18px;
+            border-radius: 6px;
+            font-size: 26px;
             font-weight: bold;
-            margin: 20px 0;
             font-family: 'Courier New', monospace;
-            letter-spacing: 2px;
+            z-index: 20;
+            box-shadow: 0 0 12px rgba(57,255,20,0.5), inset 0 0 8px rgba(0,0,0,0.8);
+            border: 2px solid #1a3a1a;
+        }
+        /* ===== פאנל ימני ===== */
+        .right-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            width: 320px;
+        }
+        .gauge-box {
+            background: #f7fafc;
+            border-radius: 16px;
+            padding: 15px;
+            border: 2px solid #e2e8f0;
+        }
+        .weight-digital {
+            background: #0a0a0a;
+            color: #39ff14;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 28px;
+            font-weight: bold;
+            font-family: 'Courier New', monospace;
+            letter-spacing: 1px;
+            margin-top: 10px;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.8);
+        }
+        .force-label {
+            font-size: 14px;
+            color: #718096;
+            margin-top: 8px;
+            min-height: 20px;
+            font-weight: bold;
         }
         .controls {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 10px;
-            margin-top: 20px;
         }
         .floor-btn {
-            background: #4299e1;
+            background: linear-gradient(180deg,#4299e1,#3182ce);
             color: white;
             border: none;
-            padding: 15px;
-            font-size: 18px;
-            border-radius: 10px;
+            padding: 16px;
+            font-size: 20px;
+            border-radius: 12px;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: all 0.2s;
             font-weight: bold;
+            box-shadow: 0 3px 0 #2c5282;
         }
-        .floor-btn:hover {
-            background: #3182ce;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-        }
-        .floor-btn:active {
-            transform: translateY(0);
-        }
+        .floor-btn:hover { transform: translateY(-2px); box-shadow: 0 5px 12px rgba(0,0,0,0.3); }
+        .floor-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 #2c5282; }
         .floor-btn.current {
-            background: #48bb78;
-        }
-        .status {
-            margin-top: 15px;
-            font-size: 18px;
-            color: #666;
-            font-weight: bold;
+            background: linear-gradient(180deg,#48bb78,#38a169);
+            box-shadow: 0 3px 0 #276749;
         }
         .emergency-btn {
-            background: #e53e3e;
+            background: linear-gradient(180deg,#f56565,#e53e3e);
             color: white;
             border: none;
-            padding: 15px 30px;
-            font-size: 18px;
-            border-radius: 10px;
+            padding: 16px;
+            font-size: 17px;
+            border-radius: 12px;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: all 0.2s;
             font-weight: bold;
-            margin-top: 15px;
-            width: 100%;
+            box-shadow: 0 3px 0 #9b2c2c;
         }
-        .emergency-btn:hover {
-            background: #c53030;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(229,62,62,0.4);
-        }
+        .emergency-btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(229,62,62,0.5); }
+        .emergency-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 #9b2c2c; }
         .emergency-btn:disabled {
-            background: #cbd5e0;
-            cursor: not-allowed;
-            transform: none;
+            background: #cbd5e0; color:#718096; cursor: not-allowed;
+            transform: none; box-shadow: 0 3px 0 #a0aec0;
         }
+        .status {
+            font-size: 18px;
+            color: #4a5568;
+            font-weight: bold;
+            padding: 8px;
+            background: #edf2f7;
+            border-radius: 10px;
+        }
+        /* רעידת מסך בנפילה */
+        @keyframes shake {
+            0%,100% { transform: translate(0,0); }
+            25% { transform: translate(-4px,2px); }
+            50% { transform: translate(4px,-2px); }
+            75% { transform: translate(-2px,3px); }
+        }
+        .shaking { animation: shake 0.15s infinite; }
     </style>
 </head>
 <body>
-    <div class="container">
+    <div class="container" id="container">
         <h1>🏢 סימולטור משקל במעלית</h1>
         
-        <div class="weight-display" id="weightDisplay">70.0 ק"ג</div>
-        
-        <div class="elevator-shaft">
-            <div class="floor-indicator" id="floorIndicator">1</div>
-            <div class="cable" id="cable"></div>
-            <div class="elevator" id="elevator">
-                <div class="person">
-                    <div class="head"></div>
-                    <div class="body"></div>
-                    <div class="scale"></div>
+        <div class="main-layout">
+            <!-- פיר המעלית -->
+            <div class="elevator-shaft" id="shaft">
+                <div class="floor-indicator" id="floorIndicator">1</div>
+                <div class="cable-hook"></div>
+                <div class="cable" id="cable"></div>
+                <div class="elevator" id="elevator">
+                    <div class="person">
+                        <div class="head"></div>
+                        <div class="body"></div>
+                        <div class="legs"><div class="leg"></div><div class="leg"></div></div>
+                        <div class="scale-platform"></div>
+                    </div>
                 </div>
             </div>
+
+            <!-- פאנל בקרה -->
+            <div class="right-panel">
+                <div class="gauge-box">
+                    <svg id="gauge" viewBox="0 0 240 160" width="100%"></svg>
+                    <div class="weight-digital" id="weightDisplay">70.0 ק"ג</div>
+                    <div class="force-label" id="forceLabel">משקל רגיל</div>
+                </div>
+                
+                <div class="status" id="status">המעלית במנוחה</div>
+                
+                <div class="controls">
+                    <button class="floor-btn" onclick="goToFloor(5)">5</button>
+                    <button class="floor-btn" onclick="goToFloor(4)">4</button>
+                    <button class="floor-btn" onclick="goToFloor(3)">3</button>
+                    <button class="floor-btn" onclick="goToFloor(2)">2</button>
+                    <button class="floor-btn current" onclick="goToFloor(1)">1</button>
+                    <button class="floor-btn" onclick="goToFloor(0)">0</button>
+                </div>
+                
+                <button class="emergency-btn" id="emergencyBtn" onclick="cutCable()">
+                    ⚠️ נתק כבל (נפילה חופשית!)
+                </button>
+            </div>
         </div>
-        
-        <div class="status" id="status">המעלית במנוחה</div>
-        
-        <div class="controls">
-            <button class="floor-btn" onclick="goToFloor(5)">5</button>
-            <button class="floor-btn" onclick="goToFloor(4)">4</button>
-            <button class="floor-btn" onclick="goToFloor(3)">3</button>
-            <button class="floor-btn" onclick="goToFloor(2)">2</button>
-            <button class="floor-btn current" onclick="goToFloor(1)">1</button>
-            <button class="floor-btn" onclick="goToFloor(0)">0</button>
-        </div>
-        
-        <button class="emergency-btn" id="emergencyBtn" onclick="cutCable()">
-            ⚠️ נתק כבל (נפילה חופשית!)
-        </button>
     </div>
 
     <script>
-        const REAL_WEIGHT = 70; // משקל אמיתי בק"ג
-        const GRAVITY = 9.8; // תאוצת כובד
+        const REAL_WEIGHT = 70;
+        const GRAVITY = 9.8;
+        const MAX_WEIGHT = 140;   // קצה הסקאלה
         let currentFloor = 1;
         let isMoving = false;
         let isFalling = false;
-        
-        function updateCableHeight() {
+
+        // ===== ציור פסי קומות בפיר =====
+        const shaft = document.getElementById('shaft');
+        const shaftH = 460, elevH = 150, topMargin = 8, bottomMargin = 2;
+        // 6 קומות (0..5). קומה 0 בתחתית, קומה 5 למעלה
+        function floorTop(floor) {
+            // top של המעלית עבור קומה נתונה
+            const range = shaftH - elevH - topMargin - bottomMargin;
+            return topMargin + (5 - floor) * (range / 5);
+        }
+        for (let f = 0; f <= 5; f++) {
+            const y = floorTop(f) + elevH; // קו הרצפה
+            const line = document.createElement('div');
+            line.className = 'floor-line';
+            line.style.top = (y - 2) + 'px';
+            shaft.appendChild(line);
+            const lbl = document.createElement('div');
+            lbl.className = 'floor-label';
+            lbl.textContent = 'קומה ' + f;
+            lbl.style.top = (y - 22) + 'px';
+            shaft.appendChild(lbl);
+        }
+
+        // ===== בניית מחוג (gauge) =====
+        const gauge = document.getElementById('gauge');
+        const cx = 120, cy = 130, R = 95;
+        // קשת מ-180° (שמאל) עד 0° (ימין) – חצי עיגול עליון
+        function polar(angleDeg, r) {
+            const a = angleDeg * Math.PI / 180;
+            return [cx + r * Math.cos(a), cy - r * Math.sin(a)];
+        }
+        function weightToAngle(w) {
+            // 0 ק"ג => 180°,  MAX => 0°
+            const frac = Math.max(0, Math.min(1, w / MAX_WEIGHT));
+            return 180 - frac * 180;
+        }
+        let svg = '';
+        // רקע קשת צבעוני: ירוק (נורמלי) באמצע, אדום בקצוות
+        function arcPath(a1, a2, r) {
+            const [x1,y1] = polar(a1, r);
+            const [x2,y2] = polar(a2, r);
+            const large = Math.abs(a1 - a2) > 180 ? 1 : 0;
+            return `M ${x1} ${y1} A ${r} ${r} 0 ${large} 1 ${x2} ${y2}`;
+        }
+        // מקטעי צבע לפי משקל
+        const bands = [
+            {from:0,   to:35,  color:'#f56565'}, // קל מאוד (אדום)
+            {from:35,  to:60,  color:'#ed8936'}, // קל
+            {from:60,  to:80,  color:'#48bb78'}, // נורמלי (ירוק)
+            {from:80,  to:105, color:'#ed8936'}, // כבד
+            {from:105, to:140, color:'#f56565'}  // כבד מאוד (אדום)
+        ];
+        bands.forEach(b => {
+            const a1 = weightToAngle(b.from);
+            const a2 = weightToAngle(b.to);
+            svg += `<path d="${arcPath(a1,a2,R)}" fill="none" stroke="${b.color}" stroke-width="16" stroke-linecap="butt"/>`;
+        });
+        // קווי סימון ומספרים
+        for (let w = 0; w <= MAX_WEIGHT; w += 20) {
+            const a = weightToAngle(w);
+            const [xo,yo] = polar(a, R-10);
+            const [xi,yi] = polar(a, R-22);
+            svg += `<line x1="${xo}" y1="${yo}" x2="${xi}" y2="${yi}" stroke="#2d3748" stroke-width="2"/>`;
+            const [tx,ty] = polar(a, R-34);
+            svg += `<text x="${tx}" y="${ty+4}" font-size="11" font-weight="bold" fill="#4a5568" text-anchor="middle">${w}</text>`;
+        }
+        // ציר המחוג
+        svg += `<line id="needle" x1="${cx}" y1="${cy}" x2="${polar(180,R-18)[0]}" y2="${polar(180,R-18)[1]}" stroke="#e53e3e" stroke-width="4" stroke-linecap="round"/>`;
+        svg += `<circle cx="${cx}" cy="${cy}" r="9" fill="#2d3748"/>`;
+        svg += `<circle cx="${cx}" cy="${cy}" r="4" fill="#e53e3e"/>`;
+        svg += `<text x="${cx}" y="${cy-50}" font-size="12" fill="#718096" text-anchor="middle">ק"ג</text>`;
+        gauge.innerHTML = svg;
+        const needle = document.getElementById('needle');
+
+        function setNeedle(weight) {
+            const a = weightToAngle(weight);
+            const [x2,y2] = polar(a, R-18);
+            needle.setAttribute('x2', x2);
+            needle.setAttribute('y2', y2);
+        }
+
+        function updateWeight(acceleration, label) {
+            const apparent = REAL_WEIGHT * (1 + acceleration / GRAVITY);
+            const clamped = Math.max(0, apparent);
+            document.getElementById('weightDisplay').textContent = clamped.toFixed(1) + ' ק"ג';
+            setNeedle(clamped);
+            const fl = document.getElementById('forceLabel');
+            if (label !== undefined) {
+                fl.textContent = label;
+            } else if (Math.abs(acceleration) < 0.01) {
+                fl.textContent = 'משקל רגיל';
+            }
+        }
+
+        function updateCable() {
             const elevator = document.getElementById('elevator');
             const cable = document.getElementById('cable');
-            const elevatorTop = parseFloat(elevator.style.top || '280');
-            cable.style.height = elevatorTop + 'px';
+            const t = parseFloat(elevator.style.top || floorTop(1));
+            cable.style.height = t + 'px';
         }
-        
-        function updateWeight(acceleration) {
-            // משקל נמדד = משקל אמיתי × (1 + תאוצה/כובד)
-            const apparentWeight = REAL_WEIGHT * (1 + acceleration / GRAVITY);
-            document.getElementById('weightDisplay').textContent = apparentWeight.toFixed(1) + ' ק"ג';
-        }
-        
+
         function goToFloor(targetFloor) {
-            if (isMoving || targetFloor === currentFloor || isFalling) return;
-            
+            if (isMoving || isFalling || targetFloor === currentFloor) return;
             isMoving = true;
             const elevator = document.getElementById('elevator');
             const floorIndicator = document.getElementById('floorIndicator');
             const status = document.getElementById('status');
-            
-            // עדכון כפתורים
-            document.querySelectorAll('.floor-btn').forEach(btn => btn.classList.remove('current'));
+
+            document.querySelectorAll('.floor-btn').forEach(b => b.classList.remove('current'));
             event.target.classList.add('current');
-            
+
             const direction = targetFloor > currentFloor ? 'up' : 'down';
             const floors = Math.abs(targetFloor - currentFloor);
-            
-            // מיקום המעלית (כל קומה = 70px)
-            const startPos = (5 - currentFloor) * 70;
-            const endPos = (5 - targetFloor) * 70;
-            
+            const endPos = floorTop(targetFloor);
+
             // שלב 1: האצה
             status.textContent = direction === 'up' ? '↑ עולה' : '↓ יורדת';
-            const acceleration = direction === 'up' ? 2 : -2; // m/s²
-            updateWeight(acceleration);
-            
+            const acc = direction === 'up' ? 2 : -2;
+            updateWeight(acc, direction === 'up' ? '⬆ מרגישים כבדים יותר' : '⬇ מרגישים קלים יותר');
+
             setTimeout(() => {
-                // שלב 2: תנועה במהירות קבועה
+                // שלב 2: מהירות קבועה
                 updateWeight(0);
                 elevator.style.top = endPos + 'px';
-                updateCableHeight();
-                
-                // עדכון קומה במהלך הנסיעה
-                const interval = setInterval(() => {
+                updateCable();
+                const iv = setInterval(() => {
                     if (direction === 'up' && currentFloor < targetFloor) {
-                        currentFloor++;
-                        floorIndicator.textContent = currentFloor;
+                        currentFloor++; floorIndicator.textContent = currentFloor;
                     } else if (direction === 'down' && currentFloor > targetFloor) {
-                        currentFloor--;
-                        floorIndicator.textContent = currentFloor;
-                    } else {
-                        clearInterval(interval);
-                    }
+                        currentFloor--; floorIndicator.textContent = currentFloor;
+                    } else { clearInterval(iv); }
                 }, 6000 / floors);
-                
             }, 1500);
-            
+
             // שלב 3: האטה
             setTimeout(() => {
-                const deceleration = direction === 'up' ? -2 : 2; // m/s²
-                updateWeight(deceleration);
+                const dec = direction === 'up' ? -2 : 2;
+                updateWeight(dec, direction === 'up' ? '⬇ מרגישים קלים יותר' : '⬆ מרגישים כבדים יותר');
             }, 4500);
-            
+
             // שלב 4: עצירה
             setTimeout(() => {
-                updateWeight(0);
+                updateWeight(0, 'משקל רגיל');
                 currentFloor = targetFloor;
                 floorIndicator.textContent = currentFloor;
                 status.textContent = 'המעלית במנוחה';
                 isMoving = false;
             }, 6000);
         }
-        
+
         function cutCable() {
             if (isFalling || isMoving) return;
-            
             isFalling = true;
             const elevator = document.getElementById('elevator');
             const cable = document.getElementById('cable');
             const status = document.getElementById('status');
-            const emergencyBtn = document.getElementById('emergencyBtn');
-            
-            emergencyBtn.disabled = true;
+            const btn = document.getElementById('emergencyBtn');
+            const container = document.getElementById('container');
+
+            btn.disabled = true;
             cable.style.display = 'none';
-            status.textContent = '🚨 נפילה חופשית!!!';
-            
-            // בנפילה חופשית המשקל הוא 0!
-            updateWeight(-GRAVITY);
-            
-            // אנימציית נפילה מהירה
-            elevator.style.transition = 'top 1.5s cubic-bezier(0.5, 0, 1, 1)';
-            elevator.style.top = '330px'; // נפילה לתחתית
-            
+            status.textContent = '🚨 נפילה חופשית!';
+            updateWeight(-GRAVITY, '🪶 חוסר משקל! 0 ק"ג');
+
+            container.classList.add('shaking');
+            elevator.style.transition = 'top 1.3s cubic-bezier(0.5,0,1,1)';
+            elevator.style.top = (shaftH - elevH + 2) + 'px';
+
             setTimeout(() => {
                 status.textContent = '💥 התרסקות!';
-                elevator.style.background = 'linear-gradient(180deg, #742a2a 0%, #5a1a1a 100%)';
-                
+                container.classList.remove('shaking');
+                elevator.style.background = 'linear-gradient(180deg,#9b2c2c,#5a1a1a)';
                 setTimeout(() => {
-                    // איפוס
-                    status.textContent = 'איפוס מעלית...';
+                    status.textContent = 'מאפס מעלית...';
                     setTimeout(() => {
-                        elevator.style.transition = 'top 6s ease-in-out';
-                        elevator.style.top = '280px';
-                        elevator.style.background = 'linear-gradient(180deg, #4a5568 0%, #2d3748 100%)';
+                        elevator.style.transition = 'top 1s ease-in-out';
+                        elevator.style.top = floorTop(1) + 'px';
+                        elevator.style.background = 'linear-gradient(180deg,#5a6678,#2d3748)';
                         cable.style.display = 'block';
-                        cable.style.height = '280px';
+                        cable.style.height = floorTop(1) + 'px';
                         currentFloor = 1;
                         document.getElementById('floorIndicator').textContent = '1';
-                        updateWeight(0);
+                        updateWeight(0, 'משקל רגיל');
                         status.textContent = 'המעלית במנוחה';
                         isFalling = false;
-                        emergencyBtn.disabled = false;
-                        
-                        document.querySelectorAll('.floor-btn').forEach(btn => btn.classList.remove('current'));
+                        btn.disabled = false;
+                        document.querySelectorAll('.floor-btn').forEach(b => b.classList.remove('current'));
                         document.querySelectorAll('.floor-btn')[4].classList.add('current');
-                    }, 1000);
-                }, 2000);
-            }, 1500);
+                        setTimeout(() => { elevator.style.transition = 'top 6s ease-in-out'; }, 1100);
+                    }, 800);
+                }, 1800);
+            }, 1300);
         }
-        
+
         // אתחול
         updateWeight(0);
-        updateCableHeight();
+        updateCable();
     </script>
 </body>
 </html>
