@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>הדגמת מהירות רגעית</title>
+    <!-- טעינת Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- טעינת Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
+    <!-- חדש: טעינת Math.js לניתוח פונקציות -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.7.0/math.min.js"></script>
+    <style>
+        /* שימוש בגופן Inter, שמתאים גם לעברית */
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap');
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
+
+    <div class="w-full max-w-6xl bg-white p-6 md:p-10 rounded-2xl shadow-xl">
+        <h1 class="text-3xl md:text-4xl font-bold text-center text-blue-800 mb-8">
+            מהירות רגעית כגבול של מהירות ממוצעת
+        </h1>
+        
+        <div class="flex flex-col md:flex-row gap-8">
+            
+            <!-- אזור הבקרה (שליטה) -->
+            <div class="w-full md:w-1/3 bg-gray-50 p-6 rounded-xl border border-gray-200">
+                <h2 class="text-2xl font-semibold text-gray-800 mb-6">בקרת סימולציה</h2>
+                
+                <!-- חדש: עריכת פונקציה -->
+                <div class="mb-6">
+                    <label for="functionInput" class="block text-lg font-medium text-gray-700 mb-2">
+                        הזן נוסחת מקום-זמן:
+                    </label>
+                    <input type="text" id="functionInput" value="t^2" class="w-full p-3 border border-gray-300 rounded-lg text-lg text-left font-mono" dir="ltr">
+                    <button id="updateFunctionBtn" class="w-full mt-3 p-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors">
+                        עדכן פונקציה וגרף
+                    </button>
+                    <div id="functionError" class="text-red-600 text-sm mt-2 font-medium" dir="ltr"></div>
+                </div>
+
+                <!-- הפרדה -->
+                <hr class="my-6 border-gray-300">
+
+                <!-- בחירת זמן t -->
+                <div class="mb-6">
+                    <label for="timeInput" class="block text-lg font-medium text-gray-700 mb-2">
+                        בחר זמן (t)
+                    </label>
+                    <input type="number" id="timeInput" value="2" min="0" max="10" step="0.1" class="w-full p-3 border border-gray-300 rounded-lg text-lg text-center font-mono">
+                </div>
+
+                <!-- סרגל הזזה ל-Δt -->
+                <div class="mb-6">
+                    <label for="deltaTInput" class="block text-lg font-medium text-gray-700 mb-2">
+                        הפרש זמן (Δt)
+                    </label>
+                    <input type="range" id="deltaTInput" value="7.01" min="0.01" max="10" step="0.01" class="w-full h-3 bg-gray-200 rounded-lg appearance-none cursor-pointer range-lg">
+                    <div class="flex justify-between text-sm text-gray-500 px-1 mt-1">
+                        <span>Δt גדול (10.0)</span>
+                        <span>Δt קטן (0.01)</span>
+                    </div>
+                    <div class="text-center text-lg font-mono text-gray-600 mt-2">
+                        Δt = <span id="deltaTValue" class="font-bold text-blue-700">3.00</span>
+                    </div>
+                </div>
+
+                <!-- תצוגת תוצאות -->
+                <div class="bg-white p-4 rounded-lg shadow-inner space-y-4">
+                    <div class="text-lg">
+                        <span class="font-semibold text-gray-800">מהירות ממוצעת (v_avg):</span>
+                        <!-- תיקון: הוספת dir="ltr" ו-text-center כדי להציג נכון מספרים שליליים -->
+                        <div id="avgVelocityOutput" class="font-mono text-2xl text-red-600 font-bold mt-1 text-center" dir="ltr">0.00</div>
+                    </div>
+                </div>
+                
+                <p class="text-center text-gray-600 italic mt-6 text-base">
+                    המהירות הרגעית היא הגבול (limit) של המהירות הממוצעת כאשר <span class="font-mono">Δt → 0</span>.
+                </p>
+
+            </div>
+
+            <!-- אזור הגרף -->
+            <div class="w-full md:w-2/3">
+                <div class="bg-white p-4 rounded-xl shadow-inner border border-gray-200" style="height: 500px;">
+                    <canvas id="positionTimeChart"></canvas>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ********************************************** -->
+    <!--  החלק הזה היה חסר אצלך - כל הלוגיקה של הדף -->
+    <!-- ********************************************** -->
+    <script>
+        // קבלת רכיבי ה-DOM
+        const timeInput = document.getElementById('timeInput');
+        const deltaTInput = document.getElementById('deltaTInput');
+        const deltaTValue = document.getElementById('deltaTValue');
+        const avgVelocityOutput = document.getElementById('avgVelocityOutput');
+        const ctx = document.getElementById('positionTimeChart').getContext('2d');
+        
+        // חדש: רכיבי הפונקציה
+        const functionInput = document.getElementById('functionInput');
+        const updateFunctionBtn = document.getElementById('updateFunctionBtn');
+        const functionError = document.getElementById('functionError');
+
+        let chart; // משתנה גלובלי עבור הגרף
+        let positionFunc = (t) => t * t; // פונקציה גלובלית
+        let mathParser = math.compile('t^2'); // מתרגם גלובלי
+        const parabolaData = []; // נתוני גרף הפונקציה הראשי
+
+        // פונקציה לאתחול ויצירת הגרף
+        function initializeChart() {
+            chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    datasets: [
+                        {
+                            label: 'גרף מקום-זמן x(t)',
+                            data: parabolaData,
+                            borderColor: 'rgb(59, 130, 246)', // כחול
+                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                            borderWidth: 3,
+                            fill: false,
+                            tension: 0.1,
+                            pointRadius: 0
+                        },
+                        {
+                            label: 'מיתר (מהירות ממוצעת)',
+                            data: [], // יתעדכן דינמית
+                            borderColor: 'rgb(220, 38, 38)', // אדום
+                            borderWidth: 2,
+                            borderDash: [5, 5], // קו מקווקו
+                            fill: false,
+                            pointRadius: 0
+                        },
+                        {
+                            label: 'נקודות חישוב',
+                            data: [], // יתעדכן דינמית
+                            backgroundColor: 'rgb(220, 38, 38)', // אדום
+                            type: 'scatter',
+                            pointRadius: 6,
+                            pointHoverRadius: 8
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            type: 'linear',
+                            position: 'bottom',
+                            title: {
+                                display: true,
+                                text: 'זמן (t)',
+                                font: { size: 16 }
+                            },
+                            min: 0,
+                            max: 10
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'מקום (x)',
+                                font: { size: 16 }
+                            },
+                            min: 0, // יתעדכן דינמית
+                            max: 100 // יתעדכן דינמית
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                font: { size: 14 }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `(t=${context.parsed.x.toFixed(2)}, x=${context.parsed.y.toFixed(2)})`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // חדש: פונקציה לעדכון הפונקציה הראשית
+        function updateFunction() {
+            const functionString = functionInput.value;
+            
+            try {
+                // נסה לתרגם את הפונקציה
+                mathParser = math.compile(functionString);
+                positionFunc = (t) => mathParser.evaluate({ t: t });
+                
+                // נקה שגיאות קודמות
+                functionError.textContent = '';
+
+                // חשב מחדש את נתוני הגרף הראשי
+                parabolaData.length = 0; // מחיקת הנתונים הקיימים
+                let yValues = [];
+                for (let t = 0; t <= 10; t += 0.25) {
+                    const y = positionFunc(t);
+                    if (isFinite(y)) { // בדיקה שהערך אינו אינסופי (למשל 1/t ב-t=0)
+                        parabolaData.push({ x: t, y: y });
+                        yValues.push(y);
+                    }
+                }
+
+                // עדכן את נתוני הגרף
+                chart.data.datasets[0].data = parabolaData;
+                chart.data.datasets[0].label = `x(t) = ${functionString}`;
+
+                // עדכן את גבולות ציר Y באופן דינמי
+                if (yValues.length > 0) {
+                    const minY = Math.min(0, ...yValues); // ודא ש-0 נכלל
+                    const maxY = Math.max(...yValues);
+                    const padding = (maxY - minY) * 0.1; // 10% ריפוד
+
+                    chart.options.scales.y.min = (minY === 0) ? 0 : minY - padding;
+                    chart.options.scales.y.max = maxY + padding;
+                    
+                    if (minY === maxY) { // מקרה של קו ישר
+                         chart.options.scales.y.min = minY - 10;
+                         chart.options.scales.y.max = maxY + 10;
+                    }
+
+                } else {
+                     chart.options.scales.y.min = 0;
+                     chart.options.scales.y.max = 100;
+                }
+
+                // עדכן את התצוגה (הגרף והחישובים)
+                updateVisualization();
+
+            } catch (e) {
+                // הצג שגיאה אם התרגום נכשל
+                functionError.textContent = `שגיאה בנוסחה: ${e.message}. נסה למשל: t^2 או 5*t+10`;
+            }
+        }
+
+        // פונקציה לעדכון התצוגה (גרף וטקסט)
+        function updateVisualization() {
+            const t = parseFloat(timeInput.value);
+            
+            // היפוך הלוגיקה של סרגל ההזזה
+            const sliderValue = parseFloat(deltaTInput.value);
+            const minDeltaT = parseFloat(deltaTInput.min);
+            const maxDeltaT = parseFloat(deltaTInput.max);
+            const deltaT = (maxDeltaT - sliderValue) + minDeltaT;
+
+            if (isNaN(t) || isNaN(deltaT)) return;
+
+            // עדכון תצוגת הערך של Δt
+            deltaTValue.textContent = deltaT.toFixed(2);
+
+            // חישוב נקודות
+            const t1 = t;
+            const x1 = positionFunc(t1);
+            const t2 = t + deltaT;
+            const x2 = positionFunc(t2);
+
+            // חישוב מהירויות
+            let avgVelocity = 0;
+            if (deltaT !== 0) {
+                avgVelocity = (x2 - x1) / deltaT;
+            }
+            
+            // עדכון תצוגת המהירויות
+            avgVelocityOutput.textContent = avgVelocity.toFixed(4);
+
+            // עדכון נתוני הגרף
+            // 1. עדכון המיתר
+            chart.data.datasets[1].data = [
+                { x: t1, y: x1 },
+                { x: t2, y: x2 }
+            ];
+
+            // 2. עדכון הנקודות
+            chart.data.datasets[2].data = [
+                { x: t1, y: x1 },
+                { x: t2, y: x2 }
+            ];
+            
+            // רענון הגרף
+            chart.update();
+        }
+
+        // הוספת מאזיני אירועים
+        timeInput.addEventListener('input', updateVisualization);
+        deltaTInput.addEventListener('input', updateVisualization);
+        updateFunctionBtn.addEventListener('click', updateFunction); // חדש
+
+        // אתחול ראשוני
+        window.onload = () => {
+            initializeChart();
+            updateFunction(); // הפעלה ראשונית כדי לצייר את "t^2"
+        };
+    </script>
+
+</body>
+</html>
