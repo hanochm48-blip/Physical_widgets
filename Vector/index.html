@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>פירוק קרטזי — מהירויות רכיבים ותנועה רציפה</title>
+<style>
+  :root{
+    --bg: #0B1120;
+    --panel: #111A2E;
+    --grid: #1E2A45;
+    --axis: #5B6B8C;
+    --text: #CBD5E1;
+    --muted: #7C8CAE;
+    --c-A: #22D3EE;
+    --c-B: #FBBF24;
+    --c-C: #FB7185;
+    --c-ghost: #A78BFA; 
+    --accent: #34D399;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin:0; padding:0; background: var(--bg); color: var(--text);
+    font-family: 'Segoe UI', system-ui, -apple-system, Arial, sans-serif;
+  }
+  .wrap {
+    max-width: 900px; margin: 0 auto; padding: 20px 16px 40px;
+  }
+  h1 {
+    font-size: 20px; font-weight: 600; margin: 4px 0 2px; letter-spacing: 0.2px;
+  }
+  .sub {
+    color: var(--muted); font-size: 13px; margin-bottom: 16px; line-height: 1.5;
+  }
+  .stage {
+    background: radial-gradient(ellipse at center, #101B33 0%, #0B1120 75%);
+    border: 1px solid var(--grid);
+    border-radius: 14px;
+    padding: 10px;
+    position: relative;
+  }
+  canvas {
+    display: block; width: 100%; height: auto; border-radius: 8px; cursor: default;
+    touch-action: none;
+  }
+  .legend {
+    display:flex; gap:18px; flex-wrap:wrap; padding: 10px 4px 2px; font-size: 12px; color: var(--muted);
+  }
+  .legend span.dot {
+    display:inline-block; width:9px; height:9px; border-radius:50%; margin-inline-end:6px; vertical-align:middle;
+  }
+  .panel {
+    background: var(--panel); border: 1px solid var(--grid); border-radius: 14px;
+    margin-top: 14px; padding: 16px 18px;
+  }
+  .row {
+    display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-bottom: 12px;
+  }
+  .row:last-child{ margin-bottom:0; }
+  button {
+    font-family: inherit; font-size: 13px; font-weight: 600; letter-spacing: 0.2px;
+    padding: 9px 16px; border-radius: 9px; border: 1px solid var(--grid);
+    background: #17223B; color: var(--text); cursor: pointer;
+    transition: border-color .15s, transform .1s, background .15s;
+  }
+  button:hover:not(:disabled) { border-color: var(--accent); background:#1B2A4A; }
+  button:active:not(:disabled) { transform: scale(0.97); }
+  button:disabled { opacity: 0.25; cursor: not-allowed; border-color: var(--grid); }
+  button.primary { background: linear-gradient(180deg, #1c9a76, #16805f); border-color: #1c9a76; color:#EAFBF5; }
+  button.primary:hover:not(:disabled) { background: linear-gradient(180deg, #22b389, #17916d); }
+  button.ghost { background: transparent; border-style: dashed; border-color: var(--c-ghost); color: var(--c-ghost); }
+  button.ghost:hover:not(:disabled) { border-color: var(--accent); background: #1B2A4A; color: var(--text); }
+  label.field {
+    display:flex; align-items:center; gap:8px; font-size: 12px; color: var(--muted);
+  }
+  input[type=range]{ accent-color: var(--accent); width: 140px; }
+  .readout {
+    display:grid; grid-template-columns: repeat(auto-fit, minmax(150px,1fr)); gap: 10px; margin-top: 4px;
+  }
+  .card {
+    background: #0E1830; border: 1px solid var(--grid); border-radius: 10px; padding: 10px 12px;
+  }
+  .card .k { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .card .v { font-size: 15px; font-weight: 700; font-variant-numeric: tabular-nums; direction: ltr; text-align: right; }
+  .hint { font-size: 12px; color: var(--muted); margin-top: 10px; line-height: 1.6; }
+  .hint b { color: var(--text); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>פירוק קרטזי — השוואת תנועה ומהירויות רכיבים ברביע השלישי</h1>
+  <div class="sub">
+    גררו את הכדור האדום (C) בתוך <b>הרביע השלישי</b> ולחצו על <b>"שגר עם התנגשות"</b>. לאחר מכן, לחצו על <b>"שגר כדור השוואה"</b> כדי לראות שיגור רציף ונקי של כדור יחיד, הממחיש כיצד מהירותו מורכבת ממהירויות רכיבי הצירים!
+  </div>
+
+  <div class="stage">
+    <canvas id="cv" width="860" height="560"></canvas>
+    <div class="legend">
+      <span><span class="dot" style="background:var(--c-C)"></span>C — כדור משוגר (נעצר ב-0,0)</span>
+      <span><span class="dot" style="background:var(--c-A)"></span>A — רכיב ציר x</span>
+      <span><span class="dot" style="background:var(--c-B)"></span>B — רכיב ציר y</span>
+      <span><span class="dot" style="background:var(--c-ghost)"></span>השוואה — כדור יחיד נע ברצף (ללא התנגשות, $t=0$ בראשית)</span>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="row">
+      <button id="btnLaunch" class="primary">שגר עם התנגשות</button>
+      <button id="btnGhost" class="ghost" disabled>שגר כדור השוואה</button>
+      <button id="btnReset">איפוס מלא</button>
+    </div>
+    <div class="row">
+      <label class="field">
+        מהירות שיגור
+        <input type="range" id="speed" min="2" max="10" step="0.5" value="6">
+        <span id="speedVal">6.0</span>
+      </label>
+    </div>
+    <div class="readout">
+      <div class="card"><div class="k">מיקום שיגור (x₀, y₀)</div><div class="v" id="rPos">—</div></div>
+      <div class="card"><div class="k">זווית מול ציר x שלילי</div><div class="v" id="rAngle">—</div></div>
+      <div class="card"><div class="k">מהירות כוללת (כדור C)</div><div class="v" id="rVel">—</div></div>
+      <div class="card"><div class="k">מהירות כדור A (ציר x)</div><div class="v" id="rVelA">—</div></div>
+      <div class="card"><div class="k">מהירות כדור B (ציר y)</div><div class="v" id="rVelB">—</div></div>
+    </div>
+    <div class="hint">
+      <b>קשר טריגונומטרי ישיר:</b> שימו לב כיצד ככל שהזווית קטנה ומתקרבת ל-$0^\circ$, מהירות כדור A מתקרבת למהירות הכוללת, וככל שהיא גדלה לכיוון $90^\circ$, מהירות כדור B הופכת לדומיננטית יותר.
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const cv = document.getElementById('cv');
+  const ctx = cv.getContext('2d');
+  const W = cv.width, H = cv.height;
+  const cx = W/2, cy = H/2;
+  const SCALE = 24; 
+  const R = 11; 
+  const diamUnit = (2 * R) / SCALE; 
+
+  const speedInput = document.getElementById('speed');
+  const speedVal = document.getElementById('speedVal');
+  const btnLaunch = document.getElementById('btnLaunch');
+  const btnGhost = document.getElementById('btnGhost');
+  const btnReset = document.getElementById('btnReset');
+  const rPos = document.getElementById('rPos');
+  const rAngle = document.getElementById('rAngle');
+  const rVel = document.getElementById('rVel');
+  const rVelA = document.getElementById('rVelA');
+  const rVelB = document.getElementById('rVelB');
+
+  function toPx(x,y){ return { x: cx + x*SCALE, y: cy - y*SCALE }; }
+  function toUnit(px,py){ return { x: (px-cx)/SCALE, y: -(py-cy)/SCALE }; }
+
+  let state = {
+    phase: 'idle', 
+    start: { x: -8.5, y: -5.5 },
+    vx: 0, vy: 0,
+    C: { x: -8.5, y: -5.5, elapsed: 0, flightTime: 0 },
+    t_act: 0, 
+    ghostTime: 0,
+    dragging: false,
+    lastT: null
+  };
+
+  function getSetup() {
+    const dx = -state.start.x;
+    const dy = -state.start.y;
+    const d = Math.hypot(dx, dy) || 1;
+    const speed = parseFloat(speedInput.value);
+    const vx = (dx / d) * speed;
+    const vy = (dy / d) * speed;
+
+    const initAx = Math.sign(vx) * diamUnit;
+    const initBy = Math.sign(vy) * diamUnit;
+
+    const t_offA = diamUnit / Math.abs(vx);
+    const t_offB = diamUnit / Math.abs(vy);
+
+    return { vx, vy, initAx, initBy, t_offA, t_offB, flightTime: d / speed };
+  }
+
+  function resetAll(){
+    state.phase = 'idle';
+    state.start.x = -8.5; 
+    state.start.y = -5.5;
+    state.C.x = -8.5;
+    state.C.y = -5.5;
+    state.C.elapsed = 0;
+    state.t_act = 0;
+    state.ghostTime = 0;
+    btnLaunch.disabled = false;
+    btnGhost.disabled = true; 
+    updateReadout();
+  }
+
+  function updateReadout() {
+    rPos.textContent = `(${state.start.x.toFixed(1)}, ${state.start.y.toFixed(1)})`;
+    const setup = getSetup();
+    rVel.textContent = `${parseFloat(speedInput.value).toFixed(2)}`;
+    
+    const angleDeg = Math.atan2(Math.abs(state.start.y), Math.abs(state.start.x)) * 180 / Math.PI;
+    rAngle.textContent = `${angleDeg.toFixed(1)}°`;
+
+    // הצגת המהירויות של הרכיבים (בערך מוחלט חיובי וברור לתלמיד)
+    rVelA.textContent = Math.abs(setup.vx).toFixed(2);
+    rVelB.textContent = Math.abs(setup.vy).toFixed(2);
+  }
+
+  speedInput.addEventListener('input', () => {
+    speedVal.textContent = parseFloat(speedInput.value).toFixed(1);
+    updateReadout();
+  });
+
+  function pointerPos(e){
+    const rect = cv.getBoundingClientRect();
+    const scaleX = cv.width/rect.width, scaleY = cv.height/rect.height;
+    const cxp = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+    const cyp = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
+    return { x: cxp*scaleX, y: cyp*scaleY };
+  }
+
+  cv.addEventListener('mousedown', (e)=>{
+    if (state.phase !== 'idle') return;
+    const p = pointerPos(e);
+    const cPx = toPx(state.C.x, state.C.y);
+    if (Math.hypot(p.x - cPx.x, p.y - cPx.y) <= R * 2.2) state.dragging = true;
+  });
+
+  window.addEventListener('mousemove', (e)=>{
+    if (!state.dragging) return;
+    const p = pointerPos(e);
+    let u = toUnit(p.x, p.y);
+    
+    // הגבלה מוחלטת לרביע השלישי בלבד
+    u.x = Math.min(-0.2, Math.max(-16.5, u.x));
+    u.y = Math.min(0.0, Math.max(-11.0, u.y));
+    
+    state.start.x = u.x; state.start.y = u.y;
+    state.C.x = u.x; state.C.y = u.y;
+    updateReadout();
+  });
+
+  window.addEventListener('mouseup', ()=>{ state.dragging = false; });
+
+  cv.addEventListener('touchstart', (e)=>{
+    if (state.phase !== 'idle') return;
+    const p = pointerPos(e);
+    const cPx = toPx(state.C.x, state.C.y);
+    if (Math.hypot(p.x - cPx.x, p.y - cPx.y) <= R * 2.2) { state.dragging = true; e.preventDefault(); }
+  }, {passive:false});
+  
+  cv.addEventListener('touchmove', (e)=>{
+    if (!state.dragging) return; e.preventDefault();
+    const p = pointerPos(e);
+    let u = toUnit(p.x, p.y);
+    
+    // הגבלה מוחלטת לרביע השלישי בלבד
+    u.x = Math.min(-0.2, Math.max(-16.5, u.x));
+    u.y = Math.min(0.0, Math.max(-11.0, u.y));
+    
+    state.start.x = u.x; state.start.y = u.y; state.C.x = u.x; state.C.y = u.y;
+    updateReadout();
+  }, {passive:false});
+  cv.addEventListener('touchend', ()=>{ state.dragging = false; });
+
+  btnLaunch.addEventListener('click', ()=>{
+    if (state.phase !== 'idle') return;
+    const setup = getSetup();
+    state.vx = setup.vx; state.vy = setup.vy;
+    state.C.flightTime = setup.flightTime;
+    state.C.elapsed = 0;
+    state.t_act = 0;
+    state.phase = 'flying';
+    btnLaunch.disabled = true;
+    btnGhost.disabled = true;
+  });
+
+  btnGhost.addEventListener('click', ()=>{
+    if (state.phase !== 'decomposing') return;
+    state.phase = 'ghost_launch'; 
+    state.ghostTime = 0; 
+    btnGhost.disabled = true;
+  });
+
+  btnReset.addEventListener('click', resetAll);
+
+  function step(dt){
+    if (state.phase === 'flying') {
+      state.C.elapsed += dt;
+      if (state.C.elapsed >= state.C.flightTime) {
+        state.C.x = 0; state.C.y = 0;
+        state.phase = 'decomposing'; 
+        state.t_act = 0;
+        btnGhost.disabled = false; 
+      } else {
+        state.C.x = state.start.x + state.vx * state.C.elapsed;
+        state.C.y = state.start.y + state.vy * state.C.elapsed;
+      }
+    }
+    else if (state.phase === 'decomposing') {
+      state.t_act += dt; 
+    }
+    else if (state.phase === 'ghost_launch') {
+      state.ghostTime += dt; 
+    }
+  }
+
+  function drawGrid(){
+    ctx.clearRect(0,0,W,H);
+    ctx.strokeStyle = getCss('--grid');
+    ctx.lineWidth = 1;
+    const stepGrid = SCALE*2;
+    for (let x = cx % stepGrid; x < W; x += stepGrid) { ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H); ctx.stroke(); }
+    for (let y = cy % stepGrid; y < H; y += stepGrid) { ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
+    ctx.strokeStyle = getCss('--axis');
+    ctx.lineWidth = 1.4;
+    ctx.beginPath(); ctx.moveTo(0,cy); ctx.lineTo(W,cy); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(cx,0); ctx.lineTo(cx,H); ctx.stroke();
+    ctx.fillStyle = getCss('--muted');
+    ctx.font = '11px system-ui';
+    ctx.fillText('x', W-14, cy-8);
+    ctx.fillText('y', cx+8, 14);
+  }
+
+  function getCss(varName){ return getComputedStyle(document.documentElement).getPropertyValue(varName).trim(); }
+
+  function drawContinuousTrails(setup) {
+    const dt_sample = 0.06;
+    
+    if (state.phase === 'flying' || state.phase === 'decomposing') {
+      ctx.beginPath();
+      let t_c = 0;
+      const max_tc = (state.phase === 'flying') ? state.C.elapsed : state.C.flightTime;
+      while (t_c <= max_tc) {
+        let p = toPx(state.start.x + state.vx * t_c, state.start.y + state.vy * t_c);
+        ctx.arc(p.x, p.y, 1.8, 0, Math.PI*2);
+        t_c += dt_sample;
+      }
+      ctx.fillStyle = getCss('--c-C'); ctx.globalAlpha = 0.4; ctx.fill(); ctx.globalAlpha = 1;
+    }
+
+    if (state.phase === 'decomposing' || state.phase === 'ghost_launch') {
+      let t_ref = (state.phase === 'ghost_launch') ? 5.0 : state.t_act; 
+
+      if (Math.abs(state.vx) > 0.01) {
+        ctx.beginPath();
+        let tau_a = 0;
+        while (tau_a <= t_ref + setup.t_offA) {
+          let p = toPx(state.vx * tau_a, 0);
+          ctx.arc(p.x, p.y, 1.8, 0, Math.PI*2);
+          tau_a += dt_sample;
+        }
+        ctx.fillStyle = getCss('--c-A'); ctx.globalAlpha = 0.35; ctx.fill(); ctx.globalAlpha = 1;
+      }
+
+      if (Math.abs(state.vy) > 0.01) {
+        ctx.beginPath();
+        let tau_b = 0;
+        while (tau_b <= t_ref + setup.t_offB) {
+          let p = toPx(0, state.vy * tau_b);
+          ctx.arc(p.x, p.y, 1.8, 0, Math.PI*2);
+          tau_b += dt_sample;
+        }
+        ctx.fillStyle = getCss('--c-B'); ctx.globalAlpha = 0.35; ctx.fill(); ctx.globalAlpha = 1;
+      }
+    }
+
+    if (state.phase === 'ghost_launch') {
+      ctx.beginPath();
+      let t_g = 0;
+      while (t_g <= state.ghostTime) {
+        let p = toPx(state.start.x + state.vx * t_g, state.start.y + state.vy * t_g);
+        ctx.arc(p.x, p.y, 1.8, 0, Math.PI*2);
+        t_g += dt_sample;
+      }
+      ctx.fillStyle = getCss('--c-ghost'); ctx.globalAlpha = 0.5; ctx.fill(); ctx.globalAlpha = 1;
+    }
+  }
+
+  function drawSecondMarks(setup) {
+    if (state.phase !== 'decomposing' && state.phase !== 'ghost_launch') return;
+
+    function drawMark(x, y, color, label) {
+      const p = toPx(x, y);
+      ctx.beginPath(); ctx.fillStyle = color; ctx.globalAlpha = 0.95;
+      ctx.arc(p.x, p.y, 5, 0, Math.PI*2); ctx.fill();
+      ctx.lineWidth = 1.2; ctx.strokeStyle = '#0B1120'; ctx.stroke();
+      ctx.fillStyle = getCss('--text'); ctx.font = 'bold 9px system-ui';
+      ctx.textAlign = 'center'; ctx.fillText(label, p.x, p.y - 10);
+      ctx.globalAlpha = 1;
+    }
+
+    let t_ref = (state.phase === 'ghost_launch') ? 5.0 : state.t_act;
+
+    if (Math.abs(state.vx) > 0.01) {
+      let max_n_A = Math.floor(t_ref + setup.t_offA);
+      for (let n = 0; n <= max_n_A; n++) { drawMark(state.vx * n, 0, getCss('--c-A'), n + 'ש\''); }
+    }
+
+    if (Math.abs(state.vy) > 0.01) {
+      let max_n_B = Math.floor(t_ref + setup.t_offB);
+      for (let n = 0; n <= max_n_B; n++) { drawMark(0, state.vy * n, getCss('--c-B'), n + 'ש\''); }
+    }
+
+    if (state.phase === 'ghost_launch') {
+      let min_n = Math.ceil(-state.C.flightTime); 
+      let max_n = Math.floor(state.ghostTime - state.C.flightTime); 
+      for (let n = min_n; n <= max_n; n++) {
+        drawMark(state.vx * n, state.vy * n, getCss('--c-ghost'), n + 'ש\'');
+      }
+    }
+  }
+
+  function drawBall(x,y,color,label){
+    const p = toPx(x,y);
+    ctx.beginPath(); ctx.fillStyle = color; ctx.arc(p.x,p.y,R,0,Math.PI*2); ctx.fill();
+    ctx.lineWidth = 1.5; ctx.strokeStyle = 'rgba(0,0,0,0.35)'; ctx.stroke();
+    if (label){
+      ctx.fillStyle = '#0B1120'; ctx.font = 'bold 11px system-ui';
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText(label, p.x, p.y+0.5);
+      ctx.textAlign = 'start'; ctx.textBaseline = 'alphabetic';
+    }
+  }
+
+  function drawAngleMarker(){
+    const p0 = toPx(0, 0);
+    const p1 = toPx(state.start.x, state.start.y);
+    ctx.save();
+    ctx.setLineDash([4,4]); ctx.strokeStyle = 'rgba(251,113,133,0.3)'; ctx.lineWidth = 1.2;
+    ctx.beginPath(); ctx.moveTo(p0.x,p0.y); ctx.lineTo(p1.x,p1.y); ctx.stroke();
+    ctx.restore();
+
+    const alpha = Math.atan2(state.start.y, state.start.x);
+    let diff = alpha - Math.PI;
+    while (diff < -Math.PI) diff += Math.PI * 2;
+    while (diff > Math.PI) diff -= Math.PI * 2;
+
+    const arcR = 2.0;
+    ctx.beginPath();
+    const steps = 30;
+    for (let i=0; i<=steps; i++){
+      const t = Math.PI + (diff * i) / steps;
+      const pp = toPx(arcR*Math.cos(t), arcR*Math.sin(t));
+      if (i===0) ctx.moveTo(pp.x,pp.y); else ctx.lineTo(pp.x,pp.y);
+    }
+    ctx.strokeStyle = getCss('--accent'); ctx.lineWidth = 2; ctx.stroke();
+    
+    const mid = Math.PI + diff / 2;
+    const lp = toPx((arcR+0.95)*Math.cos(mid), (arcR+0.95)*Math.sin(mid));
+    const deg = Math.atan2(Math.abs(state.start.y), Math.abs(state.start.x)) * 180 / Math.PI;
+    ctx.fillStyle = getCss('--accent'); ctx.font = 'bold 11px system-ui';
+    ctx.textAlign = 'center'; ctx.fillText(`${deg.toFixed(1)}°`, lp.x, lp.y+4);
+  }
+
+  function drawArrowPreview(){
+    if (state.phase !== 'idle') return;
+    const dx = -state.start.x; const dy = -state.start.y;
+    const d = Math.hypot(dx,dy) || 1;
+    const p0 = toPx(state.start.x, state.start.y);
+    const len = 30;
+    const p1 = { x: p0.x + (dx/d)*len, y: p0.y - (dy/d)*len };
+    ctx.save();
+    ctx.strokeStyle = getCss('--c-C'); ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(p0.x,p0.y); ctx.lineTo(p1.x,p1.y); ctx.stroke();
+    const ang = Math.atan2(p1.y-p0.y, p1.x-p0.x);
+    ctx.beginPath(); ctx.moveTo(p1.x, p1.y);
+    ctx.lineTo(p1.x - 7*Math.cos(ang-0.4), p1.y - 7*Math.sin(ang-0.4));
+    ctx.lineTo(p1.x - 7*Math.cos(ang+0.4), p1.y - 7*Math.sin(ang+0.4));
+    ctx.closePath(); ctx.fillStyle = getCss('--c-C'); ctx.fill();
+    ctx.restore();
+  }
+
+  function render(){
+    const setup = getSetup();
+    drawGrid();
+    drawAngleMarker();
+    drawContinuousTrails(setup);
+    drawSecondMarks(setup);
+
+    if (state.phase === 'idle' || state.phase === 'flying') {
+      drawBall(setup.initAx, 0, getCss('--c-A'), 'A');
+      drawBall(0, setup.initBy, getCss('--c-B'), 'B');
+      drawBall(state.C.x, state.C.y, getCss('--c-C'), 'C');
+    } 
+    else if (state.phase === 'decomposing') {
+      drawBall(setup.initAx + state.vx * state.t_act, 0, getCss('--c-A'), 'A');
+      drawBall(0, setup.initBy + state.vy * state.t_act, getCss('--c-B'), 'B');
+      drawBall(0, 0, getCss('--c-C'), 'C'); 
+    } 
+    else if (state.phase === 'ghost_launch') {
+      const gx = state.start.x + state.vx * state.ghostTime;
+      const gy = state.start.y + state.vy * state.ghostTime;
+      
+      const gPx = toPx(gx, gy);
+      const projX = toPx(gx, 0);
+      const projY = toPx(0, gy);
+      
+      ctx.save();
+      ctx.lineWidth = 1.2; ctx.setLineDash([4,4]);
+      ctx.strokeStyle = getCss('--c-A');
+      ctx.beginPath(); ctx.moveTo(gPx.x, gPx.y); ctx.lineTo(projX.x, projX.y); ctx.stroke();
+      ctx.strokeStyle = getCss('--c-B');
+      ctx.beginPath(); ctx.moveTo(gPx.x, gPx.y); ctx.lineTo(projY.x, projY.y); ctx.stroke();
+      ctx.restore();
+
+      drawBall(gx, gy, getCss('--c-ghost'), 'השוואה');
+    }
+
+    drawArrowPreview();
+  }
+
+  function loop(t){
+    if (state.lastT == null) state.lastT = t;
+    let dt = (t - state.lastT)/1000;
+    state.lastT = t;
+    dt = Math.min(dt, 0.05);
+    step(dt);
+    render();
+    requestAnimationFrame(loop);
+  }
+
+  resetAll(); 
+  requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
