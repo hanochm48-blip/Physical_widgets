@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>רץ על גל עמודים</title>
+<style>
+  *{box-sizing:border-box}
+  body{margin:0;font-family:Arial,Helvetica,sans-serif;background:#f4f7fb;color:#172033}
+  .app{min-height:100vh;display:flex;flex-direction:column}
+  header{padding:12px 18px;background:white;border-bottom:1px solid #dfe6ef;display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+  h1{font-size:20px;margin:0 0 2px}
+  .small{font-size:13px;color:#5d697a}
+  .controls{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-inline-start:auto}
+  .control{display:flex;align-items:center;gap:8px;background:#f8fafc;border:1px solid #dce4ee;padding:7px 10px;border-radius:10px}
+  input[type=range]{width:180px}
+  button{border:1px solid #cfd8e4;background:#fff;border-radius:9px;padding:8px 12px;font-size:14px;cursor:pointer}
+  button:hover{background:#f2f6fa}
+  .badge{min-width:62px;text-align:center;font-variant-numeric:tabular-nums;font-weight:700}
+  main{flex:1;min-height:420px;padding:14px}
+  canvas{width:100%;height:100%;min-height:520px;background:linear-gradient(#dff2ff 0 62%,#eef3f8 62% 100%);border:1px solid #d8e0ea;border-radius:14px;display:block}
+  .legend{padding:8px 18px 14px;font-size:13px;color:#586679}
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div>
+      <h1>רץ על גל עמודים</h1>
+      <div class="small">הגל נע שמאלה. נסה להתאים את מהירות הרץ למהירות הגל.</div>
+    </div>
+    <div class="controls">
+      <div class="control">
+        <label for="runnerSpeed">מהירות הדמות</label>
+        <input id="runnerSpeed" type="range" min="0" max="180" step="1" value="90">
+        <span id="runnerVal" class="badge">90</span>
+      </div>
+      <div class="control">
+        <span>מהירות הגל</span>
+        <span id="waveVal" class="badge">90</span>
+      </div>
+      <button id="toggleBtn">עצור</button>
+      <button id="resetBtn">אתחל</button>
+    </div>
+  </header>
+  <main><canvas id="c"></canvas></main>
+  <div class="legend">כאשר שתי המהירויות קרובות, הדמות נשארת בקירוב באותו מופע של הגל ולכן גם בגובה כמעט קבוע.</div>
+</div>
+<script>
+(() => {
+  const canvas = document.getElementById('c');
+  const ctx = canvas.getContext('2d');
+  const slider = document.getElementById('runnerSpeed');
+  const runnerVal = document.getElementById('runnerVal');
+  const waveVal = document.getElementById('waveVal');
+  const toggleBtn = document.getElementById('toggleBtn');
+  const resetBtn = document.getElementById('resetBtn');
+
+  const waveSpeed = 90; // px/s leftward
+  const fullCycles = 3; // מספר שלם של מחזורי גל לרוחב אזור העמודים
+  let wavelength = 360;
+  let omegaK = 2*Math.PI/wavelength;
+  const columnWidth = 34;
+  const gap = 6;
+  const amp = 105;
+  let running = true;
+  let t = 0;
+  let last = performance.now();
+  let runnerX = 0;
+  let gaitPhase = 0;
+
+  waveVal.textContent = waveSpeed;
+
+  function leftStartX(){ return 18 + columnWidth/2; }
+  function rightStartX(){ return canvas.getBoundingClientRect().width - columnWidth/2 - 18; }
+
+  function updateWavelength(){
+    const span = Math.max(240, rightStartX() - leftStartX());
+    wavelength = span / fullCycles;
+    omegaK = 2*Math.PI / wavelength;
+  }
+
+  function resize(){
+    const r = canvas.getBoundingClientRect();
+    const dpr = Math.max(1, window.devicePixelRatio || 1);
+    canvas.width = Math.round(r.width*dpr);
+    canvas.height = Math.round(r.height*dpr);
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    updateWavelength();
+    reset(false);
+  }
+
+  function baseY(){ return canvas.getBoundingClientRect().height*0.78; }
+
+  // Left-moving sine: y_surface = base - [H0 + A cos(k(x + vt - xR))].
+  // At t=0 and x=xR => crest (maximum column height).
+  function columnTopAt(x,time){
+    const phase = omegaK*(x + waveSpeed*time - rightStartX());
+    const meanHeight = 155;
+    const h = meanHeight + amp*Math.cos(phase);
+    return baseY() - h;
+  }
+
+  function reset(resetTime=true){
+    if(resetTime){
+      t=0;
+      gaitPhase=0;
+    }
+    runnerX = rightStartX();
+  }
+
+  function drawRunner(x,footY,phase){
+    // Natural leftward running cycle: opposite arm/leg pairs,
+    // bent knees and elbows, slight forward lean and body bounce.
+    const scale = 1;
+    const headR = 9*scale;
+    const cycle = Math.sin(phase);
+    const bounce = Math.abs(Math.sin(phase))*2.2;
+
+    const hip = {x:x, y:footY-47-bounce};
+    const shoulder = {x:x-6, y:hip.y-31}; // lean toward the left
+    const head = {x:shoulder.x-5, y:shoulder.y-18};
+
+    // Leftward direction means negative x is forward.
+    // Front/back leg positions alternate during the gait cycle.
+    const legSwing = 16*cycle;
+    const kneeLiftA = Math.max(0, cycle)*9;
+    const kneeLiftB = Math.max(0,-cycle)*9;
+
+    const kneeA = {x:hip.x-10-legSwing*0.55, y:hip.y+22-kneeLiftA};
+    const footA = {x:hip.x-20-legSwing, y:footY-2-kneeLiftA*0.35};
+    const kneeB = {x:hip.x+9+legSwing*0.48, y:hip.y+23-kneeLiftB};
+    const footB = {x:hip.x+18+legSwing*0.86, y:footY-2-kneeLiftB*0.35};
+
+    // Arms move opposite the legs. Elbows remain visibly bent.
+    const armSwing = -cycle;
+    const elbowA = {x:shoulder.x-14-12*armSwing, y:shoulder.y+13};
+    const handA  = {x:elbowA.x+4-10*armSwing, y:elbowA.y+15};
+    const elbowB = {x:shoulder.x+13+12*armSwing, y:shoulder.y+14};
+    const handB  = {x:elbowB.x-4+10*armSwing, y:elbowB.y+15};
+
+    ctx.lineCap='round';
+    ctx.lineJoin='round';
+
+    // rear limbs first for a little visual depth
+    ctx.strokeStyle='#445166';
+    ctx.lineWidth=4.5;
+    ctx.beginPath();
+    ctx.moveTo(hip.x,hip.y);
+    ctx.lineTo(kneeB.x,kneeB.y);
+    ctx.lineTo(footB.x,footB.y);
+    ctx.moveTo(shoulder.x,shoulder.y+5);
+    ctx.lineTo(elbowB.x,elbowB.y);
+    ctx.lineTo(handB.x,handB.y);
+    ctx.stroke();
+
+    // torso
+    ctx.strokeStyle='#2f5ea8';
+    ctx.lineWidth=8;
+    ctx.beginPath();
+    ctx.moveTo(hip.x,hip.y);
+    ctx.lineTo(shoulder.x,shoulder.y);
+    ctx.stroke();
+
+    // front leg and arm
+    ctx.strokeStyle='#202936';
+    ctx.lineWidth=5;
+    ctx.beginPath();
+    ctx.moveTo(hip.x,hip.y);
+    ctx.lineTo(kneeA.x,kneeA.y);
+    ctx.lineTo(footA.x,footA.y);
+    ctx.stroke();
+
+    ctx.lineWidth=4.5;
+    ctx.beginPath();
+    ctx.moveTo(shoulder.x,shoulder.y+5);
+    ctx.lineTo(elbowA.x,elbowA.y);
+    ctx.lineTo(handA.x,handA.y);
+    ctx.stroke();
+
+    // simple shoes that point in the running direction (left)
+    ctx.strokeStyle='#111827';
+    ctx.lineWidth=4;
+    ctx.beginPath();
+    ctx.moveTo(footA.x+3,footA.y); ctx.lineTo(footA.x-8,footA.y);
+    ctx.moveTo(footB.x+3,footB.y); ctx.lineTo(footB.x-8,footB.y);
+    ctx.stroke();
+
+    // head and a tiny nose to make the left-facing direction obvious
+    ctx.fillStyle='#f0b37e';
+    ctx.beginPath();
+    ctx.arc(head.x,head.y,headR,0,Math.PI*2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(head.x-headR+1,head.y-1);
+    ctx.lineTo(head.x-headR-5,head.y+2);
+    ctx.lineTo(head.x-headR+1,head.y+4);
+    ctx.fill();
+  }
+
+  function draw(){
+    const W = canvas.getBoundingClientRect().width;
+    const H = canvas.getBoundingClientRect().height;
+    ctx.clearRect(0,0,W,H);
+
+    // horizon baseline
+    ctx.strokeStyle='#94a3b8'; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(0,baseY()+2); ctx.lineTo(W,baseY()+2); ctx.stroke();
+
+    // columns across screen
+    const pitch = columnWidth+gap;
+    for(let x=leftStartX(); x<=rightStartX()+0.1; x+=pitch){
+      const top = columnTopAt(x,t);
+      const h = baseY()-top;
+      const grad=ctx.createLinearGradient(0,top,0,baseY());
+      grad.addColorStop(0,'#4b83c3');
+      grad.addColorStop(1,'#315f91');
+      ctx.fillStyle=grad;
+      ctx.fillRect(x-columnWidth/2,top,columnWidth,h);
+      ctx.fillStyle='rgba(255,255,255,.18)';
+      ctx.fillRect(x-columnWidth/2+3,top+3,columnWidth-6,5);
+    }
+
+    // runner wraps back to right, continuing the experiment visually
+    if(runnerX < 18) runnerX = rightStartX();
+    const nearestIndex = Math.round((runnerX-leftStartX())/pitch);
+    const supportX = leftStartX()+nearestIndex*pitch;
+    const supportTop = columnTopAt(supportX,t);
+    drawRunner(runnerX,supportTop-2,gaitPhase);
+
+    // small live readout
+    const currentHeight = Math.round(baseY()-supportTop);
+    ctx.fillStyle='rgba(255,255,255,.9)';
+    ctx.strokeStyle='#d5dee9';
+    ctx.lineWidth=1;
+    ctx.beginPath(); ctx.roundRect(16,16,190,56,10); ctx.fill(); ctx.stroke();
+    ctx.fillStyle='#27364a'; ctx.font='14px Arial'; ctx.textAlign='right';
+    ctx.fillText('גובה העמוד מתחת לדמות: '+currentHeight+' px',194,39);
+    ctx.fillText('Δv = '+(Number(slider.value)-waveSpeed)+' px/s',194,61);
+  }
+
+  function animate(now){
+    const dt = Math.min(0.05,(now-last)/1000); last=now;
+    if(running){
+      const runnerSpeed = Number(slider.value);
+      t += dt;
+      runnerX -= runnerSpeed*dt;
+
+      // קצב תנועת הידיים והרגליים פרופורציוני למהירות הריצה.
+      // במהירות 90 px/s מתקבלים בערך שני מחזורי צעד בשנייה.
+      const gaitCyclesPerSecond = (runnerSpeed / 90) * 2;
+      gaitPhase += 2*Math.PI*gaitCyclesPerSecond*dt;
+    }
+    draw();
+    requestAnimationFrame(animate);
+  }
+
+  slider.addEventListener('input',()=>runnerVal.textContent=slider.value);
+  toggleBtn.addEventListener('click',()=>{
+    running=!running;
+    toggleBtn.textContent=running?'עצור':'המשך';
+    last=performance.now();
+  });
+  resetBtn.addEventListener('click',()=>{reset(true); running=true; toggleBtn.textContent='עצור'; last=performance.now();});
+  window.addEventListener('resize',resize);
+  resize();
+  requestAnimationFrame(animate);
+})();
+</script>
+<input type='hidden' name='ntsp_block_page' value='https://m.safepage.neto.net.il/?a=block/block1&level=-15&url=http%3A%2F%2Fchatgpt.com%2Fbackend-api%2Festuary%2Fcontent%3Fid%3Dfile_00000000c7ac820a97e19d8e576978fb%26ts%3D496564%26p%3Dfs%26cid%3D1%26sig%3D599344d2029e99e0a2ed2057d3342a1bdd25afd609848590a521fed33a31fc71%26v%3D0&user_id=1305193&sigid=e51c156361a395a4d51ce8516c2462e9e73cd3564edcacddb8a610e4702916da&startm=0&keyword=&referer=https%3A%2F%2Fchatgpt.com%2Fc%2F6a8d1a48-fc6c-83eb-9218-68e899c140b6&category=24&cause=Quiltingjs'/><input type='hidden' name='ntsp_is_etrog' value='0'/><input type='hidden' name='ntsp_url_category' value='24'/><input type='hidden' name='ntsp_quilting' value='3'/><input type='hidden' name='ntsp_media_level' value='-15'/><input type='hidden' name='ntsp_user_level' value='-15'/><input type='hidden' name='ntsp_url_level' value='20'/><input type='hidden' name='ntsp_block_wa_status' value='0'/><script src='/jsQuilting/server/jsDict_utf8.js?v=1&k=23898278c1850f536d688db3614128a0' type='text/javascript' defer></script></body>
+</html>
