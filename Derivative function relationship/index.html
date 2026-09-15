@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>פונקציה ונגזרת</title>
+<style>
+  :root{
+    --bg:#0f172a;
+    --panel:#1e293b;
+    --accent:#38bdf8;
+    --accent2:#f472b6;
+    --grid:#334155;
+    --text:#e2e8f0;
+    --muted:#94a3b8;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:'Segoe UI', Arial, sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding:24px 12px 60px;
+  }
+  h1{
+    font-size:1.4rem;
+    margin:0 0 18px;
+    color:var(--text);
+    text-align:center;
+  }
+  .controls{
+    display:flex;
+    gap:16px;
+    flex-wrap:wrap;
+    justify-content:center;
+    background:var(--panel);
+    padding:14px 20px;
+    border-radius:12px;
+    margin-bottom:20px;
+    box-shadow:0 4px 12px rgba(0,0,0,.3);
+  }
+  .control-group{
+    display:flex;
+    flex-direction:column;
+    gap:4px;
+    font-size:.85rem;
+    color:var(--muted);
+  }
+  select, input[type=range]{
+    background:#0b1220;
+    color:var(--text);
+    border:1px solid var(--grid);
+    border-radius:8px;
+    padding:6px 10px;
+    font-size:.95rem;
+  }
+  select{cursor:pointer;}
+  .charts{
+    display:flex;
+    flex-direction:column;
+    gap:18px;
+    width:100%;
+    max-width:720px;
+  }
+  .chart-box{
+    background:var(--panel);
+    border-radius:14px;
+    padding:14px;
+    box-shadow:0 4px 12px rgba(0,0,0,.3);
+  }
+  .chart-title{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-size:.95rem;
+    margin-bottom:8px;
+    color:var(--muted);
+  }
+  .dot{
+    width:10px;height:10px;border-radius:50%;
+    display:inline-block;
+  }
+  canvas{
+    width:100%;
+    height:auto;
+    display:block;
+    border-radius:8px;
+    background:#0b1220;
+  }
+  .range-label{
+    display:flex;
+    justify-content:space-between;
+    font-size:.75rem;
+    color:var(--muted);
+  }
+  canvas{
+    cursor:crosshair;
+    touch-action:none;
+  }
+  .marker-info{
+    display:flex;
+    gap:22px;
+    justify-content:center;
+    flex-wrap:wrap;
+    background:var(--panel);
+    padding:10px 18px;
+    border-radius:12px;
+    margin-top:6px;
+    box-shadow:0 4px 12px rgba(0,0,0,.3);
+    font-size:.9rem;
+  }
+  .marker-info span.label{
+    color:var(--muted);
+    margin-left:4px;
+  }
+  .marker-info .val-x{color:#facc15; font-weight:600;}
+  .marker-info .val-f{color:var(--accent); font-weight:600;}
+  .marker-info .val-fd{color:var(--accent2); font-weight:600;}
+  footer{
+    margin-top:24px;
+    font-size:.75rem;
+    color:var(--muted);
+    text-align:center;
+  }
+</style>
+</head>
+<body>
+
+<h1>גרף פונקציה וגרף הנגזרת שלה</h1>
+
+<div class="controls">
+  <div class="control-group">
+    <label for="funcSelect">בחירת פונקציה</label>
+    <select id="funcSelect"></select>
+  </div>
+  <div class="control-group">
+    <label for="rangeSlider">טווח ציר X: <span id="rangeVal">10</span>-</span></label>
+    <input type="range" id="rangeSlider" min="2" max="20" value="10" step="1">
+  </div>
+</div>
+
+<div class="charts">
+  <div class="chart-box">
+    <div class="chart-title"><span class="dot" style="background:var(--accent)"></span> גרף הפונקציה f(x)</div>
+    <canvas id="funcCanvas" width="640" height="260"></canvas>
+  </div>
+  <div class="chart-box">
+    <div class="chart-title"><span class="dot" style="background:var(--accent2)"></span> גרף הנגזרת f'(x)</div>
+    <canvas id="derivCanvas" width="640" height="260"></canvas>
+  </div>
+</div>
+
+<div class="marker-info">
+  <div><span class="label">x =</span><span class="val-x" id="markerX">0</span></div>
+  <div><span class="label">f(x) =</span><span class="val-f" id="markerF">0</span></div>
+  <div><span class="label">f'(x) =</span><span class="val-fd" id="markerFd">0</span></div>
+</div>
+
+<footer>הנגזרת מחושבת נומרית (הפרש מרכזי) כדי שתעבוד עבור כל פונקציה שנבחרת. אפשר לגרור את הסמן הצהוב על אחד הגרפים כדי לראות את הנקודה המקבילה בגרף השני.</footer>
+
+<script>
+const functions = [
+  { name: "sin(x)", f: x => Math.sin(x) },
+  { name: "cos(x)", f: x => Math.cos(x) },
+  { name: "x²", f: x => x*x },
+  { name: "x³", f: x => x*x*x },
+  { name: "eˣ", f: x => Math.exp(x) },
+  { name: "ln(x)  (x>0)", f: x => x > 0 ? Math.log(x) : NaN },
+  { name: "1/x", f: x => x !== 0 ? 1/x : NaN },
+  { name: "1/x²", f: x => x !== 0 ? 1/(x*x) : NaN },
+  { name: "√x  (x≥0)", f: x => x >= 0 ? Math.sqrt(x) : NaN },
+  { name: "tan(x)", f: x => Math.tan(x) },
+  { name: "x·sin(x)", f: x => x * Math.sin(x) },
+  { name: "x² - 3x + 2", f: x => x*x - 3*x + 2 },
+];
+
+const select = document.getElementById('funcSelect');
+functions.forEach((fn, i) => {
+  const opt = document.createElement('option');
+  opt.value = i;
+  opt.textContent = fn.name;
+  select.appendChild(opt);
+});
+
+const funcCanvas = document.getElementById('funcCanvas');
+const derivCanvas = document.getElementById('derivCanvas');
+const fctx = funcCanvas.getContext('2d');
+const dctx = derivCanvas.getContext('2d');
+const rangeSlider = document.getElementById('rangeSlider');
+const rangeVal = document.getElementById('rangeVal');
+const markerXEl = document.getElementById('markerX');
+const markerFEl = document.getElementById('markerF');
+const markerFdEl = document.getElementById('markerFd');
+
+let markerX = 0;      // current marker position in data coordinates
+let isDragging = false;
+let currentRange = parseInt(rangeSlider.value); // current -range..range for both charts
+
+function numericDerivative(f, x, h=0.0001){
+  const y1 = f(x+h);
+  const y2 = f(x-h);
+  if(!isFinite(y1) || !isFinite(y2)) return NaN;
+  return (y1 - y2) / (2*h);
+}
+
+function drawGrid(ctx, w, h, xMin, xMax, yMin, yMax){
+  ctx.clearRect(0,0,w,h);
+  ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--grid');
+  ctx.lineWidth = 1;
+
+  const xScale = w / (xMax - xMin);
+  const yScale = h / (yMax - yMin);
+
+  // grid lines every 1 unit on x, and reasonable step on y
+  for(let gx = Math.ceil(xMin); gx <= xMax; gx++){
+    const px = (gx - xMin) * xScale;
+    ctx.beginPath();
+    ctx.moveTo(px, 0);
+    ctx.lineTo(px, h);
+    ctx.stroke();
+  }
+  const yStep = Math.max(1, Math.round((yMax-yMin)/8));
+  for(let gy = Math.ceil(yMin/yStep)*yStep; gy <= yMax; gy += yStep){
+    const py = h - (gy - yMin) * yScale;
+    ctx.beginPath();
+    ctx.moveTo(0, py);
+    ctx.lineTo(w, py);
+    ctx.stroke();
+  }
+
+  // axes
+  ctx.strokeStyle = '#64748b';
+  ctx.lineWidth = 1.5;
+  const x0 = (0 - xMin) * xScale;
+  const y0 = h - (0 - yMin) * yScale;
+  ctx.beginPath(); ctx.moveTo(x0,0); ctx.lineTo(x0,h); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(0,y0); ctx.lineTo(w,y0); ctx.stroke();
+
+  return {xScale, yScale, x0, y0};
+}
+
+function computeYRange(f, xMin, xMax, samples=400){
+  let yMin = Infinity, yMax = -Infinity;
+  for(let i=0;i<=samples;i++){
+    const x = xMin + (xMax-xMin)*i/samples;
+    const y = f(x);
+    if(isFinite(y)){
+      if(y < yMin) yMin = y;
+      if(y > yMax) yMax = y;
+    }
+  }
+  if(!isFinite(yMin) || !isFinite(yMax)){ yMin=-1; yMax=1; }
+  if(yMin === yMax){ yMin -= 1; yMax += 1; }
+  // clamp extreme values (like tan, 1/x asymptotes)
+  const cap = 15;
+  yMin = Math.max(yMin, -cap);
+  yMax = Math.min(yMax, cap);
+  const pad = (yMax - yMin) * 0.15;
+  return [yMin - pad, yMax + pad];
+}
+
+function plotFunction(ctx, w, h, f, xMin, xMax, color){
+  const [yMin, yMax] = computeYRange(f, xMin, xMax);
+  const {xScale, yScale} = drawGrid(ctx, w, h, xMin, xMax, yMin, yMax);
+
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 2.5;
+  ctx.beginPath();
+  let started = false;
+  const samples = 500;
+  let prevY = null;
+  for(let i=0;i<=samples;i++){
+    const x = xMin + (xMax-xMin)*i/samples;
+    let y = f(x);
+    if(!isFinite(y) || y < yMin - (yMax-yMin) || y > yMax + (yMax-yMin)){
+      started = false;
+      prevY = null;
+      continue;
+    }
+    const px = (x - xMin) * xScale;
+    const py = h - (y - yMin) * yScale;
+
+    // break line on discontinuity jumps (like tan or 1/x)
+    if(prevY !== null && Math.abs(y - prevY) > (yMax-yMin)*0.5){
+      started = false;
+    }
+
+    if(!started){
+      ctx.moveTo(px, py);
+      started = true;
+    } else {
+      ctx.lineTo(px, py);
+    }
+    prevY = y;
+  }
+  ctx.stroke();
+
+  return {xMin, xMax, yMin, yMax, xScale, yScale};
+}
+
+function drawMarker(ctx, w, h, f, scale, color, x){
+  const {xMin, xMax, yMin, yMax, xScale, yScale} = scale;
+  if(x < xMin || x > xMax) return;
+  const px = (x - xMin) * xScale;
+
+  // vertical line
+  ctx.strokeStyle = '#facc15';
+  ctx.lineWidth = 1.5;
+  ctx.setLineDash([5,4]);
+  ctx.beginPath();
+  ctx.moveTo(px, 0);
+  ctx.lineTo(px, h);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  // point on curve
+  const y = f(x);
+  if(isFinite(y)){
+    const yClamped = Math.min(Math.max(y, yMin), yMax);
+    const py = h - (yClamped - yMin) * yScale;
+    ctx.beginPath();
+    ctx.arc(px, py, 6, 0, Math.PI*2);
+    ctx.fillStyle = color;
+    ctx.fill();
+    ctx.strokeStyle = '#0b1220';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+  }
+  return y;
+}
+
+function currentFn(){
+  return functions[parseInt(select.value)];
+}
+
+function render(){
+  const fn = currentFn();
+  currentRange = parseInt(rangeSlider.value);
+  rangeVal.textContent = currentRange;
+
+  const w = funcCanvas.width;
+  const h = funcCanvas.height;
+
+  const derivFn = x => numericDerivative(fn.f, x);
+
+  // clamp marker to the current range
+  if(markerX > currentRange) markerX = currentRange;
+  if(markerX < -currentRange) markerX = -currentRange;
+
+  const fScale = plotFunction(fctx, w, h, fn.f, -currentRange, currentRange, '#38bdf8');
+  const dScale = plotFunction(dctx, w, h, derivFn, -currentRange, currentRange, '#f472b6');
+
+  const fVal = drawMarker(fctx, w, h, fn.f, fScale, '#38bdf8', markerX);
+  const fdVal = drawMarker(dctx, w, h, derivFn, dScale, '#f472b6', markerX);
+
+  markerXEl.textContent = markerX.toFixed(2);
+  markerFEl.textContent = (isFinite(fVal) ? fVal.toFixed(3) : '—');
+  markerFdEl.textContent = (isFinite(fdVal) ? fdVal.toFixed(3) : '—');
+}
+
+function pixelToDataX(canvas, clientX){
+  const rect = canvas.getBoundingClientRect();
+  const scaleX = canvas.width / rect.width;
+  const pixelX = (clientX - rect.left) * scaleX;
+  const x = -currentRange + (pixelX / canvas.width) * (2 * currentRange);
+  return Math.min(Math.max(x, -currentRange), currentRange);
+}
+
+function attachDragHandlers(canvas){
+  function start(clientX){
+    isDragging = true;
+    markerX = pixelToDataX(canvas, clientX);
+    render();
+  }
+  function move(clientX){
+    if(!isDragging) return;
+    markerX = pixelToDataX(canvas, clientX);
+    render();
+  }
+  function end(){ isDragging = false; }
+
+  canvas.addEventListener('mousedown', e => start(e.clientX));
+  window.addEventListener('mousemove', e => move(e.clientX));
+  window.addEventListener('mouseup', end);
+
+  canvas.addEventListener('touchstart', e => {
+    start(e.touches[0].clientX);
+    e.preventDefault();
+  }, {passive:false});
+  canvas.addEventListener('touchmove', e => {
+    move(e.touches[0].clientX);
+    e.preventDefault();
+  }, {passive:false});
+  canvas.addEventListener('touchend', end);
+}
+
+attachDragHandlers(funcCanvas);
+attachDragHandlers(derivCanvas);
+
+select.addEventListener('change', render);
+rangeSlider.addEventListener('input', render);
+
+render();
+</script>
+</body>
+</html>
