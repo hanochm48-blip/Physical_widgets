@@ -1,0 +1,688 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="מעבדה אינטראקטיבית לבניית מעגלים חשמליים עם ראוסטט בעל שלושה הדקים ורב־מודד.">
+  <meta name="theme-color" content="#163c3c"><title>מעבדת מעגלים | ראוסטט ורב־מודד</title>
+  <style>:root{--ink:#183b37;--muted:#657870;--paper:#f2f4ee;--surface:#fffefb;--line:#dce4dc;--green:#28765d;--mint:#e9f2e8;--copper:#bc6442;--red:#bf4f48;--orange:#edb66a;font-family:Arial,"Noto Sans Hebrew",sans-serif;color:var(--ink);background:var(--paper);font-synthesis:none}
+*{box-sizing:border-box}body{margin:0}button,input,select{font:inherit}button,select{cursor:pointer}button{color:inherit}button:disabled{opacity:.3;cursor:default}button:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible{outline:3px solid #3996b9;outline-offset:3px}button{border:0}button:hover:not(:disabled){filter:brightness(.96)}[hidden]{display:none!important}.header{background:#163c3c;color:#fafbf6;padding:23px max(28px,calc((100vw - 1640px)/2));display:flex;align-items:center;justify-content:space-between;gap:20px}.brand{display:flex;gap:14px;align-items:center}.brand-mark{width:50px;height:50px;border:1px solid #59736c;border-radius:14px;display:grid;place-items:center;background:#244b47}.brand-mark svg{width:35px;fill:none;stroke:#d4e7c3;stroke-width:2;stroke-linecap:round}.eyebrow{font-size:12px;letter-spacing:.6px;opacity:.7}.brand h1{margin:4px 0 0;font-size:25px;font-weight:600}.header-actions{display:flex;gap:10px}.header-button{background:#294d49;color:#eef4e8;border:1px solid #526e66;border-radius:9px;padding:10px 15px;font-size:13px}.header-button span{font-size:18px;margin-left:5px}.app-shell{max-width:1640px;margin:auto;padding:26px 28px 18px}.intro{display:flex;justify-content:space-between;align-items:center;margin-bottom:23px;gap:20px}.intro h2{font-size:26px;margin:0 0 7px;letter-spacing:-.7px}.intro p{color:var(--muted);margin:0;font-size:14px}.example-picker{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--muted)}select{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:8px;padding:9px 10px;min-height:38px;max-width:100%}.lab-layout{display:grid;grid-template-columns:224px minmax(0,1fr);gap:19px;align-items:start}.sidebar{display:flex;flex-direction:column;gap:15px}.shelf,.inspector{background:var(--surface);border:1px solid var(--line);border-radius:15px;padding:16px}.section-heading{display:flex;justify-content:space-between;align-items:center;gap:5px;margin-bottom:13px}.section-heading h3{font-size:15px;margin:0}.section-heading span{font-size:10px;color:var(--muted)}.palette{display:grid;grid-template-columns:1fr 1fr;gap:8px}.palette-item{display:flex;flex-direction:column;align-items:center;gap:5px;padding:8px 3px;border-radius:9px;background:#f4f6f0;border:1px solid #e9eee5;min-height:72px;transition:background .15s,border-color .15s}.palette-item:hover{background:#e8f1e7;border-color:#b8d0b9}.palette-item svg{width:57px;height:29px}.palette-item span{font-size:11px}.palette-item.wide{grid-column:1/-1;flex-direction:row;justify-content:center;gap:13px;min-height:56px}.wire-colors{border-top:1px solid var(--line);margin-top:13px;padding-top:11px;display:flex;align-items:center;justify-content:space-between;font-size:11px;color:var(--muted)}#wire-colors{display:flex;gap:4px}.color-button{width:19px;height:19px;border-radius:50%;border:2px solid var(--surface);outline:1px solid transparent}.color-button.active{outline-color:var(--ink)}.inspector{padding-bottom:15px}.inspector p{font-size:12px;line-height:1.7;color:var(--muted);margin:9px 0}.property{display:flex;flex-direction:column;gap:6px;margin:13px 0;font-size:12px}.property input[type=number]{width:100%;border:1px solid var(--line);border-radius:7px;padding:8px;background:white;direction:ltr;text-align:right}.property input[type=range]{width:100%;accent-color:var(--green);direction:ltr;cursor:ew-resize;margin:5px 0}.property select{width:100%;font-size:12px}.range-labels{display:flex;justify-content:space-between;direction:ltr;color:var(--muted);font-size:10px}.resistance-split{display:grid;grid-template-columns:1fr 1fr;gap:7px;direction:ltr}.resistance-split div{padding:10px 4px;text-align:center;background:var(--mint);border-radius:8px}.resistance-split span{display:block;font-size:10px;color:var(--muted);margin-bottom:5px}.resistance-split strong{font-size:16px;font-weight:500}.property-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:14px}.small-button{padding:8px 9px;border:1px solid var(--line);border-radius:7px;background:#f3f5ef;font-size:11px}.small-button.danger{color:#a54740;background:#f9efea;border-color:#ecd8d2}.primary-button{padding:10px 19px;background:var(--green);color:white;border-radius:9px;font-size:13px}.meter-settings{background:#f5efe4;border:1px solid #ece0c9;border-radius:9px;padding:10px}.meter-settings .reading{background:#d8e5c7;padding:13px 5px;text-align:center;direction:ltr;font-family:monospace;font-size:27px;border-radius:6px;color:#263c26}.meter-settings .reading small{font:12px Arial}.meter-hint{font-size:11px;line-height:1.7;margin-top:8px}.mode-buttons{display:flex;gap:5px;direction:ltr}.mode-buttons button{flex:1;background:#eff2eb;border:1px solid var(--line);border-radius:7px;padding:9px 3px;font-size:12px}.mode-buttons button.active{background:var(--green);color:white;border-color:var(--green)}.fuse-box{font-size:10px;line-height:1.8;padding:8px 0 0}.fuse-ok{color:var(--green)}.fuse-bad{color:var(--red)}.model-note{font-size:10px;color:#7d897f;text-align:center;line-height:1.8}.workbench{border:1px solid #d3ded4;border-radius:16px;background:var(--surface);overflow:hidden;box-shadow:0 6px 30px #27483d06}.toolbar{display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap;min-height:56px;padding:10px 14px;border-bottom:1px solid var(--line)}.tool-group{display:flex;gap:5px;align-items:center}.tool{background:transparent;border-radius:7px;padding:8px 10px;font-size:15px;color:var(--muted);white-space:nowrap}.tool span{font-size:12px;margin-right:3px}.tool.active{background:#e9f0e5;color:#255c49}.tool#delete-tool.active{color:#a3463d;background:#fae8e1}.icon-tool{width:30px;height:31px;border-radius:6px;background:transparent;color:var(--muted);font-size:20px}.toolbar-separator{width:1px;height:20px;background:var(--line);margin:0 3px}.values-toggle{font-size:11px;white-space:nowrap;display:flex;align-items:center;gap:4px;color:var(--muted);cursor:pointer}.values-toggle input{accent-color:var(--green);cursor:pointer}.stage-wrap{position:relative;background:#fafcf7;aspect-ratio:1200/730;min-height:390px;overflow:hidden;direction:ltr}#board{display:block;width:100%;height:100%;touch-action:none;user-select:none;-webkit-user-select:none}.zoom-controls{position:absolute;bottom:15px;left:15px;display:flex;border:1px solid var(--line);box-shadow:0 3px 10px #203c3510;border-radius:8px;overflow:hidden;direction:ltr}.zoom-controls button{background:#fffefaee;height:29px;min-width:29px;font-size:16px;padding:0 8px}.zoom-controls #zoom-fit{font-size:10px;border-left:1px solid var(--line);border-right:1px solid var(--line)}.status-strip{background:#f1f5ed;display:flex;justify-content:space-between;gap:10px;padding:13px 17px;align-items:center;border-top:1px solid var(--line);font-size:11px}.status-main{display:flex;align-items:center;gap:7px}.status-dot{width:7px;height:7px;border-radius:50%;background:#93a598}.status-dot.active{background:#41956c;box-shadow:0 0 0 3px #41956c1a}.status-dot.error{background:#c06450;box-shadow:0 0 0 3px #c064501a}#interaction-hint{color:var(--muted);font-size:10px}.warnings:empty{display:none}.warnings{padding:8px 15px;background:#fff3e9;border-top:1px solid #eedccc;color:#9e5639;font-size:11px;line-height:1.8}.warning-line{display:flex;gap:7px}.warning-line span:first-child{font-size:13px}.empty-hint{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;direction:rtl;pointer-events:none;width:85%}.empty-symbol{display:block;font-size:60px;color:#a3b3a5}.empty-hint h3{font-size:22px;font-weight:500;margin:8px}.empty-hint p{font-size:13px;color:var(--muted)}.footer{display:flex;justify-content:space-between;gap:20px;font-size:10px;color:#7a867d;padding-top:14px;line-height:1.8}.port{cursor:crosshair}.component{cursor:grab}.component:active{cursor:grabbing}.port-halo{fill:transparent;stroke:transparent}.port:hover .port-halo,.port:focus .port-halo{fill:#d0e9d899;stroke:#52966d;stroke-width:1.5}.port.pending .port-halo{fill:#e0b47d66;stroke:#ae7541;stroke-width:2;stroke-dasharray:3 2}.wire-hit{cursor:pointer}.wire-hit:hover+.wire-line{stroke-width:5}.slider-handle{cursor:ew-resize}.switch-lever,.meter-mode{cursor:pointer}.board-label{fill:#59736a;font-size:12px;text-anchor:middle}.part-name{font-size:12px;fill:#365446;text-anchor:middle}.value-badge{fill:#226954;font-size:11px;text-anchor:middle}.selected-ring{fill:#dcebd52a;stroke:#8eb18d;stroke-width:1.5;stroke-dasharray:5 4;pointer-events:none}.wire-node{fill:#fffef6;stroke:#628366;stroke-width:2;cursor:move}dialog{max-width:670px;width:calc(100% - 32px);border:1px solid var(--line);border-radius:20px;padding:27px;color:var(--ink);background:var(--surface);box-shadow:0 20px 120px #14343140;max-height:90vh;overflow:auto}dialog::backdrop{background:#163c3c70;backdrop-filter:blur(3px)}.dialog-title{position:relative}.dialog-title h2{font-size:26px;margin:6px 0 20px}.dialog-close{position:absolute;left:0;top:0;width:33px;height:33px;background:#edf1e8;border-radius:50%;font-size:22px}.guide{padding-right:22px}.guide li{padding-right:6px;margin:18px 0}.guide strong{font-size:15px}.guide p,.help-note p{font-size:12px;line-height:1.85;color:var(--muted);margin:6px 0}.guide li::marker{color:var(--green);font-weight:bold}.help-note{border:1px solid #dfe6d8;background:#f0f5e9;padding:14px;border-radius:11px}.help-note strong{font-size:13px}.dialog-bottom{display:flex;justify-content:space-between;align-items:center;gap:15px;padding-top:20px}.dialog-bottom span{font-size:11px;color:var(--muted);max-width:65%;line-height:1.7}.toast{position:fixed;bottom:25px;left:50%;transform:translateX(-50%);z-index:20;padding:12px 20px;border-radius:10px;background:#1e4540;color:#fffefa;box-shadow:0 5px 30px #19362c30;font-size:13px;max-width:90%;text-align:center;line-height:1.7}.wire-instruction{fill:#6e775b;font-size:12px;text-anchor:middle}.selection-empty{font-size:12px;line-height:1.7;color:var(--muted);padding:10px 0}.new-wire-tool #board{cursor:crosshair}.delete-mode #board,.delete-mode .component,.delete-mode .wire-hit{cursor:not-allowed}.rheostat-end-note{font-size:10px!important}.inspector strong,bdi{unicode-bidi:isolate}.tip-chip{background:#edf3e8;color:#45704f;border-radius:5px;padding:4px 7px;font-size:10px;display:inline-block}.inspector .selection-title{font-size:12px;color:var(--muted)}
+@media(min-width:1700px){.stage-wrap{min-height:700px}}@media(max-width:1180px){.lab-layout{grid-template-columns:200px minmax(0,1fr);gap:12px}.app-shell{padding:20px}.shelf,.inspector{padding:13px}.tool{padding:7px}.toolbar{padding:9px}.intro h2{font-size:24px}.stage-wrap{aspect-ratio:1200/780}.header{padding:20px}.footer span:last-child{display:none}}@media(max-width:800px){.header{padding:16px;gap:10px}.brand-mark{width:41px;height:41px}.brand h1{font-size:21px}.header-actions{gap:5px}.header-button{padding:8px;font-size:11px}.header-button span{display:none}.eyebrow{font-size:10px}.app-shell{padding:17px 12px}.intro{align-items:flex-start;gap:12px;margin-bottom:17px}.intro h2{font-size:21px}.intro p{font-size:12px}.example-picker{display:flex;flex-direction:column;align-items:flex-start;gap:5px;font-size:10px}.example-picker select{font-size:11px;max-width:190px;padding:8px 5px}.lab-layout{display:flex;flex-direction:column}.sidebar{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);width:100%;gap:10px}.model-note{grid-column:1/-1}.palette{grid-template-columns:repeat(3,1fr);gap:4px}.palette-item{min-height:62px;padding:7px 1px}.palette-item span{font-size:10px}.palette-item svg{width:42px;height:23px}.palette-item.wide{grid-column:auto;flex-direction:column;gap:5px}.shelf,.inspector{padding:12px}.wire-colors{flex-direction:column;gap:7px}.section-heading span{display:none}.workbench{width:100%}.stage-wrap{min-height:370px;aspect-ratio:1200/900}.toolbar{padding:8px;gap:4px}.tool{font-size:14px;padding:7px 6px}.tool span{font-size:10px;margin-right:1px}.icon-tool{width:26px}.values-toggle{font-size:10px}.toolbar-separator{display:none}.status-strip{padding:12px 10px;flex-wrap:wrap}.footer{padding-top:12px;font-size:10px}.inspector .property{margin:8px 0}.inspector .property select{padding:7px;font-size:11px}.inspector .resistance-split strong{font-size:14px}.inspector .resistance-split div{padding:8px 3px}.meter-settings .reading{font-size:23px;padding:8px}.inspector p{font-size:11px}.toolbar .tool-group:last-child{margin-right:auto}}
+@media(max-width:430px){.header-actions{flex-direction:column}.header-button{padding:5px 8px}.intro h2{font-size:18px}.intro p{max-width:150px;line-height:1.5}.example-picker select{max-width:165px}.palette{grid-template-columns:1fr 1fr}.stage-wrap{min-height:320px}.property-actions{gap:4px}.small-button{padding:6px 7px}.resistance-split{gap:4px}.dialog-bottom{flex-direction:column;align-items:stretch}.dialog-bottom span{max-width:100%}.inspector p.rheostat-end-note{display:none}}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto;transition:none!important}}
+
+.free-joint{cursor:grab}.free-joint:active{cursor:grabbing}
+
+.toolbar-hint{font-size:11px;color:var(--muted);padding-right:10px}kbd{font:10px monospace;background:#e8ede3;border:1px solid #ced8ca;border-radius:4px;padding:3px 5px}.delete-hint{font-size:10px;color:var(--muted);align-self:center}.meter-range-wrapper{height:32px;width:100%;display:flex;align-items:center;direction:rtl}.on-meter-range{width:100%;height:31px;min-height:0;padding:3px 8px;border:1px solid #b89457;border-radius:6px;background:#fff5dc;color:#344c38;font-family:Arial,sans-serif;font-size:14px;direction:rtl;cursor:pointer;touch-action:manipulation}.on-meter-range:focus-visible{outline:2px solid #28765d;outline-offset:-2px}.lamp-state{padding:10px 8px;background:#edf1e8;border-radius:8px;font-size:12px;text-align:center;color:#6a7e70}.lamp-state.lit{background:#fff2c9;color:#987325}#board:focus-visible{outline:2px solid #83a98a;outline-offset:-2px}@media(max-width:800px){.toolbar-hint{font-size:10px;padding-right:3px}}@media(max-width:480px){.toolbar-hint{display:none}}
+</style>
+</head>
+<body>
+<header class="header">
+  <div class="brand"><span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 40 40"><path d="M8 29V11H18M22 11H32V29H22M18 29H8"/><path d="M18 5V17M22 8V14M16 25H24V33H16Z"/></svg></span><div><div class="eyebrow">פיזיקה · מעגלי זרם ישר</div><h1>מעבדת מעגלים</h1></div></div>
+  <div class="header-actions"><button id="help-button" class="header-button">איך עובדים?</button><button id="download-html" class="header-button" title="הורדת קובץ עצמאי להפעלה ללא אינטרנט"><span aria-hidden="true">↓</span> גרסה ללא אינטרנט</button></div>
+</header>
+<main class="app-shell">
+  <section class="intro"><div><h2>בונים. מחברים. מודדים.</h2><p>הזיזו את הגררה וגלו מה משתנה במעגל.</p></div><label class="example-picker"><span>מעגל לדוגמה</span><select id="examples"><option value="blank" selected>לוח ריק</option><option value="" disabled>בחרו מעגל לדוגמה</option><option value="series">ראוסטט בטור — מדידת זרם</option><option value="divider">מחלק מתח — שלושה הדקים</option><option value="measurement">מחלק מתח — מדידת מתח וזרם</option><option value="parallel">נגדים במקביל — מדידת מתח</option><option value="lamp">נורת ביקורת וראוסטט</option></select></label></section>
+  <div class="lab-layout">
+    <aside class="sidebar" aria-label="רכיבים והגדרות">
+      <section class="shelf"><div class="section-heading"><h3>רכיבים</h3><span>לחצו להוספה</span></div><div id="palette" class="palette"></div><div class="wire-colors"><span>צבע החוט</span><div id="wire-colors" aria-label="בחירת צבע לחוט"></div></div></section>
+      <section class="inspector"><div class="section-heading"><h3 id="inspector-heading">הגדרות רכיב</h3><span id="selected-tag"></span></div><div id="inspector-content"></div></section>
+      <div class="model-note">סוללות עם התנגדות פנימית אקראית: <bdi>0.5–1.5 Ω</bdi><br>מד־מתח אידאלי · חוטים ללא התנגדות<br>מד־זרם עם התנגדות זעירה ונתיכים מדומים</div>
+    </aside>
+    <section class="workbench" aria-label="לוח בניית המעגל">
+      <div class="toolbar">
+        <div class="tool-group"><button id="undo" class="icon-tool" title="ביטול הפעולה האחרונה (Ctrl+Z)" aria-label="ביטול פעולה">↶</button><button id="redo" class="icon-tool" title="ביצוע מחדש (Ctrl+Y)" aria-label="ביצוע מחדש">↷</button><span class="toolbar-separator"></span><label class="values-toggle"><input id="show-values" type="checkbox"> הצגת ערכים</label><span class="toolbar-hint">בחרו רכיב · <kbd>Delete</kbd> למחיקה</span></div>
+        <div class="tool-group"><button id="save-circuit" class="icon-tool" title="שמירת המעגל לקובץ" aria-label="שמירת המעגל">↓</button><button id="load-circuit" class="icon-tool" title="טעינת מעגל מקובץ" aria-label="טעינת המעגל">↑</button></div>
+      </div>
+      <div class="stage-wrap"><svg id="board" tabindex="0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 730" role="group" aria-label="מעגל חשמלי: לחצו על הדקים לחיבור חוטים וגררו רכיבים להזזה"><defs><pattern id="grid" width="25" height="25" patternUnits="userSpaceOnUse"><circle cx="1" cy="1" r="1" fill="#d4ddda"/></pattern><filter id="component-shadow" x="-30%" y="-30%" width="160%" height="180%"><feDropShadow dx="0" dy="4" stdDeviation="4" flood-color="#234b44" flood-opacity=".13"/></filter></defs><rect id="grid-background" x="-5000" y="-5000" width="12000" height="12000" fill="url(#grid)"/><g id="wires-layer"></g><g id="components-layer"></g><g id="overlay-layer"></g></svg><div class="zoom-controls"><button id="zoom-out" aria-label="הקטנה">−</button><button id="zoom-fit" title="התאמת המעגל למסך">התאמה</button><button id="zoom-in" aria-label="הגדלה">+</button></div><div id="empty-hint" class="empty-hint" hidden><span class="empty-symbol">⌁</span><h3>המעגל הבא מתחיל כאן</h3><p>הוסיפו רכיבים וחוטים מהמדף, ואז גררו את קצות החוטים להדקים.</p></div></div>
+      <div class="status-strip"><div class="status-main"><span id="status-dot" class="status-dot"></span><span id="status-text" role="status">מוכן לבנייה</span></div><span id="interaction-hint">הוסיפו חוט מהמדף וגררו את קצותיו להדקים</span></div>
+      <div id="warnings" class="warnings" aria-live="polite"></div>
+    </section>
+  </div>
+  <footer class="footer"><span>בחרו בלחיצה · גררו להזזה · הוסיפו חוט מהמדף וחברו את קצותיו</span><span>Esc לסיום חוט · Delete למחיקה · R לסיבוב</span></footer>
+</main>
+<dialog id="help-dialog"><div class="dialog-title"><div class="eyebrow">מדריך קצר</div><h2>מהדק ראשון עד למדידה</h2><button id="close-help" class="dialog-close" aria-label="סגירת ההסבר">×</button></div><ol class="guide"><li><strong>מוסיפים רכיבים</strong><p>לחצו על רכיב במדף וגררו אותו על הלוח. הבחירה והגרירה תמיד פעילות. למחיקה בחרו רכיב או חוט ולחצו Delete. לחיצה על רכיב פותחת את הגדרותיו.</p></li><li><strong>מחברים חוט</strong><p>לחצו על חוט במדף: יופיע חוט ישר עם שני קצוות חופשיים. גררו כל קצה אל הדק כדי לחברו. אפשר לגרור חוט חופשי שלם, להמשיך מקצה בלחיצה או להוסיף הסתעפות בלחיצה כפולה על חוט. אפשר גם לחבר שני הדקים בלחיצות רצופות. חציית חוטים אינה יוצרת חיבור.</p></li><li><strong>משתמשים בראוסטט</strong><p>A ו־B הם קצות הנגד; W הוא הדק הגררה. בחיבור A–W ההתנגדות גדלה כשמזיזים את הגררה לכיוון B. בין A–B ההתנגדות קבועה. חברו את שלושת ההדקים כדי לבנות מחלק מתח.</p></li><li><strong>מגדירים את הרב־מודד</strong><p>בחרו את מצב המדידה ואת הטווח ישירות על רב־המודד. למתח: מצב V, טווח מתאים וחיבור לשקעים COM ו־V, במקביל לרכיב. לזרם: מצב I וחיבור בטור, עם COM ושקע mI בטווחים עד 200 mA, או I בטווחי 2 A ו־10 A. שקע mI מסומן בדרך כלל mA במכשיר אמיתי.</p></li></ol><div class="help-note"><strong>מה מופיע על הצג?</strong><p><bdi>OL</bdi> — חריגה מהטווח; <bdi>JACK</bdi> — שקע שאינו מתאים להגדרה; <bdi>FUSE</bdi> — נתיך מדומה שנשרף. הנתיכים: 200 mA בשקע mI ו־10 A בשקע I. אפשר לחדש נתיך בהגדרות המכשיר.</p><p>זהו מודל לימודי לזרם ישר: לכל סוללה התנגדות פנימית אקראית של <bdi>0.5–1.5 Ω</bdi>, שנקבעת בעת הוספתה ונשמרת עם המעגל. הערך שעל הסוללה הוא הכא״מ; מתח ההדקים הוא <bdi>V = ε − Ir</bdi>. מד־המתח בעל התנגדות אינסופית, ובשקעי הזרם התנגדות של <bdi>0.001 Ω</bdi>. נורת הביקורת היא מודל לימודי עם התנגדות קבועה של 20 Ω ובהירות לפי ההספק ביחס למתח הנקוב. אין הדמיה של חימום או שריפת נורה.</p></div><div class="dialog-bottom"><span>להוספת נקודת חיבור או הסתעפות: לחצו פעמיים על חוט. גררו את הנקודה לעיצוב המסלול.</span><button id="start-working" class="primary-button">למעבדה</button></div></dialog>
+<input id="file-input" type="file" accept=".json,application/json" hidden><div id="toast" class="toast" role="status" hidden></div>
+<script>/* DC circuit solver. Batteries have series internal resistance. Wires are
+   ideal; voltage input is open, current inputs have a 0.001 ohm shunt and fuses. */
+const CircuitEngine = (() => {
+  const SHUNT = 0.001;
+  const LIMITS = {I: 10, mI: 0.2};
+  const portNames = c => c.type === 'rheostat' ? ['A','B','W'] : c.type === 'meter' ? ['COM','V','I','mI'] : c.type === 'junction' ? ['J'] : c.type === 'battery' ? ['n','p'] : ['A','B'];
+  const key = (id, port) => `${id}:${port}`;
+  function linearSolve(matrix, rhs) {
+    const n = rhs.length;
+    const a = matrix.map((r,i) => [...r,rhs[i]]), pivots = [];
+    let row = 0;
+    for (let col=0; col<n && row<n; col++) {
+      let best = row;
+      for (let i=row+1;i<n;i++) if (Math.abs(a[i][col]) > Math.abs(a[best][col])) best=i;
+      if (Math.abs(a[best][col]) < 1e-11) continue;
+      [a[row],a[best]] = [a[best],a[row]];
+      const pivot=a[row][col];
+      for (let j=col;j<=n;j++) a[row][j]/=pivot;
+      for (let i=row+1;i<n;i++) {
+        const f=a[i][col];
+        if (Math.abs(f)<1e-15) continue;
+        for (let j=col;j<=n;j++) a[i][j]-=f*a[row][j];
+      }
+      pivots.push(col); row++;
+    }
+    for (let i=row;i<n;i++) if (Math.abs(a[i][n])>1e-7) return {ok:false};
+    const x=Array(n).fill(0);
+    for (let i=row-1;i>=0;i--) {
+      let v=a[i][n];
+      for (let j=pivots[i]+1;j<n;j++) v-=a[i][j]*x[j];
+      x[pivots[i]]=v;
+    }
+    return {ok:x.every(Number.isFinite),x,ambiguous:row<n};
+  }
+  function solve(state) {
+    const components=state.components || [], wires=state.wires || [];
+    const parent=new Map(), external=new Map(), nodes=new Map(), volts=new Map(), islands=new Map();
+    const resistors=[], sources=[], componentData={}, meterReadings={}, warnings=[];
+    for (const c of components) for (const p of portNames(c)) {
+      const k=key(c.id,p); parent.set(k,k); external.set(k,0);
+    }
+    const find=k=>{let a=k; while(parent.get(a)!==a) a=parent.get(a); while(k!==a){const t=parent.get(k);parent.set(k,a);k=t;}return a;};
+    const union=(a,b)=>{a=find(a);b=find(b);if(a!==b)parent.set(b,a);};
+    for(const w of wires) {
+      const a=key(w.a.id,w.a.port),b=key(w.b.id,w.b.port);
+      if(!parent.has(a)||!parent.has(b))continue;
+      external.set(a,external.get(a)+1);external.set(b,external.get(b)+1);union(a,b);
+    }
+    for(const c of components) {
+      if(c.type==='switch'&&c.closed) union(key(c.id,'A'),key(c.id,'B'));
+      if(c.type==='rheostat') {
+        const t=Math.min(1,Math.max(0,c.position));
+        if(t<=1e-9)union(key(c.id,'A'),key(c.id,'W'));
+        if(t>=1-1e-9)union(key(c.id,'B'),key(c.id,'W'));
+      }
+    }
+    for(const k of parent.keys()){const r=find(k);nodes.set(k,r);volts.set(r,0);}
+    const addR=(c,p,q,r,part)=>{if(r>0)resistors.push({id:c.id,part,a:find(key(c.id,p)),b:find(key(c.id,q)),r});};
+    let hardShort=false;
+    for(const c of components) {
+      componentData[c.id]={};
+      if(c.type==='resistor') addR(c,'A','B',c.resistance,'R');
+      if(c.type==='lamp') addR(c,'A','B',c.resistance,'lamp');
+      if(c.type==='rheostat') {
+        const t=Math.min(1,Math.max(0,c.position));
+        addR(c,'A','W',c.resistance*t,'AW');addR(c,'W','B',c.resistance*(1-t),'WB');
+        componentData[c.id]={rAW:c.resistance*t,rWB:c.resistance*(1-t)};
+      }
+      if(c.type==='battery') {
+        const a=find(key(c.id,'p')),b=find(key(c.id,'n'));
+        const r=Number.isFinite(c.internalResistance)&&c.internalResistance>0?c.internalResistance:1;
+        if(a===b){hardShort=true;warnings.push({type:'short',id:c.id,text:'קצר בין הדקי הסוללה. הזרם מוגבל על ידי ההתנגדות הפנימית.'});}
+        sources.push({id:c.id,a,b,v:c.voltage,r});
+      }
+      if(c.type==='meter') for(const p of ['I','mI']) if(c.fuses?.[p]!==false) addR(c,p,'COM',SHUNT,p);
+    }
+    const adjacency=new Map([...volts.keys()].map(k=>[k,new Set()]));
+    for(const e of [...resistors,...sources]) {adjacency.get(e.a).add(e.b);adjacency.get(e.b).add(e.a);}
+    let island=0, conflict=false;
+    for(const start of adjacency.keys()) {
+      if(islands.has(start))continue;
+      const group=[], todo=[start];islands.set(start,island);
+      while(todo.length){const node=todo.pop();group.push(node);for(const next of adjacency.get(node))if(!islands.has(next)){islands.set(next,island);todo.push(next);}}
+      const bs=sources.filter(e=>islands.get(e.a)===island), rs=resistors.filter(e=>islands.get(e.a)===island);
+      const ref=bs[0]?.b||group[0], free=group.filter(k=>k!==ref), index=new Map(free.map((k,i)=>[k,i]));
+      const n=free.length+bs.length, matrix=Array.from({length:n},()=>Array(n).fill(0)), rhs=Array(n).fill(0);
+      const stamp=(a,b,v)=>{if(a!==ref&&b!==ref)matrix[index.get(a)][index.get(b)]+=v;};
+      for(const e of rs){const g=1/e.r;stamp(e.a,e.a,g);stamp(e.b,e.b,g);stamp(e.a,e.b,-g);stamp(e.b,e.a,-g);}
+      bs.forEach((e,i)=>{
+        const j=free.length+i;
+        if(e.a!==ref){matrix[index.get(e.a)][j]+=1;matrix[j][index.get(e.a)]+=1;}
+        if(e.b!==ref){matrix[index.get(e.b)][j]-=1;matrix[j][index.get(e.b)]-=1;}
+        /* Branch current is inward at +: Vp - Vn - r*i = emf. */
+        matrix[j][j]=-e.r;
+        rhs[j]=e.v;
+      });
+      const solved=linearSolve(matrix,rhs);
+      if(!solved.ok){conflict=true;warnings.push({type:'conflict',text:'מקורות המתח מחוברים באופן סותר. בדקו את הסוללות והחוטים.'});}
+      else {
+        for(const k of free)volts.set(k,solved.x[index.get(k)]);
+        bs.forEach((e,i)=>{
+          const current=-solved.x[free.length+i];
+          componentData[e.id]={current,voltage:volts.get(e.a)-volts.get(e.b),internalDrop:e.r*current,internalPower:e.r*current*current};
+        });
+      }
+      island++;
+    }
+    const invalid=conflict;
+    const voltage=(id,p)=>volts.get(nodes.get(key(id,p)))||0;
+    const sameIsland=(id,p,q)=>islands.get(nodes.get(key(id,p)))===islands.get(nodes.get(key(id,q)));
+    const tripFuses=[];
+    for(const e of resistors) {
+      const v=volts.get(e.a)-volts.get(e.b), current=v/e.r;
+      if(e.part==='R') componentData[e.id]={current,voltage:v};
+      else if(e.part==='lamp') {
+        const c=components.find(c=>c.id===e.id),power=v*current,ratedPower=c.ratedVoltage*c.ratedVoltage/c.resistance;
+        componentData[e.id]={current,voltage:v,power,brightness:invalid?0:Math.min(1,Math.max(0,power/ratedPower))};
+      }
+      else if(['AW','WB'].includes(e.part)) {componentData[e.id]['current'+e.part]=current;componentData[e.id]['voltage'+e.part]=v;}
+      else {
+        componentData[e.id][e.part]=current;
+        if(!invalid&&Math.abs(current)>LIMITS[e.part]*(1+1e-6))tripFuses.push({id:e.id,port:e.part,current});
+      }
+    }
+    for(const c of components.filter(c=>c.type==='meter')) {
+      const connected=p=>(external.get(key(c.id,p))||0)>0;
+      const isV=c.mode==='V', intended=isV?'V':c.range<=0.2?'mI':'I';
+      let reading={status:'unconnected',text:'— — —',unit:isV?'V':c.range<=0.2?'mA':'A',value:null,port:intended,hint:`חברו חוטים לשקעים COM ו־${intended}.`};
+      const used=['V','I','mI'].filter(connected);
+      if(invalid)reading={...reading,status:'invalid',text:'ERR',hint:'יש שגיאה בחיבור המעגל.'};
+      else if(used.length>1)reading={...reading,status:'wrong',text:'JACK',hint:'חברו את החוט האדום לשקע אחד בלבד: '+intended+'.'};
+      else if(used.length===1&&used[0]!==intended)reading={...reading,status:'wrong',text:'JACK',hint:`השקע המחובר הוא ${used[0]}; המצב והטווח דורשים ${intended}.`};
+      else if(!isV&&c.fuses?.[intended]===false)reading={...reading,status:'fuse',text:'FUSE',hint:`הנתיך של שקע ${intended} נשרף. נתקו את החיבור וחדשו את הנתיך.`};
+      else if(connected('COM')&&connected(intended)) {
+        if(!sameIsland(c.id,intended,'COM'))reading={...reading,status:'floating',text:'— — —',hint:'הגששים אינם מחוברים לאותה מערכת חשמלית; הפרש המתח אינו מוגדר.'};
+        else {
+          let value=isV?voltage(c.id,'V')-voltage(c.id,'COM'):(componentData[c.id][intended]||0);
+          if(Math.abs(value)<1e-10)value=0;
+          const overload=Math.abs(value)>c.range+1e-10;
+          const scaled=!isV&&c.range<=0.2?value*1000:value;
+          const decimals=isV?(c.range<1?4:c.range<10?3:c.range<100?2:1):(c.range<=0.002?3:c.range<=0.02?2:c.range<=0.2?1:c.range<=2?3:2);
+          let numeric=scaled.toFixed(decimals);if(Number(numeric)===0)numeric=(0).toFixed(decimals);
+          reading={...reading,status:overload?'overload':'ok',text:overload?'OL':numeric,value,hint:overload?'הערך גבוה מהטווח שנבחר. בחרו טווח גדול יותר.':value<0?'סימן מינוס: כיוון החיבור הפוך ביחס ל־COM.':isV?'מדידת מתח בין V ל־COM.':'מדידת זרם דרך '+intended+' אל COM.'};
+        }
+      }
+      meterReadings[c.id]=reading;
+      if(reading.status==='wrong')warnings.push({type:'meter',id:c.id,text:reading.hint});
+      if(isV&&['I','mI'].some(connected))warnings.push({type:'meter',id:c.id,text:'חיבור שקע זרם יוצר מסלול בעל התנגדות זעירה, גם כאשר בוחרים מדידת מתח.'});
+      if(reading.status==='overload')warnings.push({type:'range',id:c.id,text:reading.hint});
+      if(c.fuses?.I===false||c.fuses?.mI===false)warnings.push({type:'fuse',id:c.id,text:'נתיך ברב־מודד נשרף; ניתן לחדשו בלוח ההגדרות.'});
+    }
+    const active=!invalid&&components.some(c=>c.type==='battery'&&Math.abs(componentData[c.id]?.current||0)>1e-8);
+    return {invalid,hardShort,conflict,active,componentData,meterReadings,warnings,tripFuses,voltage,external,nodes,islands};
+  }
+  return {solve,portNames,key,SHUNT,LIMITS};
+})();
+if(typeof module!=='undefined')module.exports=CircuitEngine;
+</script>
+<script>(() => {
+  'use strict';
+  const $=id=>document.getElementById(id);
+  const board=$('board'), palette=$('palette'), inspector=$('inspector-content');
+  const COLORS=['#bf6144','#384c4c','#397ea2','#5d8660'];
+  const METER_SCALE=0.84;
+  const SIZE={battery:[150,95],resistor:[150,95],rheostat:[260,155],switch:[140,95],meter:[240*METER_SCALE,290*METER_SCALE],junction:[28,28],lamp:[160,130]};
+  const V_RANGES=[0.2,2,20,200], I_RANGES=[0.002,0.02,0.2,2,10];
+  const MAX_PARTS=55, MAX_JOINTS=250, MAX_WIRES=500;
+  const BATTERY_R_MIN=0.5, BATTERY_R_MAX=1.5;
+  const randomBatteryResistance=()=>Math.round((BATTERY_R_MIN+Math.random()*(BATTERY_R_MAX-BATTERY_R_MIN))*100)/100;
+  const NAMES={battery:'סוללה',resistor:'נגד',rheostat:'ראוסטט',switch:'מפסק',meter:'רב־מודד',junction:'צומת חיבור',lamp:'נורת ביקורת'};
+  let state={version:1,components:[],wires:[],showValues:false}, selected=null,pending=null,wireColor=COLORS[0],nextId=1;
+  let past=[],future=[],result=null,drag=null,pointer={x:600,y:365},view={x:0,y:0,w:1200,h:730},spaceDown=false,toastTimer;
+  const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const fmt=(v,d=2)=>Number(v.toFixed(d)).toString();
+  const uid=p=>p+nextId++;
+  const snapshot=()=>JSON.stringify(state);
+  const component=id=>state.components.find(c=>c.id===id);
+  const wire=id=>state.wires.find(w=>w.id===id);
+  const rangeLabel=(range,mode)=>mode==='V'?range+' V':range<=0.2?fmt(range*1000)+' mA':range+' A';
+  function note(text){clearTimeout(toastTimer);$('toast').textContent=text;$('toast').hidden=false;toastTimer=setTimeout(()=>$('toast').hidden=true,4400);}
+  function persist(){try{localStorage.setItem('rheostat-lab-v1',snapshot());}catch{}}
+  function remember(){past.push(snapshot());if(past.length>60)past.shift();future=[];}
+  function recompute(){
+    let trips=[];
+    for(let i=0;i<8;i++){
+      result=CircuitEngine.solve(state);
+      if(!result.tripFuses.length)break;
+      for(const t of result.tripFuses){const c=component(t.id);c.fuses[t.port]=false;trips.push(t.port);}
+    }
+    if(trips.length)note('הנתיך המדומה בשקע '+[...new Set(trips)].join(', ')+' נשרף בעקבות זרם גבוה.');
+  }
+  function change(fn){remember();fn();recompute();persist();render();}
+  function undo(){if(!past.length)return;future.push(snapshot());state=JSON.parse(past.pop());pending=null;checkSelection();recompute();persist();render();}
+  function redo(){if(!future.length)return;past.push(snapshot());state=JSON.parse(future.pop());pending=null;checkSelection();recompute();persist();render();}
+  function checkSelection(){if(selected&&!(selected.kind==='component'?component(selected.id):wire(selected.id)))selected=null;}
+  function baseComponent(type,x,y,extra={}){
+    const c={id:uid('c'),type,x,y,rotation:0};
+    if(type==='battery')Object.assign(c,{voltage:1.5,internalResistance:randomBatteryResistance()});
+    if(type==='resistor')Object.assign(c,{resistance:10});
+    if(type==='rheostat')Object.assign(c,{resistance:20,position:0.5});
+    if(type==='switch')Object.assign(c,{closed:true});
+    if(type==='meter')Object.assign(c,{mode:'V',range:20,fuses:{I:true,mI:true}});
+    if(type==='lamp')Object.assign(c,{resistance:20,ratedVoltage:1.5});
+    return Object.assign(c,extra);
+  }
+  const MEASUREMENT_EXAMPLE={"version":1,"components":[{"id":"c68","type":"battery","x":417,"y":25,"rotation":0,"voltage":1.5},{"id":"c69","type":"rheostat","x":408,"y":186,"rotation":0,"resistance":20,"position":0.6},{"id":"c72","type":"meter","x":108,"y":65,"rotation":0,"mode":"I","range":0.2,"fuses":{"I":true,"mI":true}},{"id":"c77","type":"resistor","x":418,"y":489,"rotation":0,"resistance":15},{"id":"c94","type":"meter","x":115,"y":381,"rotation":0,"mode":"V","range":2,"fuses":{"I":true,"mI":true}},{"id":"c95","type":"junction","x":339,"y":339,"rotation":0},{"id":"c97","type":"junction","x":149,"y":345,"rotation":0},{"id":"c100","type":"junction","x":140,"y":648,"rotation":0},{"id":"c102","type":"junction","x":395,"y":638,"rotation":0},{"id":"c105","type":"junction","x":558,"y":595,"rotation":0}],"wires":[{"id":"w73","a":{"id":"c68","port":"n"},"b":{"id":"c69","port":"A"},"points":[],"color":"#bf6144"},{"id":"w74","a":{"id":"c68","port":"p"},"b":{"id":"c69","port":"B"},"points":[],"color":"#bf6144"},{"id":"w87","a":{"id":"c77","port":"B"},"b":{"id":"c69","port":"W"},"points":[],"color":"#bf6144"},{"id":"w91","a":{"id":"c72","port":"mI"},"b":{"id":"c77","port":"A"},"points":[],"color":"#bf6144"},{"id":"w96","a":{"id":"c69","port":"A"},"b":{"id":"c95","port":"J"},"points":[],"color":"#bf6144"},{"id":"w98","a":{"id":"c95","port":"J"},"b":{"id":"c97","port":"J"},"points":[],"color":"#bf6144"},{"id":"w99","a":{"id":"c97","port":"J"},"b":{"id":"c72","port":"COM"},"points":[],"color":"#bf6144"},{"id":"w101","a":{"id":"c94","port":"COM"},"b":{"id":"c100","port":"J"},"points":[],"color":"#bf6144"},{"id":"w103","a":{"id":"c100","port":"J"},"b":{"id":"c102","port":"J"},"points":[],"color":"#bf6144"},{"id":"w104","a":{"id":"c102","port":"J"},"b":{"id":"c77","port":"A"},"points":[],"color":"#bf6144"},{"id":"w106","a":{"id":"c94","port":"V"},"b":{"id":"c105","port":"J"},"points":[],"color":"#bf6144"},{"id":"w107","a":{"id":"c105","port":"J"},"b":{"id":"c77","port":"B"},"points":[],"color":"#bf6144"}],"showValues":false};
+  function example(kind){
+    if(kind==='measurement'){
+      const s=validateState(JSON.parse(JSON.stringify(MEASUREMENT_EXAMPLE)));
+      s.showValues=state.showValues;
+      selected={kind:'component',id:s.components.find(c=>c.type==='meter'&&c.mode==='V').id};
+      return s;
+    }
+    const s={version:1,components:[],wires:[],showValues:state.showValues||false};
+    const add=(...args)=>{const c=baseComponent(...args);s.components.push(c);return c;};
+    const connect=(a,p,b,q,points=[],color=COLORS[0])=>s.wires.push({id:uid('w'),a:{id:a.id,port:p},b:{id:b.id,port:q},points,color});
+    if(kind==='series'){
+      const b=add('battery',90,182),r=add('resistor',345,184),rh=add('rheostat',560,160),sw=add('switch',570,430),m=add('meter',910,270,{mode:'I',range:2});
+      connect(b,'p',r,'A',[{x:292,y:229}]);
+      connect(r,'B',rh,'A',[{x:525,y:229},{x:525,y:245}]);
+      connect(rh,'W',sw,'B',[{x:690,y:90},{x:838,y:90},{x:838,y:475}]);
+      connect(sw,'A',m,'I',[{x:570,y:600},{x:m.x+150*METER_SCALE,y:600}]);
+      connect(m,'COM',b,'n',[{x:m.x+40*METER_SCALE,y:650},{x:90,y:650}],COLORS[1]);
+    }
+    if(kind==='divider'){
+      const b=add('battery',95,200,{voltage:9}),rh=add('rheostat',420,175),r=add('resistor',500,450,{resistance:10}),m=add('meter',880,270),sw=add('switch',570,75);
+      connect(b,'p',sw,'A',[{x:295,y:245},{x:295,y:120}]);
+      connect(sw,'B',rh,'B',[{x:765,y:120},{x:765,y:260}]);
+      connect(rh,'A',b,'n',[{x:340,y:260},{x:340,y:600},{x:95,y:600}],COLORS[1]);
+      connect(rh,'W',m,'V',[{x:550,y:155},{x:825,y:155},{x:825,y:590},{x:m.x+95*METER_SCALE,y:590}],COLORS[2]);
+      connect(m,'COM',b,'n',[{x:m.x+40*METER_SCALE,y:650},{x:95,y:650}],COLORS[1]);
+      /* The load is initially unconnected: attach it to investigate loading. */
+      selected={kind:'component',id:rh.id};
+    }
+    if(kind==='parallel'){
+      const b=add('battery',85,285),a=add('resistor',410,200,{resistance:5}),r=add('resistor',410,355,{resistance:10}),z=add('resistor',410,510,{resistance:15}),sw=add('switch',410,70),m=add('meter',880,260);
+      connect(b,'p',sw,'A',[{x:280,y:330},{x:280,y:115}]);
+      for(const q of[a,r,z])connect(sw,'B',q,'A',[{x:635,y:115},{x:635,y:q.y+45},{x:380,y:q.y+45}]);
+      for(const q of[a,r,z])connect(q,'B',b,'n',[{x:725,y:q.y+45},{x:725,y:640},{x:85,y:640}],COLORS[1]);
+      connect(m,'V',a,'A',[{x:m.x+95*METER_SCALE,y:165},{x:365,y:165},{x:365,y:245}]);
+      connect(m,'COM',a,'B',[{x:m.x+40*METER_SCALE,y:610},{x:760,y:610},{x:760,y:245}],COLORS[1]);
+    }
+    if(kind==='lamp'){
+      const b=add('battery',80,200),l=add('lamp',370,187),rh=add('rheostat',650,200),sw=add('switch',660,460),m=add('meter',960,240);
+      connect(b,'p',l,'A');connect(l,'B',rh,'A',[{x:570,y:247},{x:570,y:285}]);
+      connect(rh,'W',sw,'B',[{x:780,y:100},{x:890,y:100},{x:890,y:505}]);
+      connect(sw,'A',b,'n',[{x:660,y:620},{x:80,y:620}],COLORS[1]);
+      connect(m,'V',l,'A',[{x:m.x+95*METER_SCALE,y:150},{x:345,y:150},{x:345,y:247}],COLORS[2]);
+      connect(m,'COM',l,'B',[{x:m.x+40*METER_SCALE,y:570},{x:600,y:570},{x:600,y:247}],COLORS[1]);
+    }
+    if(kind!=='divider')selected=s.components.find(c=>c.type==='rheostat')?{kind:'component',id:s.components.find(c=>c.type==='rheostat').id}:s.components.find(c=>c.type==='meter')?{kind:'component',id:s.components.find(c=>c.type==='meter').id}:null;
+    return normalizeWireVertices(s);
+  }
+  function localPort(c,p){
+    if(c.type==='rheostat')return p==='A'?{x:0,y:85}:p==='B'?{x:260,y:85}:{x:36+188*c.position,y:8};
+    if(c.type==='meter')return {x:{COM:40,V:95,I:150,mI:205}[p]*METER_SCALE,y:267*METER_SCALE};
+    if(c.type==='lamp')return{x:p==='A'?0:160,y:60};
+    if(c.type==='junction')return{x:14,y:14};
+    return{x:['n','A'].includes(p)?0:SIZE[c.type][0],y:c.type==='battery'?47:45};
+  }
+  function transformPoint(c,p){const [w,h]=SIZE[c.type],cx=w/2,cy=h/2,a=c.rotation*Math.PI/180;return{x:c.x+cx+(p.x-cx)*Math.cos(a)-(p.y-cy)*Math.sin(a),y:c.y+cy+(p.x-cx)*Math.sin(a)+(p.y-cy)*Math.cos(a)};}
+  function localPoint(c,p){const [w,h]=SIZE[c.type],cx=w/2,cy=h/2,a=-c.rotation*Math.PI/180;return{x:cx+(p.x-c.x-cx)*Math.cos(a)-(p.y-c.y-cy)*Math.sin(a),y:cy+(p.x-c.x-cx)*Math.sin(a)+(p.y-c.y-cy)*Math.cos(a)};}
+  function endpoint(e){const c=component(e.id);return c?transformPoint(c,localPort(c,e.port)):{x:0,y:0};}
+  function boardPoint(e){const matrix=board.getScreenCTM();if(!matrix)return{x:0,y:0};const p=new DOMPoint(e.clientX,e.clientY).matrixTransform(matrix.inverse());return{x:p.x,y:p.y};}
+  function wirePoints(w){return[endpoint(w.a),...(w.points||[]),endpoint(w.b)];}
+  function pathFromPoints(points){
+    return points.map((p,i)=>`${i?'L':'M'} ${p.x} ${p.y}`).join(' ');
+  }
+  function nearbyPort(p,excludeId=null){
+    let nearest=null,best=14;
+    for(const c of state.components){if(c.id===excludeId)continue;for(const port of CircuitEngine.portNames(c)){
+      const q=transformPoint(c,localPort(c,port)),d=Math.hypot(p.x-q.x,p.y-q.y);
+      if(d<best){best=d;nearest={id:c.id,port};}
+    }}return nearest;
+  }
+  function canAddJoint(){if(state.components.filter(c=>c.type==='junction').length<MAX_JOINTS)return true;note('הגעתם למספר נקודות החיבור המרבי.');return false;}
+  function canAddWires(count=1){if(state.wires.length+count<=MAX_WIRES)return true;note('הגעתם למספר החוטים המרבי.');return false;}
+  function newJoint(p){const c=baseComponent('junction',Math.round(p.x)-14,Math.round(p.y)-14);state.components.push(c);return{id:c.id,port:'J'};}
+  function appendWire(a,b,color=wireColor,points=[]){const w={id:uid('w'),a:{...a},b:{...b},points,color};state.wires.push(w);return w;}
+  function extendToEmpty(p){
+    const near=nearbyPort(p);if(near){connectPort(near.id,near.port);return;}
+    if(!canAddJoint()||(pending&&!canAddWires()))return;
+    change(()=>{const e=newJoint(p);if(pending)appendWire(pending,e);pending=e;selected={kind:'component',id:e.id};});
+  }
+  function projectOnWire(w,p){
+    const pts=wirePoints(w);let best={distance:Infinity,index:0,point:pts[0]};
+    for(let i=1;i<pts.length;i++){
+      const a=pts[i-1],b=pts[i],dx=b.x-a.x,dy=b.y-a.y,l=dx*dx+dy*dy,t=l?Math.max(0,Math.min(1,((p.x-a.x)*dx+(p.y-a.y)*dy)/l)):0;
+      const q={x:a.x+t*dx,y:a.y+t*dy},distance=Math.hypot(q.x-p.x,q.y-p.y);
+      if(distance<best.distance)best={distance,index:i-1,point:q};
+    }return best;
+  }
+  function splitWire(w,projection){
+    const e=newJoint(projection.point),oldB=w.b,pts=w.points||[],i=projection.index;
+    appendWire(e,oldB,w.color,pts.slice(i));w.b={...e};w.points=pts.slice(0,i);return e;
+  }
+  function connectAtWire(w,p,start=false){
+    const hit=projectOnWire(w,p),a=endpoint(w.a),b=endpoint(w.b);
+    if(Math.hypot(hit.point.x-a.x,hit.point.y-a.y)<8){connectPort(w.a.id,w.a.port);return;}
+    if(Math.hypot(hit.point.x-b.x,hit.point.y-b.y)<8){connectPort(w.b.id,w.b.port);return;}
+    if(!canAddJoint()||!canAddWires(pending?2:1))return;
+    change(()=>{const from=pending,e=splitWire(w,hit);if(from){appendWire(from,e);pending=null;}else pending=start?e:null;selected={kind:'component',id:e.id};});
+  }
+  function mergeJoint(id,target){
+    for(const w of state.wires)for(const end of['a','b'])if(w[end].id===id)w[end]={...target};
+    state.wires=state.wires.filter(w=>w.a.id!==w.b.id||w.a.port!==w.b.port);
+    state.components=state.components.filter(c=>c.id!==id);
+    if(pending?.id===id)pending={...target};selected={kind:'component',id:target.id};
+  }
+  function normalizeWireVertices(s){
+    /* Legacy route points become real, draggable wire endpoints. Collinear
+       cosmetic points disappear; coincident corners on one conductor share
+       a node, while unrelated crossings remain separate. */
+    const parent=new Map(),byId=new Map(s.components.map(c=>[c.id,c]));
+    const find=k=>{if(!parent.has(k))parent.set(k,k);let r=k;while(parent.get(r)!==r)r=parent.get(r);while(k!==r){const next=parent.get(k);parent.set(k,r);k=next;}return r;};
+    const key=e=>CircuitEngine.key(e.id,e.port);
+    for(const w of s.wires)parent.set(find(key(w.a)),find(key(w.b)));
+    const at=e=>transformPoint(byId.get(e.id),localPort(byId.get(e.id),e.port));
+    const prepared=s.wires.map(w=>{
+      const pts=[at(w.a),...(w.points||[]),at(w.b)].filter((p,i,a)=>!i||Math.hypot(p.x-a[i-1].x,p.y-a[i-1].y)>1e-6),out=[];
+      for(const p of pts){
+        while(out.length>1){const a=out.at(-2),b=out.at(-1),cross=(b.x-a.x)*(p.y-b.y)-(b.y-a.y)*(p.x-b.x),dot=(b.x-a.x)*(p.x-b.x)+(b.y-a.y)*(p.y-b.y);if(Math.abs(cross)>1e-6||dot<0)break;out.pop();}
+        out.push(p);
+      }return{w,points:out.slice(1,-1)};
+    });
+    const added=prepared.reduce((n,x)=>n+x.points.length,0);
+    if(s.wires.length+added>MAX_WIRES||s.components.filter(c=>c.type==='junction').length+added>MAX_JOINTS)return s;
+    const corners=new Map(),wires=[];
+    for(const {w,points} of prepared){
+      let from=w.a;const net=find(key(w.a));
+      for(const p of points){
+        const corner=net+'|'+p.x+','+p.y;let e=corners.get(corner);
+        if(!e){const c=baseComponent('junction',p.x-14,p.y-14);s.components.push(c);e={id:c.id,port:'J'};corners.set(corner,e);}
+        wires.push({id:wires.some(x=>x.id===w.id)?uid('w'):w.id,a:{...from},b:{...e},points:[],color:w.color});from=e;
+      }
+      wires.push({id:points.length?uid('w'):w.id,a:{...from},b:{...w.b},points:[],color:w.color});
+    }
+    s.wires=wires;return s;
+  }
+  function port(c,p,label=p,color='#637a6c'){
+    const {x,y}=localPort(c,p),picked=pending?.id===c.id&&pending.port===p,connected=result?.external.get(CircuitEngine.key(c.id,p))>0;
+    if(c.type==='junction'){
+      const degree=result?.external.get(CircuitEngine.key(c.id,p))||0;
+      return `<g class="port free-joint${picked?' pending':''}" data-port="J" data-id="${c.id}" role="button" tabindex="0" aria-label="נקודת חיבור: לחצו להמשך חוט, גררו להזזה"><title>נקודת חיבור — לחצו להמשך חוט, גררו להזזה</title><circle class="port-halo" cx="${x}" cy="${y}" r="14"/><circle cx="${x}" cy="${y}" r="${degree>1?5:6}" fill="${degree>1?'#406b51':'#fffef8'}" stroke="#406b51" stroke-width="2"/></g>`;
+    }
+    const ly=c.type==='meter'?y+15:c.type==='rheostat'&&p==='W'?y-13:y+24;
+    return `<g class="port${picked?' pending':''}" data-port="${p}" data-id="${c.id}" role="button" tabindex="0" aria-label="${NAMES[c.type]}: הדק ${label}"><title>הדק ${label} — לחצו לחיבור</title><circle class="port-halo" cx="${x}" cy="${y}" r="15"/><circle cx="${x}" cy="${y}" r="7" fill="${color}" stroke="#fffef8" stroke-width="2"/><circle cx="${x}" cy="${y}" r="3" fill="${connected?wireColor:'#182f2b'}"/><text x="${x}" y="${ly}" class="board-label" font-size="${c.type==='meter'?11:12}" direction="ltr">${label}</text></g>`;
+  }
+  function componentMarkup(c){
+    const [w,h]=SIZE[c.type],sel=selected?.kind==='component'&&selected.id===c.id,data=result?.componentData[c.id]||{};
+    const ordinal=state.components.filter(x=>x.type===c.type).findIndex(x=>x.id===c.id)+1;
+    let body='';
+    if(c.type==='battery')body=`<path d="M0 47H32M118 47H150" fill="none" stroke="#5a7063" stroke-width="4"/><g filter="url(#component-shadow)"><rect x="30" y="7" width="90" height="80" rx="14" fill="#355b52"/><rect x="31" y="7" width="88" height="20" rx="10" fill="#526e5b"/><path d="M35 28H115" stroke="#87a585"/><text x="75" y="60" fill="#f3f7e7" font-size="21" text-anchor="middle" direction="ltr">${c.voltage} V</text><text x="75" y="78" fill="#adc2ac" font-size="9" text-anchor="middle">כא״מ · סוללה ${ordinal}</text></g>${port(c,'n','−')}${port(c,'p','+','#b7654f')}${state.showValues?`<text x="75" y="110" class="value-badge" direction="ltr">r = ${fmt(c.internalResistance)} Ω · ${fmt(data.voltage||0)} V</text>`:''}`;
+    if(c.type==='resistor')body=`<path d="M0 45H35M115 45H150" stroke="#5a7063" stroke-width="4"/><g filter="url(#component-shadow)"><rect x="34" y="27" width="82" height="36" rx="9" fill="#e7cb92" stroke="#bfa16c"/><path d="M47 28V62M62 28V62" stroke="${c.resistance===5?'#577447':c.resistance===10?'#9b613e':'#825770'}" stroke-width="5"/><path d="M102 28V62" stroke="#ae8d38" stroke-width="4"/><text x="82" y="49" fill="#554b34" font-size="14" text-anchor="middle" direction="ltr">${c.resistance} Ω</text></g><text x="75" y="16" class="part-name">נגד ${ordinal}</text>${port(c,'A','A')}${port(c,'B','B')}${state.showValues?`<text x="75" y="88" class="value-badge" direction="ltr">${fmt(data.voltage||0)} V · ${fmt(Math.abs(data.current||0)*1000,1)} mA</text>`:''}`;
+    if(c.type==='switch')body=`<rect x="26" y="27" width="89" height="34" rx="16" fill="#eef0e9" stroke="#d2dccf"/><path d="M0 45H38M102 45H140" stroke="#637667" stroke-width="4"/><circle cx="39" cy="45" r="5" fill="#546e5b"/><circle cx="101" cy="45" r="5" fill="#546e5b"/><g class="switch-lever" data-switch="${c.id}" role="button" tabindex="0" aria-label="${c.closed?'פתיחת':'סגירת'} המפסק"><rect x="30" y="4" width="83" height="55" fill="transparent"/><path d="M40 45L101 ${c.closed?45:14}" stroke="${c.closed?'#477658':'#8a997f'}" stroke-width="5" stroke-linecap="round"/></g><text x="70" y="82" class="part-name">${c.closed?'סגור':'פתוח'}</text>${port(c,'A','A')}${port(c,'B','B')}`;
+    if(c.type==='rheostat'){
+      const sx=36+188*c.position;
+      const coils=Array.from({length:32},(_,i)=>`M${36+i*6} 65V103`).join('');
+      body=`<path d="M0 85H33M228 85H260" stroke="#657766" stroke-width="4"/><g filter="url(#component-shadow)"><rect x="28" y="65" width="204" height="40" rx="7" fill="#d3c3a1" stroke="#b5a582"/><path d="${coils}" stroke="#b9875b" stroke-width="2"/><rect x="20" y="108" width="220" height="13" rx="5" fill="#6a7f70"/><path d="M33 58H228" stroke="#708478" stroke-width="5" stroke-linecap="round"/></g><rect x="30" y="32" width="202" height="72" data-slider="${c.id}" fill="transparent" class="slider-handle"/><g class="slider-handle" data-slider="${c.id}"><path d="M${sx} 8V81" stroke="#345d4d" stroke-width="4"/><path d="M${sx-6} 74L${sx} 86L${sx+6} 74Z" fill="#254e42"/><rect x="${sx-16}" y="39" width="32" height="22" rx="7" fill="#345e4b" stroke="#234738"/><path d="M${sx-5} 45V55M${sx} 45V55M${sx+5} 45V55" stroke="#b7c8ab"/></g><text x="130" y="141" class="part-name" direction="ltr">${c.resistance} Ω <tspan direction="rtl">· ראוסטט ${ordinal}</tspan></text>${port(c,'A','A')}${port(c,'B','B')}${port(c,'W','W','#3a785b')}${state.showValues?`<text x="130" y="158" class="value-badge" direction="ltr">A–W: ${fmt(data.rAW)} Ω · W–B: ${fmt(data.rWB)} Ω</text>`:''}`;
+    }
+    if(c.type==='lamp'){
+      const light=data.brightness||0,on=light>0.005;
+      body=`<defs><radialGradient id="lamp-glow-${c.id}"><stop offset="0" stop-color="#ffc83f" stop-opacity="${light*.75}"/><stop offset=".5" stop-color="#ffd56a" stop-opacity="${light*.3}"/><stop offset="1" stop-color="#ffe5ac" stop-opacity="0"/></radialGradient></defs><circle cx="80" cy="50" r="57" fill="url(#lamp-glow-${c.id})"/><path d="M0 60H50L65 72M160 60H110L95 72" fill="none" stroke="#617364" stroke-width="4"/><g filter="url(#component-shadow)"><circle cx="80" cy="50" r="30" fill="${on?'#fff0b3':'#e6eee8'}" fill-opacity="${on ? .35+light*.65 : .85}" stroke="${on?'#d7a74a':'#99afa0'}" stroke-width="2"/><path d="M65 74V59M95 74V59" stroke="#6f7e67" stroke-width="2"/><path d="M65 59L70 50L75 60L80 50L85 60L90 50L95 59" fill="none" stroke="${on?'#f3b31f':'#738578'}" stroke-width="${on?3:2}" stroke-linejoin="round"/><path d="M60 29Q71 17 83 22" fill="none" stroke="#fffef5" stroke-width="3" stroke-linecap="round"/><rect x="61" y="79" width="38" height="23" rx="5" fill="#7c8b7b"/><path d="M65 86H95M65 92H95" stroke="#c5cec0" stroke-width="2"/><rect x="71" y="102" width="18" height="5" rx="2" fill="#526b59"/></g><text x="80" y="124" class="part-name">נורת ביקורת ${ordinal}</text>${port(c,'A','A')}${port(c,'B','B')}${state.showValues?`<text x="80" y="143" class="value-badge" direction="ltr">${fmt(Math.abs(data.voltage||0))} V · ${fmt(data.power||0,3)} W</text>`:''}`;
+    }
+    if(c.type==='meter'){
+      const reading=result.meterReadings[c.id],isV=c.mode==='V',needle=isV?-47:47,ranges=isV?V_RANGES:I_RANGES;
+      body=`<g transform="scale(${METER_SCALE})"><g filter="url(#component-shadow)"><rect x="3" y="1" width="234" height="284" rx="24" fill="#efb966" stroke="#c58e45" stroke-width="2"/><rect x="16" y="15" width="208" height="81" rx="12" fill="#455d49"/><rect x="24" y="23" width="192" height="65" rx="7" fill="#d8e5bf"/><text x="120" y="38" font-size="9" fill="#728560" text-anchor="middle" direction="ltr">DC · ${rangeLabel(c.range,c.mode)}</text><text x="113" y="70" font-family="monospace" font-size="${reading.text.length>7?30:36}" fill="#293b25" text-anchor="middle" direction="ltr">${reading.text}</text><text x="198" y="81" font-size="10" fill="#44583a" text-anchor="middle" direction="ltr">${reading.unit}</text><text x="120" y="112" fill="#6b5839" font-size="12" text-anchor="middle">רב־מודד ${ordinal}</text><circle cx="120" cy="161" r="42" fill="#d39e54" stroke="#bf8641"/><circle cx="120" cy="161" r="33" fill="#405344" stroke="#2d4638" stroke-width="2"/><g transform="rotate(${needle} 120 161)"><rect x="113" y="132" width="14" height="55" rx="6" fill="#5f7460"/><path d="M120 135V146" stroke="#f6edd0" stroke-width="3" stroke-linecap="round"/></g><g class="meter-mode" data-mode="V" data-id="${c.id}" role="button" tabindex="0" aria-label="מצב מתח"><rect x="25" y="137" width="42" height="41" rx="7" fill="${isV?'#365b44':'#dda858'}"/><text x="46" y="162" fill="${isV?'#fff5dc':'#695533'}" font-size="20" text-anchor="middle">V</text></g><g class="meter-mode" data-mode="I" data-id="${c.id}" role="button" tabindex="0" aria-label="מצב זרם"><rect x="173" y="137" width="42" height="41" rx="7" fill="${!isV?'#365b44':'#dda858'}"/><text x="194" y="162" fill="${!isV?'#fff5dc':'#695533'}" font-size="20" text-anchor="middle">I</text></g><path d="M25 249H214" stroke="#cc984e"/></g><foreignObject x="26" y="213" width="188" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="meter-range-wrapper"><select class="on-meter-range" data-meter-range="${c.id}" aria-label="טווח מדידה ברב־מודד ${ordinal}">${ranges.map(n=>`<option value="${n}" ${n===c.range?'selected':''}>טווח: &#x2066;${rangeLabel(n,c.mode)}&#x2069;</option>`).join('')}</select></div></foreignObject></g>${port(c,'COM','COM','#37413c')}${port(c,'V','V','#b95946')}${port(c,'I','I','#b95946')}${port(c,'mI','mI','#b95946')}${['I','mI'].filter(p=>c.fuses[p]===false).map(p=>{const q=localPort(c,p);return`<path d="M${q.x-6} ${q.y-6}L${q.x+6} ${q.y+6}M${q.x+6} ${q.y-6}L${q.x-6} ${q.y+6}" stroke="#f5deba" stroke-width="2" pointer-events="none"/>`;}).join('')}`;
+    }
+    if(c.type==='junction')body=port(c,'J','●','#487655');
+    const highlight=sel?(c.type==='junction'?'<circle class="selected-ring" cx="14" cy="14" r="16"/>':`<rect class="selected-ring" x="-17" y="-22" width="${w+34}" height="${h+39}" rx="15"/>`):'';
+    return `<g class="component" data-component="${c.id}" transform="translate(${c.x} ${c.y}) rotate(${c.rotation} ${w/2} ${h/2})">${highlight}${body}</g>`;
+  }
+  function renderStage(){
+    board.setAttribute('viewBox',`${view.x} ${view.y} ${view.w} ${view.h}`);
+    $('wires-layer').innerHTML=state.wires.map(w=>{
+      const d=pathFromPoints(wirePoints(w)),sel=selected?.kind==='wire'&&selected.id===w.id;
+      return `<g data-wire="${w.id}">${sel?`<path d="${d}" stroke="#b5ccad" stroke-width="10" fill="none" opacity=".55"/>`:''}<path d="${d}" stroke="#fafcf7" stroke-width="7" fill="none" stroke-linecap="round" pointer-events="none"/><path class="wire-hit" data-wire="${w.id}" d="${d}" stroke="transparent" stroke-width="18" fill="none"/><path class="wire-line" d="${d}" stroke="${w.color}" stroke-width="3.5" fill="none" stroke-linecap="round" pointer-events="none"/></g>`;
+    }).join('');
+    $('components-layer').innerHTML=state.components.map(componentMarkup).join('');
+    let overlay='';
+    if(selected?.kind==='wire'){const w=wire(selected.id);if(w)overlay=(w.points||[]).map((p,i)=>`<circle class="wire-node" data-wire-point="${i}" data-id="${w.id}" cx="${p.x}" cy="${p.y}" r="6"/>`).join('');}
+    if(pending){const a=endpoint(pending);overlay+=`<path d="${pathFromPoints([a,pointer])}" fill="none" stroke="${wireColor}" stroke-width="2.5" stroke-dasharray="6 5" pointer-events="none"/>`;}
+    $('overlay-layer').innerHTML=overlay;
+    $('empty-hint').hidden=state.components.length!==0;
+  }
+  function renderInspector(){
+    $('selected-tag').textContent='';
+    if(!selected){$('inspector-heading').textContent='הגדרות רכיב';inspector.innerHTML='<div class="selection-empty">בחרו רכיב על הלוח כדי לשנות את הגדרותיו.</div><span class="tip-chip">חוט יכול להסתיים גם במקום ריק</span>';return;}
+    if(selected.kind==='wire'){
+      const w=wire(selected.id);if(!w)return;$('inspector-heading').textContent='חוט חיבור';
+      inspector.innerHTML=`<p>החוט מחבר בקווים ישרים את הנקודות שנבחרו. לחיצה כפולה עליו מוסיפה נקודת חיבור שאפשר לגרור או להסתעף ממנה.</p><label class="property">צבע<select data-prop="wireColor">${COLORS.map((x,i)=>`<option value="${x}" ${x===w.color?'selected':''}>${['נחושת','שחור','כחול','ירוק'][i]}</option>`).join('')}</select></label><div class="property-actions">${w.points.length?'<button class="small-button" data-action="straighten">יישור החוט</button>':''}<span class="delete-hint">Delete למחיקת החוט</span></div>`;return;
+    }
+    const c=component(selected.id);if(!c)return;
+    $('inspector-heading').textContent=NAMES[c.type];$('selected-tag').textContent='נבחר';
+    let content='';
+    if(c.type==='battery'){
+      const d=result.componentData[c.id];
+      content=`<label class="property">מתח המקור (כא״מ)<select data-prop="voltage"><option value="1.5" ${c.voltage===1.5?'selected':''}>1.5 V</option><option value="9" ${c.voltage===9?'selected':''}>9 V</option></select></label><div class="property"><span>התנגדות פנימית — r</span><strong><bdi>${fmt(c.internalResistance)} Ω</bdi></strong></div><p>ההתנגדות נקבעת אקראית בעת הוספת הסוללה ונשארת קבועה. הערך שעל הסוללה הוא הכא״מ; בזמן אספקת זרם מתח ההדקים קטן לפי <bdi>V = ε − Ir</bdi>.</p><div class="resistance-split"><div><span>מתח הדקים</span><strong><bdi>${fmt(d.voltage||0)} V</bdi></strong></div><div><span>זרם הסוללה</span><strong><bdi>${fmt(d.current||0,3)} A</bdi></strong></div></div><p>הדק + נמצא בצד הימני של הסוללה לפני סיבוב.</p>`;
+    }
+    if(c.type==='resistor')content=`<label class="property">התנגדות<select data-prop="resistance">${[5,10,15].map(n=>`<option value="${n}" ${c.resistance===n?'selected':''}>${n} Ω</option>`).join('')}</select></label><p>אפשר לחבר כמה נגדים בטור או במקביל.</p>`;
+    if(c.type==='rheostat')content=`<label class="property">התנגדות מלאה A–B (Ω)<input type="number" min="1" max="2000" step="1" data-prop="resistance" value="${c.resistance}"></label><label class="property">מיקום הגררה: <span id="slider-percent">${Math.round(c.position*100)}%</span><input type="range" min="0" max="100" step="1" data-prop="position" value="${c.position*100}"><div class="range-labels"><span>A</span><span>B</span></div></label><div class="resistance-split"><div><span>A–W</span><strong id="raw-value">${fmt(c.resistance*c.position)} Ω</strong></div><div><span>W–B</span><strong id="rwb-value">${fmt(c.resistance*(1-c.position))} Ω</strong></div></div><p class="rheostat-end-note">בין A ל־B ההתנגדות קבועה. W נע יחד עם הגררה וניתן לחבר אליו חוט.</p>`;
+    if(c.type==='switch')content=`<div class="property"><span>מצב המפסק</span><button class="primary-button" data-action="toggle">${c.closed?'פתיחת המפסק':'סגירת המפסק'}</button></div><p>אפשר גם ללחוץ על זרוע המפסק בלוח.</p>`;
+    if(c.type==='meter'){
+      const r=result.meterReadings[c.id];
+      content=`<p>בחרו מצב V או I וטווח מדידה ישירות על המכשיר.</p><div class="meter-hint">${esc(r.hint)}</div><span class="tip-chip">השקעים המתאימים: <bdi>COM + ${r.port}</bdi></span><div class="fuse-box"><div class="${c.fuses.I?'fuse-ok':'fuse-bad'}">I · נתיך 10 A · ${c.fuses.I?'תקין':'שרוף'}</div><div class="${c.fuses.mI?'fuse-ok':'fuse-bad'}">mI · נתיך 200 mA · ${c.fuses.mI?'תקין':'שרוף'}</div></div>${!c.fuses.I||!c.fuses.mI?'<button class="small-button" data-action="fuse">חידוש נתיכים</button>':''}`;
+    }
+    if(c.type==='lamp'){
+      const d=result.componentData[c.id],light=d.brightness||0;
+      content=`<label class="property">מתח נקוב לנורה<select data-prop="ratedVoltage"><option value="1.5" ${c.ratedVoltage===1.5?'selected':''}>1.5 V</option><option value="9" ${c.ratedVoltage===9?'selected':''}>9 V</option></select></label><div class="lamp-state ${light>.005?'lit':''}">${light>.8?'הנורה מאירה':light>.005?'הנורה מאירה בעוצמה חלקית':'הנורה כבויה'}</div><p>בהירות הנורה משתנה לפי ההספק החשמלי. זהו מודל לימודי עם התנגדות קבועה של <bdi>${c.resistance} Ω</bdi>.</p><div class="resistance-split"><div><span>מתח הנורה</span><strong>${fmt(Math.abs(d.voltage||0))} V</strong></div><div><span>הספק</span><strong>${fmt(d.power||0,3)} W</strong></div></div>`;
+    }
+    if(c.type==='junction')content='<p>זו נקודה חופשית על הלוח. גררו אותה לעיצוב המעגל, או אל הדק כדי להתחבר אליו. לחצו עליה כדי להמשיך חוט; אפשר לחבר אליה כמה חוטים.</p><p>חציית חוטים יוצרת חיבור רק אם בוחרים לחבר בנקודה הזו.</p>';
+    inspector.innerHTML=content+`<div class="property-actions">${c.type!=='junction'?'<button class="small-button" data-action="rotate">↻ סיבוב</button>':''}<span class="delete-hint">Delete למחיקה</span></div>`;
+  }
+  function renderStatus(){
+    $('status-text').textContent=result.invalid?'שגיאה בחיבור המעגל':result.hardShort?'קצר בין הדקי הסוללה':result.active?'המעגל פעיל':state.components.length?'אין זרם במעגל':'מוכן לבנייה';
+    $('status-dot').className='status-dot'+(result.invalid||result.hardShort?' error':result.active?' active':'');
+    $('interaction-hint').textContent=pending?'בחרו הדק או נקודה על הלוח · Esc לסיום החוט':'הוסיפו חוט מהמדף וגררו את קצותיו להדקים';
+    const warnings=[...new Set(result.warnings.map(w=>w.text))];
+    $('warnings').innerHTML=warnings.map(w=>`<div class="warning-line"><span aria-hidden="true">△</span><span>${esc(w)}</span></div>`).join('');
+    $('undo').disabled=!past.length;$('redo').disabled=!future.length;
+    $('show-values').checked=state.showValues;
+  }
+  function render(){checkSelection();renderStage();renderInspector();renderStatus();}
+  function setMode(c,mode){if(c.mode===mode)return;change(()=>{c.mode=mode;c.range=mode==='V'?20:2;});}
+  function removeSelected(){if(!selected)return;change(()=>{
+    const removed=state.wires.filter(w=>selected.kind==='wire'?w.id===selected.id:w.a.id===selected.id||w.b.id===selected.id);
+    const candidates=new Set(removed.flatMap(w=>[w.a.id,w.b.id]));
+    if(selected.kind==='component')state.components=state.components.filter(c=>c.id!==selected.id);
+    state.wires=state.wires.filter(w=>!removed.includes(w));
+    const used=new Set(state.wires.flatMap(w=>[w.a.id,w.b.id]));
+    state.components=state.components.filter(c=>c.type!=='junction'||!candidates.has(c.id)||used.has(c.id));
+    selected=null;pending=null;
+  });}
+  function connectPort(id,p){
+    if(!pending){pending={id,port:p};selected={kind:'component',id};render();return;}
+    if(pending.id===id&&pending.port===p){pending=null;render();return;}
+    const e={id,port:p};
+    if(state.wires.some(w=>(w.a.id===pending.id&&w.a.port===pending.port&&w.b.id===id&&w.b.port===p)||(w.b.id===pending.id&&w.b.port===pending.port&&w.a.id===id&&w.a.port===p))){pending=null;render();note('שני ההדקים כבר מחוברים בחוט.');return;}
+    if(!canAddWires())return;
+    change(()=>{appendWire(pending,e);pending=null;});
+  }
+  function addComponent(type,extra={}){
+    if(type==='wire'){addLooseWire();return;}
+    if(type==='junction'){if(!canAddJoint())return;}
+    else if(state.components.filter(c=>c.type!=='junction').length>=MAX_PARTS){note('הגעתם למספר הרכיבים המרבי בלוח.');return;}
+    change(()=>{
+      const [w,h]=SIZE[type];let x=430,y=290;
+      for(let i=0;i<30;i++){const col=i%5,row=Math.floor(i/5);x=250+col*125;y=160+row*72;if(!state.components.some(c=>Math.hypot(c.x-x,c.y-y)<80))break;}
+      const c=baseComponent(type,Math.min(x,1160-w),Math.min(y,690-h),extra);state.components.push(c);selected={kind:'component',id:c.id};pending=null;
+    });
+  }
+  function addLooseWire(){
+    if(state.components.filter(c=>c.type==='junction').length+2>MAX_JOINTS||!canAddWires())return;
+    change(()=>{
+      let x=420,y=340;for(let i=0;i<30;i++){x=180+(i%4)*220;y=170+Math.floor(i/4)*65;if(!state.components.some(c=>Math.hypot(c.x+14-x,c.y+14-y)<75||Math.hypot(c.x+14-(x+150),c.y+14-y)<75))break;}
+      const a=newJoint({x,y}),b=newJoint({x:x+150,y}),w=appendWire(a,b);
+      selected={kind:'wire',id:w.id};pending=null;
+    });
+  }
+  const icon={wire:`<path d="M7 15H51" stroke="#b56548" stroke-width="3"/><circle cx="7" cy="15" r="4" fill="#fffef8" stroke="#406b51" stroke-width="2"/><circle cx="51" cy="15" r="4" fill="#fffef8" stroke="#406b51" stroke-width="2"/>`,lamp:`<path d="M3 15H17M41 15H55" stroke="#6f836d" stroke-width="2"/><circle cx="29" cy="13" r="11" fill="#ffde78" stroke="#cc9e44"/><path d="M24 14L27 9L30 15L33 9L36 14" fill="none" stroke="#b78529" stroke-width="1.6"/><rect x="24" y="22" width="10" height="6" rx="2" fill="#7c8b7b"/>`,battery:`<path d="M1 15H12M46 15H57" stroke="#537165" stroke-width="2"/><rect x="12" y="5" width="34" height="20" rx="5" fill="#436453"/><path d="M34 11V19M30 15H38" stroke="#d7e2c4"/><path d="M17 15H23" stroke="#d7e2c4"/>`,resistor:`<path d="M1 15H13M44 15H57" stroke="#7c886e" stroke-width="2"/><rect x="13" y="6" width="31" height="17" rx="4" fill="#e6c58a"/><path d="M21 7V22M35 7V22" stroke="#a57b43" stroke-width="3"/>`,rheostat:`<path d="M1 19H10M46 19H57" stroke="#7c886e" stroke-width="2"/><rect x="10" y="12" width="36" height="13" rx="3" fill="#d7c199"/><path d="M16 13V24M21 13V24M26 13V24M31 13V24M36 13V24M41 13V24" stroke="#b88b64"/><path d="M30 2V18" stroke="#43674f" stroke-width="2"/><rect x="25" y="6" width="10" height="7" rx="2" fill="#43674f"/>`,switch:`<path d="M2 22H16M41 22H56M16 22L40 6" stroke="#5a795e" stroke-width="3"/><circle cx="16" cy="22" r="3" fill="#365747"/><circle cx="41" cy="22" r="3" fill="#365747"/>`,meter:`<rect x="17" y="1" width="25" height="27" rx="5" fill="#edba68"/><rect x="21" y="5" width="17" height="7" rx="2" fill="#cee0ae"/><circle cx="30" cy="19" r="5" fill="#43674f"/>`,junction:`<path d="M1 15H56M29 2V28" stroke="#5a795e" stroke-width="2"/><circle cx="29" cy="15" r="5" fill="#3b7451"/>`};
+  const items=[['battery','סוללה 1.5 V',{voltage:1.5}],['battery','סוללה 9 V',{voltage:9}],['resistor','נגד 5 Ω',{resistance:5}],['resistor','נגד 10 Ω',{resistance:10}],['resistor','נגד 15 Ω',{resistance:15}],['switch','מפסק',{}],['meter','רב־מודד',{}],['junction','צומת חיבור',{}],['wire','חוט',{}],['lamp','נורת ביקורת',{}],['rheostat','ראוסטט · שלושה הדקים',{}]];
+  palette.innerHTML=items.map(([type,label],i)=>`<button class="palette-item${type==='rheostat'?' wide':''}" data-add="${i}" title="הוספת ${label}"><svg viewBox="0 0 58 30" aria-hidden="true">${icon[type]}</svg><span>${label}</span></button>`).join('');
+  palette.addEventListener('click',e=>{const t=e.target.closest('[data-add]');if(t){const [type,,extra]=items[Number(t.dataset.add)];addComponent(type,extra);}});
+  function renderColors(){$('wire-colors').innerHTML=COLORS.map((color,i)=>`<button class="color-button${wireColor===color?' active':''}" data-color="${color}" style="background:${color}" aria-label="חוט ${['נחושת','שחור','כחול','ירוק'][i]}" title="חוט ${['נחושת','שחור','כחול','ירוק'][i]}"></button>`).join('');}
+  $('wire-colors').addEventListener('click',e=>{const t=e.target.closest('[data-color]');if(t){wireColor=t.dataset.color;renderColors();}});
+  inspector.addEventListener('click',e=>{
+    const el=e.target.closest('[data-action]');if(!el||!selected)return;const action=el.dataset.action,c=selected.kind==='component'?component(selected.id):null;
+    if(action==='rotate'&&c)change(()=>c.rotation=(c.rotation+90)%360);
+    if(action==='toggle'&&c)change(()=>c.closed=!c.closed);
+    if(action==='fuse'&&c){
+      /* Disconnect blown inputs before replacement; an unsafe loop otherwise retrips. */
+      change(()=>{const blown=['I','mI'].filter(p=>!c.fuses[p]);state.wires=state.wires.filter(w=>!((w.a.id===c.id&&blown.includes(w.a.port))||(w.b.id===c.id&&blown.includes(w.b.port))));c.fuses={I:true,mI:true};});note('הנתיכים חודשו והחוטים משקעי הנתיכים השרופים נותקו.');
+    }
+    if(action==='straighten'&&selected.kind==='wire')change(()=>wire(selected.id).points=[]);
+  });
+  inspector.addEventListener('change',e=>{
+    const p=e.target.dataset.prop;if(!p||p==='position'||!selected)return;
+    const c=selected.kind==='component'?component(selected.id):null;
+    if(p==='wireColor'){change(()=>wire(selected.id).color=e.target.value);return;}
+    const value=Number(e.target.value);
+    if(!Number.isFinite(value)){renderInspector();return;}
+    if(p==='resistance'&&c.type==='rheostat'&&(value<1||value>2000)){note('בחרו התנגדות בין 1 ל־2000 אוהם.');renderInspector();return;}
+    change(()=>c[p]=value);
+  });
+  let rangeEdit=false;
+  inspector.addEventListener('input',e=>{
+    if(e.target.dataset.prop!=='position'||!selected)return;const c=component(selected.id);
+    if(!rangeEdit){remember();rangeEdit=true;}
+    c.position=Number(e.target.value)/100;recompute();renderStage();renderStatus();
+    $('slider-percent').textContent=Math.round(c.position*100)+'%';$('raw-value').textContent=fmt(c.resistance*c.position)+' Ω';$('rwb-value').textContent=fmt(c.resistance*(1-c.position))+' Ω';persist();
+  });
+  inspector.addEventListener('change',e=>{if(e.target.dataset.prop==='position'){rangeEdit=false;renderInspector();}});
+  board.addEventListener('pointerdown',e=>{
+    if(e.button!==0&&e.button!==1)return;const p=boardPoint(e);pointer=p;
+    const rangeEl=e.target.closest('[data-meter-range]');if(rangeEl){selected={kind:'component',id:rangeEl.dataset.meterRange};pending=null;$('overlay-layer').innerHTML='';renderInspector();renderStatus();return;}
+    board.focus({preventScroll:true});
+    if(spaceDown||e.button===1){drag={kind:'pan',start:p,view:{...view},client:{x:e.clientX,y:e.clientY}};board.setPointerCapture(e.pointerId);e.preventDefault();return;}
+    const portEl=e.target.closest('[data-port]');if(portEl){
+      e.preventDefault();const c=component(portEl.dataset.id);
+      if(c.type==='junction'&&!pending){
+        selected={kind:'component',id:c.id};drag={kind:'component',id:c.id,start:p,x:c.x,y:c.y,started:false,clickPort:{id:c.id,port:'J'},snap:null};
+        board.setPointerCapture(e.pointerId);render();return;
+      }
+      connectPort(portEl.dataset.id,portEl.dataset.port);return;
+    }
+    const modeEl=e.target.closest('[data-mode]');if(modeEl){e.preventDefault();selected={kind:'component',id:modeEl.dataset.id};setMode(component(modeEl.dataset.id),modeEl.dataset.mode);render();return;}
+    const switchEl=e.target.closest('[data-switch]');if(switchEl){e.preventDefault();selected={kind:'component',id:switchEl.dataset.switch};change(()=>{const c=component(switchEl.dataset.switch);c.closed=!c.closed;});return;}
+    const handle=e.target.closest('[data-wire-point]');
+    if(handle){drag={kind:'point',id:handle.dataset.id,index:Number(handle.dataset.wirePoint),started:false};board.setPointerCapture(e.pointerId);e.preventDefault();return;}
+    const compEl=e.target.closest('[data-component]');
+    if(compEl){const c=component(compEl.dataset.component);selected={kind:'component',id:c.id};
+      const slider=e.target.closest('[data-slider]');drag=slider?{kind:'slider',id:c.id,start:p,started:false}:{kind:'component',id:c.id,start:p,x:c.x,y:c.y,started:false};
+      if(slider){remember();drag.started=true;updateSlider(c,p);recompute();}
+      board.setPointerCapture(e.pointerId);render();e.preventDefault();return;
+    }
+    const wireEl=e.target.closest('[data-wire]');if(wireEl){
+      selected={kind:'wire',id:wireEl.dataset.wire};
+      const w=wire(wireEl.dataset.wire);
+      if(pending)connectAtWire(w,p);else {
+        const ends=[w.a,w.b].map(e=>component(e.id));
+        if(ends.every(c=>c.type==='junction'&&(result.external.get(c.id+':J')||0)===1)){
+          drag={kind:'wire',start:p,ends:ends.map(c=>({id:c.id,x:c.x,y:c.y})),started:false};board.setPointerCapture(e.pointerId);e.preventDefault();
+        }render();
+      }return;
+    }
+    if(pending){extendToEmpty(p);return;}
+    pending=null;selected=null;render();
+  });
+  function updateSlider(c,p){c.position=Math.round(Math.min(1,Math.max(0,(localPoint(c,p).x-36)/188))*100)/100;}
+  board.addEventListener('pointermove',e=>{
+    const p=boardPoint(e);pointer=p;
+    if(!drag){if(pending)renderStage();return;}
+    if(drag.kind==='pan'){const rect=board.getBoundingClientRect();view.x=drag.view.x-(e.clientX-drag.client.x)*drag.view.w/rect.width;view.y=drag.view.y-(e.clientY-drag.client.y)*drag.view.h/rect.height;renderStage();return;}
+    if(!drag.started&&drag.start&&Math.hypot(p.x-drag.start.x,p.y-drag.start.y)<3)return;
+    if(!drag.started){remember();drag.started=true;}
+    if(drag.kind==='component'){
+      const c=component(drag.id),[w,h]=SIZE[c.type],joint=c.type==='junction';
+      c.x=Math.round(Math.max(joint?-14:18,Math.min(joint?1186:1182-w,drag.x+p.x-drag.start.x)));
+      c.y=Math.round(Math.max(joint?-14:25,Math.min(joint?716:705-h,drag.y+p.y-drag.start.y)));
+      if(joint){drag.snap=nearbyPort(transformPoint(c,{x:14,y:14}),c.id);if(drag.snap){const q=endpoint(drag.snap);c.x=q.x-14;c.y=q.y-14;}}
+    }
+    if(drag.kind==='slider'){updateSlider(component(drag.id),p);recompute();renderInspector();renderStatus();}
+    if(drag.kind==='point'){wire(drag.id).points[drag.index]={x:Math.round(p.x),y:Math.round(p.y)};}
+    if(drag.kind==='wire')for(const end of drag.ends){const c=component(end.id);c.x=Math.round(end.x+p.x-drag.start.x);c.y=Math.round(end.y+p.y-drag.start.y);}
+    renderStage();e.preventDefault();
+  });
+  const endDrag=(cancel=false)=>{
+    const ended=drag;drag=null;
+    if(ended?.started){if(!cancel&&ended.snap)mergeJoint(ended.id,ended.snap);recompute();persist();render();}
+    else if(!cancel&&ended?.clickPort)connectPort(ended.clickPort.id,ended.clickPort.port);
+  };
+  board.addEventListener('pointerup',()=>endDrag());board.addEventListener('pointercancel',()=>endDrag(true));
+  board.addEventListener('dblclick',e=>{
+    const el=e.target.closest('[data-wire]');if(!el)return;
+    const p=boardPoint(e),w=wire(el.dataset.wire);connectAtWire(w,p);
+  });
+  board.addEventListener('keydown',e=>{
+    if(e.target.closest('[data-meter-range]'))return;
+    const el=e.target.closest('[data-port]'),sw=e.target.closest('[data-switch]'),mode=e.target.closest('[data-mode]');
+    if(e.key!=='Enter'&&e.key!==' ')return;
+    if(el){e.preventDefault();e.stopPropagation();connectPort(el.dataset.id,el.dataset.port);}
+    else if(sw){e.preventDefault();e.stopPropagation();change(()=>{const c=component(sw.dataset.switch);c.closed=!c.closed;});}
+    else if(mode){e.preventDefault();e.stopPropagation();setMode(component(mode.dataset.id),mode.dataset.mode);}
+  });
+  board.addEventListener('change',e=>{
+    const id=e.target.dataset.meterRange;if(!id)return;const c=component(id),value=Number(e.target.value);
+    if(c?.type!=='meter'||!(c.mode==='V'?V_RANGES:I_RANGES).includes(value))return;
+    selected={kind:'component',id};change(()=>c.range=value);
+  });
+  $('undo').addEventListener('click',undo);$('redo').addEventListener('click',redo);
+  $('show-values').addEventListener('change',e=>change(()=>state.showValues=e.target.checked));
+  $('examples').addEventListener('change',e=>{change(()=>{state=example(e.target.value);pending=null;});view={x:0,y:0,w:1200,h:730};renderStage();if(e.target.value==='divider')note('שלושת ההדקים מחוברים. הנגד הנוסף זמין לבדיקת השפעת עומס.');});
+  function zoom(factor){const w=Math.max(400,Math.min(2600,view.w*factor)),h=w*730/1200;view={x:view.x+(view.w-w)/2,y:view.y+(view.h-h)/2,w,h};renderStage();}
+  $('zoom-in').addEventListener('click',()=>zoom(.8));$('zoom-out').addEventListener('click',()=>zoom(1.25));
+  $('zoom-fit').addEventListener('click',()=>{
+    if(!state.components.length){view={x:0,y:0,w:1200,h:730};renderStage();return;}
+    const points=state.components.flatMap(c=>{const[w,h]=SIZE[c.type];return[{x:-20,y:-20},{x:w+20,y:-20},{x:w+20,y:h+30},{x:-20,y:h+30}].map(p=>transformPoint(c,p));}).concat(state.wires.flatMap(w=>w.points||[]));
+    const x=Math.min(...points.map(p=>p.x))-30,y=Math.min(...points.map(p=>p.y))-30,maxX=Math.max(...points.map(p=>p.x))+30,maxY=Math.max(...points.map(p=>p.y))+30,w=Math.max(maxX-x,(maxY-y)*1200/730,500),h=w*730/1200;view={x:x-(w-(maxX-x))/2,y:y-(h-(maxY-y))/2,w,h};renderStage();
+  });
+  board.addEventListener('wheel',e=>{if(e.ctrlKey||e.metaKey){e.preventDefault();zoom(e.deltaY>0?1.1:.9);}},{passive:false});
+  document.addEventListener('keydown',e=>{
+    if(['INPUT','SELECT','TEXTAREA'].includes(e.target.tagName)||$('help-dialog').open)return;
+    if(e.key==='Escape'){pending=null;render();}
+    if(e.key==='Delete'||e.key==='Del'){if(selected){e.preventDefault();removeSelected();}}
+    if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='z'){e.preventDefault();e.shiftKey?redo():undo();}
+    if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='y'){e.preventDefault();redo();}
+    if(e.key.toLowerCase()==='r'&&selected?.kind==='component'){const c=component(selected.id);change(()=>c.rotation=(c.rotation+90)%360);}
+    if(e.key===' '){spaceDown=true;e.preventDefault();}
+  });
+  document.addEventListener('keyup',e=>{if(e.key===' ')spaceDown=false;});window.addEventListener('blur',()=>{spaceDown=false;endDrag(true);});
+  function download(content,name,mime){const a=document.createElement('a'),u=URL.createObjectURL(new Blob([content],{type:mime}));a.href=u;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000);}
+  $('save-circuit').addEventListener('click',()=>download(JSON.stringify(state,null,2),'circuit.json','application/json'));
+  $('load-circuit').addEventListener('click',()=>$('file-input').click());
+  function validateState(input){
+    if(!input||input.version!==1||!Array.isArray(input.components)||!Array.isArray(input.wires)||input.components.length>MAX_PARTS+MAX_JOINTS||input.wires.length>MAX_WIRES)throw new Error('invalid');
+    if(input.components.filter(c=>c?.type==='junction').length>MAX_JOINTS||input.components.filter(c=>c?.type!=='junction').length>MAX_PARTS)throw new Error('invalid');
+    const seen=new Set(),c=[];
+    for(const v of input.components){
+      if(!Object.hasOwn(SIZE,v.type)||typeof v.id!=='string'||!/^c\d+$/.test(v.id)||seen.has(v.id))throw new Error('invalid');seen.add(v.id);
+      if(![v.x,v.y,v.rotation].every(Number.isFinite))throw new Error('invalid');
+      const n={id:v.id,type:v.type,x:Math.max(-1000,Math.min(3000,v.x)),y:Math.max(-1000,Math.min(3000,v.y)),rotation:[0,90,180,270].includes(v.rotation)?v.rotation:0};
+      if(v.type==='battery'){
+        if(![1.5,9].includes(v.voltage))throw new Error('invalid');
+        const r=v.internalResistance===undefined?randomBatteryResistance():v.internalResistance;
+        if(!Number.isFinite(r)||r<BATTERY_R_MIN||r>BATTERY_R_MAX)throw new Error('invalid');
+        Object.assign(n,{voltage:v.voltage,internalResistance:r});
+      }
+      if(v.type==='resistor'){if(![5,10,15].includes(v.resistance))throw new Error('invalid');n.resistance=v.resistance;}
+      if(v.type==='rheostat'){if(!Number.isFinite(v.resistance)||v.resistance<1||v.resistance>2000||!Number.isFinite(v.position)||v.position<0||v.position>1)throw new Error('invalid');n.resistance=v.resistance;n.position=v.position;}
+      if(v.type==='switch')n.closed=!!v.closed;
+      if(v.type==='meter'){if(!['V','I'].includes(v.mode)||!(v.mode==='V'?V_RANGES:I_RANGES).includes(v.range))throw new Error('invalid');Object.assign(n,{mode:v.mode,range:v.range,fuses:{I:v.fuses?.I!==false,mI:v.fuses?.mI!==false}});}
+      if(v.type==='lamp'){if(!Number.isFinite(v.resistance)||v.resistance<1||v.resistance>2000||![1.5,9].includes(v.ratedVoltage))throw new Error('invalid');Object.assign(n,{resistance:v.resistance,ratedVoltage:v.ratedVoltage});}
+      c.push(n);nextId=Math.max(nextId,Number(v.id.slice(1))+1);
+    }
+    const wires=[];
+    for(const w of input.wires){
+      if(typeof w.id!=='string'||!/^w\d+$/.test(w.id)||seen.has(w.id))throw new Error('invalid');seen.add(w.id);
+      for(const e of[w.a,w.b]){const co=c.find(v=>v.id===e?.id);if(!co||!CircuitEngine.portNames(co).includes(e.port))throw new Error('invalid');}
+      const points=w.points||[];if(!Array.isArray(points)||points.length>100||points.some(p=>!Number.isFinite(p.x)||!Number.isFinite(p.y)||Math.abs(p.x)>5000||Math.abs(p.y)>5000))throw new Error('invalid');
+      wires.push({id:w.id,a:{id:w.a.id,port:w.a.port},b:{id:w.b.id,port:w.b.port},points:points.map(p=>({x:p.x,y:p.y})),color:COLORS.includes(w.color)?w.color:COLORS[0]});nextId=Math.max(nextId,Number(w.id.slice(1))+1);
+    }
+    return normalizeWireVertices({version:1,components:c,wires,showValues:!!input.showValues});
+  }
+  $('file-input').addEventListener('change',async e=>{const file=e.target.files[0];if(!file)return;try{if(file.size>1000000)throw new Error('size');const loaded=validateState(JSON.parse(await file.text()));change(()=>{state=loaded;selected=null;pending=null;});$('zoom-fit').click();note('המעגל נטען.');}catch{note('הקובץ אינו מעגל תקין של היישומון.');}e.target.value='';});
+  /* App shells start blank on first use and restore the last circuit from this
+     browser on later visits. Downloads include the app and its examples. */
+  const htmlTemplate=document.documentElement.cloneNode(true);
+  htmlTemplate.querySelectorAll('#initial-circuit').forEach(el=>el.remove());
+  const originalHTML='<!doctype html>\n'+htmlTemplate.outerHTML;
+  $('download-html').addEventListener('click',()=>{
+    download(originalHTML,'rheostat-circuit-lab.html','text/html;charset=utf-8');note('הקובץ העצמאי כולל את היישומון ואת המעגלים לדוגמה. פתחו אותו בדפדפן ללא אינטרנט.');
+  });
+  $('help-button').addEventListener('click',()=>$('help-dialog').showModal());
+  $('close-help').addEventListener('click',()=>$('help-dialog').close());$('start-working').addEventListener('click',()=>$('help-dialog').close());
+  $('help-dialog').addEventListener('click',e=>{if(e.target===$('help-dialog')){const r=e.target.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)e.target.close();}});
+  state=example('blank');
+  try{const saved=localStorage.getItem('rheostat-lab-v1');if(saved)state=validateState(JSON.parse(saved));}catch{}
+  $('examples').value=state.components.length?'':'blank';
+  recompute();persist();renderColors();render();
+  /* Read-only hooks for numerical and DOM smoke verification. */
+  window.CircuitLab={getState:()=>JSON.parse(snapshot()),getResult:()=>result,validateState,example,localPort,transformPoint,pathFromPoints};
+})();
+</script>
+<input type='hidden' name='ntsp_block_page' value='https://m.safepage.neto.net.il/?a=block/block1&level=-15&url=http%3A%2F%2Fchatgpt.com%2Fbackend-api%2Festuary%2Fcontent%3Fid%3Dfile_000000006b9881f4adbffd9488f7fe95%26fn%3Drheostat-circuit-lab.html%26cd%3Dattachment%26ts%3D497611%26p%3Dfs%26cid%3D1%26sig%3Dc7871468b538e90c4a87f9fe1dc438846f1ccd8042dc45ad4bfe6698ba6980b6%26v%3D0&user_id=1305193&sigid=e51c156361a395a4d51ce8516c2462e9e73cd3564edcacddb8a610e4702916da&startm=0&keyword=&referer=https%3A%2F%2Fchatgpt.com%2F&category=24&cause=Quiltingjs'/><input type='hidden' name='ntsp_is_etrog' value='0'/><input type='hidden' name='ntsp_url_category' value='24'/><input type='hidden' name='ntsp_quilting' value='3'/><input type='hidden' name='ntsp_media_level' value='-15'/><input type='hidden' name='ntsp_user_level' value='-15'/><input type='hidden' name='ntsp_url_level' value='20'/><input type='hidden' name='ntsp_block_wa_status' value='0'/><script src='/jsQuilting/server/jsDict_utf8.js?v=1&k=23898278c1850f536d688db3614128a0' type='text/javascript' defer></script></body></html>
