@@ -255,6 +255,8 @@
   .card:nth-child(10){animation-delay:.49s}
   .card:nth-child(11){animation-delay:.54s}
   .card:nth-child(12){animation-delay:.59s}
+  .card:nth-child(13){animation-delay:.64s}
+  .card:nth-child(14){animation-delay:.69s}
 
   @media (prefers-reduced-motion:reduce){
     .card{animation:none;opacity:1;transform:none;transition:border-color .2s ease}
@@ -275,7 +277,7 @@
       </svg>
     </h1>
     <p class="sub">ריכוז של כל הסימולציות והיישומים האינטראקטיביים שבניתי — במקום אחד, נגישים בלחיצה.</p>
-    <p class="count"><b>12</b> יישומונים&nbsp;&nbsp;·&nbsp;&nbsp;מכניקה · חשמל · קינמטיקה · מעבדה · גלים</p>
+    <p class="count"><b>14</b> יישומונים&nbsp;&nbsp;·&nbsp;&nbsp;מכניקה · חשמל · קינמטיקה · מעבדה · גלים · חדו"א</p>
 
     <div class="toolbar">
       <button id="foldersBtn" class="btn-folders" type="button" aria-expanded="false" aria-controls="folders">
@@ -516,6 +518,44 @@
       <h2 class="card__title">רץ על גל עמודים</h2>
     </a>
 
+    <!-- 13 פונקציה ונגזרת -->
+    <a href="./Derivative%20function%20relationship/" class="card">
+      <span class="card__num">13</span>
+      <div class="card__icon">
+        <svg class="ico" viewBox="0 0 64 64" aria-hidden="true">
+          <line x1="10" y1="54" x2="10" y2="8"/>
+          <line x1="10" y1="54" x2="56" y2="54"/>
+          <path d="M12 48 C 24 14, 40 14, 52 48"/>
+          <g class="hl">
+            <path d="M12 42 Q 32 30, 52 42"/>
+          </g>
+        </svg>
+      </div>
+      <span class="card__cat">חדו"א</span>
+      <h2 class="card__title">פונקציה ונגזרת</h2>
+    </a>
+
+    <!-- 14 מעבדת מעגלים: ראוסטט ורב-מודד -->
+    <a href="./rheostat-circuit-lab/" class="card">
+      <span class="card__num">14</span>
+      <div class="card__icon">
+        <svg class="ico" viewBox="0 0 64 64" aria-hidden="true">
+          <rect x="8" y="27" width="20" height="10" rx="2"/>
+          <line x1="2" y1="32" x2="8" y2="32"/>
+          <line x1="28" y1="32" x2="36" y2="32"/>
+          <g class="hl">
+            <line x1="14" y1="27" x2="22" y2="18"/>
+            <polyline points="18,18 22,18 22,22"/>
+          </g>
+          <circle cx="48" cy="32" r="10"/>
+          <line x1="42" y1="27" x2="54" y2="37"/>
+          <line x1="54" y1="27" x2="42" y2="37"/>
+        </svg>
+      </div>
+      <span class="card__cat">חשמל</span>
+      <h2 class="card__title">מעבדת מעגלים: ראוסטט ורב-מודד</h2>
+    </a>
+
   </main>
 </div>
 
@@ -540,7 +580,7 @@
   /* מיפוי slug של תיקייה -> כותרת עברית מתוך הכרטיסים שבדף */
   var titleBySlug = {};
   cards.forEach(function(a){
-    var slug = a.getAttribute('href').replace(/^\.?\//,'').replace(/\/+$/,'').toLowerCase();
+    var slug = decodeURIComponent(a.getAttribute('href')).replace(/^\.?\//,'').replace(/\/+$/,'').toLowerCase();
     titleBySlug[slug] = a.querySelector('.card__title').textContent.trim();
   });
 
