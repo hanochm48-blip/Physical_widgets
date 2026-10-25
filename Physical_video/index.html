@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#101d36">
+<meta name="description" content="מאגר סרטוני הדגמה קצרים למכניקה תיכונית: חוקי ניוטון, תנע, אנרגיה, תנועה מעגלית וחיכוך.">
+<title>פיזיקה שרואים | מאגר סרטוני מכניקה</title>
+<style>
+:root{color-scheme:light;--navy:#10213a;--ink:#192a43;--sub:#68788c;--line:#e5ebf2;--bg:#f4f7fa;--blue:#4565e8;--soft:#eef2ff;--white:#fff;--shadow:0 10px 32px rgba(21,43,72,.065)}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;font-family:Arial,"Noto Sans Hebrew","Segoe UI",sans-serif;color:var(--ink);background:var(--bg);line-height:1.55}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
+a{color:inherit;text-decoration:none}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid #8da5fa;outline-offset:3px}
+.wrap{max-width:1260px;margin:auto;padding-inline:34px}
+.topbar{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:20}
+.topbar-inner{display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:70px}
+.brand{display:flex;align-items:center;gap:11px;font-weight:800;letter-spacing:-.5px;font-size:21px}
+.brand-mark{display:grid;place-items:center;width:38px;height:38px;background:var(--navy);color:#fff;border-radius:12px}
+.brand-small{font-size:12px;color:#79889b;font-weight:500;margin-top:-5px;letter-spacing:0}
+.nav-actions{display:flex;gap:9px;align-items:center}
+.btn{border:1px solid var(--line);background:white;color:var(--ink);min-height:42px;border-radius:12px;padding:9px 15px;display:inline-flex;align-items:center;justify-content:center;gap:8px;font-weight:700;transition:transform .15s,background .15s,border-color .15s;white-space:nowrap}
+.btn:hover{transform:translateY(-1px);border-color:#b7c7e9;background:#f7f9ff}
+.btn.primary{background:#4866ea;border-color:#4866ea;color:#fff}
+.btn.primary:hover{background:#3450d5}
+.btn.navy{background:var(--navy);color:white;border-color:var(--navy)}
+.btn.mini{font-size:13px;min-height:37px;padding:7px 11px}
+.btn.ghost{background:transparent}
+.icon{height:19px;width:19px;flex:none;vertical-align:middle}
+.hero{margin-top:28px;background:linear-gradient(112deg,#112541,#142b4c 59%,#1c3b65);border-radius:25px;color:white;position:relative;overflow:hidden;min-height:258px;box-shadow:0 18px 42px rgba(21,43,72,.12)}
+.hero:before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 83% 53%,rgba(90,162,248,.22),transparent 29%),repeating-linear-gradient(90deg,transparent 0,transparent 59px,rgba(255,255,255,.035) 60px),repeating-linear-gradient(0deg,transparent 0,transparent 59px,rgba(255,255,255,.035) 60px);opacity:.95}
+.hero-inner{display:flex;align-items:center;justify-content:space-between;gap:22px;padding:42px 47px;position:relative;z-index:1}
+.eyebrow{display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:700;letter-spacing:.3px;color:#b6d1ff}
+.dot{height:7px;width:7px;border-radius:50%;background:#75e2c6;box-shadow:0 0 0 4px rgba(117,226,198,.14)}
+h1{font-size:clamp(31px,4vw,48px);letter-spacing:-1.5px;line-height:1.18;margin:13px 0 14px;font-weight:850}
+.hero-copy{color:#c2d2e7;font-size:16px;line-height:1.8;max-width:600px;margin:0}
+.hero-meta{display:flex;gap:12px;flex-wrap:wrap;margin-top:24px}
+.hero-meta span{font-size:13px;display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.11);padding:7px 13px;border-radius:99px;color:#e3ecfb}
+.hero-art{flex:0 0 285px;height:215px;position:relative;display:grid;place-items:center;opacity:.96}
+.hero-art svg{width:100%;height:100%;filter:drop-shadow(0 0 24px rgba(91,158,248,.16))}
+.section-heading{display:flex;align-items:end;justify-content:space-between;gap:18px;margin:35px 0 17px}
+.section-heading h2{font-size:23px;line-height:1.4;margin:0;letter-spacing:-.5px}
+.section-heading p{color:var(--sub);font-size:14px;margin:3px 0 0}
+.help-copy{color:var(--sub);font-size:13px}
+.topics{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+.topic{background:white;border:1px solid var(--line);border-radius:16px;text-align:right;padding:16px;min-width:0;transition:.18s;display:flex;flex-direction:column;gap:9px;position:relative;overflow:hidden;box-shadow:0 2px 8px rgba(12,33,62,.025)}
+.topic:before{content:"";position:absolute;top:0;right:0;bottom:0;width:4px;background:var(--c,#6684ce);opacity:.7}
+.topic:hover{border-color:#c4d2e9;transform:translateY(-2px)}
+.topic.active{border-color:#5776ed;box-shadow:0 0 0 2px rgba(69,101,232,.1),var(--shadow)}
+.topic .topic-title{font-size:15px;font-weight:800}
+.topic .topic-sub{color:var(--sub);font-size:12px}
+.topic .count{height:29px;min-width:29px;display:inline-grid;place-items:center;background:#f1f5fa;color:#54667f;border-radius:10px;font-size:13px;font-weight:700;margin-right:auto;padding-inline:7px}
+.topic-top{display:flex;gap:8px;align-items:start;justify-content:space-between}
+.topic-symbol{width:35px;height:35px;display:grid;place-items:center;border-radius:11px;background:color-mix(in srgb,var(--c) 13%,white);color:var(--c);font-size:19px;font-weight:bold}
+.controls{display:flex;gap:11px;align-items:center;flex-wrap:wrap;margin:24px 0 16px}
+.search{display:flex;align-items:center;gap:9px;flex:1 1 330px;border:1px solid #dbe3ef;background:white;border-radius:12px;padding-inline:13px;min-height:46px}
+.search:focus-within{outline:2px solid #bdcafd}
+.search svg{color:#8a99a9}
+.search input{border:none;background:none;outline:0;width:100%;min-width:0;font-size:14px;color:var(--ink)}
+.sort{min-height:46px;border:1px solid #dbe3ef;border-radius:12px;padding:0 12px;background:white;max-width:215px;color:var(--ink)}
+.check-control{display:flex;align-items:center;gap:8px;border:1px solid #dbe3ef;background:white;border-radius:12px;min-height:46px;padding:8px 13px;font-size:14px;font-weight:700;cursor:pointer}
+.check-control:has(input:checked){border-color:#9eaff7;background:#eef2ff}
+.check-control input{accent-color:#4866ea;width:16px;height:16px}
+.results-line{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin:10px 0 16px}
+.results-line h3{font-size:16px;margin:0}
+.results-line .muted{font-size:13px;color:var(--sub)}
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;margin-bottom:35px}
+.video-card{background:white;border:1px solid #e2e9f2;border-radius:19px;overflow:hidden;box-shadow:0 4px 18px rgba(22,43,72,.035);display:flex;flex-direction:column;min-width:0;transition:transform .17s,box-shadow .17s}
+.video-card:hover{transform:translateY(-3px);box-shadow:var(--shadow)}
+.poster{aspect-ratio:16/8.75;background:linear-gradient(135deg,#20375f,#445b80);position:relative;overflow:hidden;display:block;isolation:isolate}
+.poster .poster-fallback{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.28);font-size:80px;font-weight:900;transform:rotate(-10deg)}
+.poster img{width:100%;height:100%;object-fit:cover;display:block;position:absolute;inset:0;z-index:1}
+.poster:after{content:"";position:absolute;inset:36% 0 0;background:linear-gradient(transparent,rgba(12,27,49,.67));z-index:2;pointer-events:none}
+.poster-label{position:absolute;top:13px;right:13px;z-index:3;display:inline-flex;gap:6px;align-items:center;background:rgba(255,255,255,.95);border-radius:8px;padding:6px 10px;font-size:12px;font-weight:700;color:#273c5a}
+.poster-label:before{content:"";width:7px;height:7px;border-radius:50%;background:var(--c,#6684ce)}
+.play-circle{width:54px;height:54px;position:absolute;z-index:3;top:50%;left:50%;transform:translate(-50%,-50%);border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.94);color:#304e96;box-shadow:0 5px 20px rgba(0,0,0,.15)}
+.poster:hover .play-circle{background:white;scale:1.07}
+.poster-caption{position:absolute;bottom:12px;right:15px;left:13px;z-index:3;display:flex;justify-content:space-between;align-items:center;color:#fff;font-size:12px;gap:8px}
+.poster-caption span{background:rgba(10,22,43,.45);padding:3px 7px;border-radius:6px}
+.card-body{padding:18px 19px 16px;display:flex;flex-direction:column;flex:1}
+.concept{font-size:12px;color:#506ad2;font-weight:800;letter-spacing:.1px;min-height:19px}
+.card-head{display:flex;align-items:start;justify-content:space-between;gap:5px}
+.card-title{font-size:18px;font-weight:800;letter-spacing:-.3px;line-height:1.42;margin:5px 0 7px}
+.fav-btn{flex:0 0 37px;height:37px;background:#f6f8fb;border:none;border-radius:11px;display:grid;place-items:center;color:#8999a9}
+.fav-btn:hover,.fav-btn.selected{color:#e49924;background:#fff4d8}
+.card-description{font-size:13px;color:var(--sub);line-height:1.7;margin:0 0 16px;min-height:43px}
+.question{background:#f2f6ff;border-right:3px solid #8ba0f8;border-radius:10px;padding:12px 13px;margin-top:auto}
+.question-top{font-size:11px;font-weight:800;color:#526dd7;margin:0 0 5px;display:flex;gap:6px;align-items:center}
+.question-text{font-size:14px;line-height:1.6;font-weight:700;color:#24395b;margin:0}
+.card-foot{padding-top:14px;display:flex;gap:9px;align-items:center}
+.card-foot .btn{flex:1}
+.card-foot .btn.mini{flex:0 0 auto}
+.empty{grid-column:1/-1;display:grid;justify-items:center;text-align:center;background:white;border:1px dashed #cbd6e7;border-radius:19px;padding:65px 20px}
+.empty strong{font-size:19px}.empty p{font-size:14px;color:var(--sub)}
+.footer{display:flex;justify-content:space-between;gap:20px;border-top:1px solid #e2eaf3;margin-top:16px;padding-block:22px 32px;color:#6e8197;font-size:12px;flex-wrap:wrap}
+.footer strong{color:#40516d}
+dialog{border:0;background:white;color:var(--ink);border-radius:22px;padding:0;max-width:min(92vw,850px);width:100%;max-height:90vh;overflow:auto;box-shadow:0 28px 80px rgba(6,20,42,.29)}
+dialog::backdrop{background:rgba(8,24,49,.69);backdrop-filter:blur(4px)}
+.dialog-header{display:flex;justify-content:space-between;gap:16px;align-items:start;padding:21px 26px;border-bottom:1px solid var(--line)}
+.dialog-header h2{margin:2px 0 0;font-size:24px;letter-spacing:-.5px}
+.dialog-eyebrow{font-weight:800;font-size:12px;color:#4c6ad9}
+.x-btn{height:38px;width:38px;display:grid;place-items:center;border:1px solid var(--line);background:#f8faff;border-radius:10px;color:#405473}
+.dialog-main{padding:24px 26px 27px}
+.dialog-summary{margin:0 0 15px;color:var(--sub);font-size:14px}
+.dialog-video{aspect-ratio:16/9;background:linear-gradient(130deg,#162b49,#304e82);border-radius:15px;overflow:hidden;position:relative;display:grid;place-items:center;color:#fff}
+.dialog-video .dialog-cover{display:flex;align-items:center;flex-direction:column;gap:14px;text-align:center;padding:20px;position:relative;z-index:1}
+.dialog-video iframe{width:100%;height:100%;border:0;position:absolute;inset:0;z-index:2}
+.dialog-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:15px 0 17px}
+.instruction-panel{border-radius:14px;padding:16px;background:#eff4ff;margin:17px 0}
+.instruction-panel .small-heading{font-size:12px;font-weight:800;color:#5069d0;margin:0 0 7px}
+.instruction-panel .big-question{font-size:20px;font-weight:800;line-height:1.6;margin:0}
+.detail-row{display:grid;grid-template-columns:130px 1fr;gap:10px;font-size:14px;padding:10px 0;border-bottom:1px solid #ecf0f5}
+.detail-row>div:first-child{color:#6c7e95;font-weight:700}
+.teacher-box{background:#f7faf7;border:1px solid #dcebdc;border-radius:12px;margin-top:14px;padding:15px}
+.teacher-box h3{margin:0 0 6px;font-size:15px}
+.teacher-box p{margin:0;font-size:14px;line-height:1.75}
+[hidden]{display:none!important}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:15px}
+.field{display:flex;flex-direction:column;gap:6px;min-width:0}
+.field.full{grid-column:1/-1}
+.field label{font-size:13px;font-weight:800;color:#344a68}
+.field input,.field textarea,.field select{width:100%;border:1px solid #d6e0ec;border-radius:10px;padding:11px 12px;color:var(--ink);background:#fff;min-width:0}
+.field textarea{min-height:74px;resize:vertical}
+.dialog-footer{display:flex;gap:12px;justify-content:flex-start;flex-wrap:wrap;margin-top:22px}
+.note{font-size:12px;color:var(--sub)}
+.backup-menu{position:relative}
+.backup-panel{position:absolute;top:calc(100% + 8px);left:0;min-width:210px;background:white;border:1px solid var(--line);padding:7px;z-index:30;box-shadow:var(--shadow);border-radius:12px}
+.backup-panel button{display:block;width:100%;border:none;text-align:right;padding:10px 13px;background:transparent;border-radius:8px;color:var(--ink);font-size:13px}
+.backup-panel button:hover{background:#eef3fb}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(15px);background:#112541;color:white;padding:11px 20px;border-radius:12px;box-shadow:0 10px 30px #10213a55;font-size:14px;z-index:100;opacity:0;pointer-events:none;transition:.25s;max-width:90vw;text-align:center}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+@media(max-width:1100px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.hero-art{flex-basis:210px}.topics{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:680px){.wrap{padding-inline:16px}.topbar-inner{min-height:62px}.brand{font-size:17px}.brand-mark{height:34px;width:34px}.brand-small{display:none}.brand{font-size:15px}.nav-actions{gap:4px}.nav-actions .btn{padding:7px 8px;min-height:37px;font-size:11px}.hero{margin-top:15px;border-radius:18px}.hero-inner{padding:29px 22px}.hero-art{display:none}.hero-copy{font-size:14px}.hero-meta{margin-top:18px}.hero-meta span{font-size:11px}.section-heading{margin-top:27px}.topics{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:7px;margin-inline:-2px}.topic{flex:0 0 148px;scroll-snap-align:start;padding:12px}.topic .topic-sub{font-size:11px}.controls{gap:8px;margin:14px 0}.search{flex-basis:100%}.sort{flex:1;max-width:unset}.grid{grid-template-columns:1fr;gap:14px}.card-description{min-height:0}.dialog-header{padding:18px}.dialog-main{padding:17px}.form-grid{grid-template-columns:1fr}.field.full{grid-column:auto}.detail-row{grid-template-columns:1fr;gap:1px}.footer{font-size:11px}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;transition:none!important}}
+@media print{.topbar,.controls,.nav-actions,.card-foot,.fav-btn,.footer{display:none!important}.hero{min-height:auto;box-shadow:none}.hero-art{display:none}.grid{grid-template-columns:repeat(2,1fr)}.video-card{break-inside:avoid}.poster{display:none}.question{background:white;border:1px solid #bbb}.wrap{max-width:none}}
+
+/* Management and notes controls */
+.card-manage{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;padding-top:10px;border-top:1px solid #edf1f6}
+.card-manage button{appearance:none;display:inline-flex;gap:5px;align-items:center;justify-content:center;border:1px solid #e2e9f2;border-radius:9px;background:#fff;color:#526781;font-size:12px;font-weight:700;min-height:33px;padding:5px 9px}
+.card-manage button:hover{background:#eef3ff;border-color:#c1cff3;color:#3052ba}
+.card-manage button.danger:hover,.btn.danger:hover{background:#fff1f1;border-color:#ecc1c1;color:#b93232}
+.note-indicator{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;color:#3e7182;background:#edf9fa;padding:5px 9px;border-radius:8px;margin-top:9px;width:fit-content}
+.personal-note{background:#fffaf1;border:1px solid #f1dfbf;border-radius:12px;padding:14px;margin-top:13px}
+.personal-note h3{font-size:14px;margin:0 0 5px;color:#8d6221}
+.personal-note p{font-size:13px;margin:0;line-height:1.7;white-space:pre-wrap;overflow-wrap:anywhere}
+.personal-note button{margin-top:10px}
+.newton-filters{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-top:15px}
+.newton-filters>span{font-size:13px;font-weight:700;color:#68788c;margin-left:6px}
+.newton-filters button{min-height:34px;padding:5px 12px;border-radius:20px;border:1px solid #dbe3ef;background:white;font-size:12px;font-weight:700;color:#3c5371}
+.newton-filters button.active{color:white;background:#5269d9;border-color:#5269d9}
+.detail-manage{display:flex;flex-wrap:wrap;gap:9px;margin:20px 0 4px}
+textarea.large-notes{min-height:170px;line-height:1.7}
+.form-hint{font-size:12px;color:var(--sub)}
+@media(max-width:680px){.card-manage{gap:6px}.card-manage button{flex:1}.newton-filters>span{flex-basis:100%}}
+@media print{.card-manage,.newton-filters,.detail-manage{display:none!important}}
+</style>
+</head>
+<body>
+<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style="display:none"><symbol id="i-play" viewBox="0 0 24 24"><path d="m8 5 12 7-12 7z" fill="currentColor"/></symbol><symbol id="i-search" viewBox="0 0 24 24"><circle cx="10.8" cy="10.8" r="7" fill="none" stroke="currentColor" stroke-width="2"/><path d="m16 16 5 5" stroke="currentColor" stroke-width="2"/></symbol><symbol id="i-star" viewBox="0 0 24 24"><path d="m12 2 3.15 6.4 7.05 1.03-5.1 4.98 1.2 7.04L12 18.1l-6.3 3.35 1.2-7.04-5.1-4.98 7.05-1.03Z" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linejoin="round"/></symbol><symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14m-6-6 6 6-6 6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></symbol><symbol id="i-close" viewBox="0 0 24 24"><path d="M5 5 19 19M19 5 5 19" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></symbol><symbol id="i-external" viewBox="0 0 24 24"><path d="M14 4h6v6M20 4l-9 9M20 14v6H4V4h6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol><symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 4v16M4 12h16" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round"/></symbol></svg>
+<header class="topbar"><div class="wrap topbar-inner">
+ <div class="brand"><div class="brand-mark" aria-hidden="true">∑</div><div><div>פיזיקה שרואים</div><div class="brand-small">מאגר הדגמות למכניקה בתיכון</div></div></div>
+ <div class="nav-actions"><div class="backup-menu"><button id="backupBtn" class="btn ghost" type="button" aria-expanded="false">גיבוי המאגר ▾</button><div id="backupPanel" class="backup-panel" hidden><button id="exportBtn" type="button">↓ ייצוא המאגר לקובץ</button><button id="importBtn" type="button">↑ ייבוא גיבוי</button><button id="restoreBtn" type="button" hidden>↶ שחזור סרטונים שנמחקו</button></div></div><button class="btn primary" id="addBtn" type="button"><svg class="icon"><use href="#i-plus"/></svg> הוספת סרטון</button></div>
+ </div></header>
+<main class="wrap">
+ <section class="hero" aria-label="פתיחה"><div class="hero-inner"><div><div class="eyebrow"><span class="dot"></span> ללמוד פיזיקה דרך תופעות</div><h1>רואים. מנבאים.<br>מבינים את החוק.</h1><p class="hero-copy">אוסף הדגמות מסקרנות וממוקדות לחוקי המכניקה: קודם שואלים מה יקרה, אחר כך צופים — ורק אז מסבירים.</p><div class="hero-meta"><span><strong id="totalCount">19</strong> סרטונים</span><span>5 נושאי לימוד</span><span>שאלת חיזוי לכל סרטון</span></div></div>
+ <div class="hero-art" aria-hidden="true"><svg viewBox="0 0 300 240" fill="none"><circle cx="142" cy="119" r="95" stroke="#7CADF4" opacity=".3" stroke-width="1.4" stroke-dasharray="4 7"/><circle cx="142" cy="119" r="62" stroke="#A1C6FF" opacity=".48" stroke-width="1.7"/><circle cx="142" cy="119" r="27" stroke="#8DA9DE" opacity=".22" fill="#7DA7EB"/><path d="M142 119 214 58" stroke="#A5CEFF" stroke-width="2" stroke-dasharray="5 5"/><path d="M142 119 233 154" stroke="#75DFC9" stroke-width="2.4"/><path d="M229 147l7 9-12 2" stroke="#75DFC9" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="214" cy="58" r="17" fill="#71DFCB"/><circle cx="214" cy="58" r="8" fill="#D4FFF5"/><circle cx="142" cy="119" r="4" fill="#B8D6FF"/><circle cx="80" cy="149" r="7" fill="#88ABF7"/><path d="m55 59 14 0m-7-7 0 14M246 192h23" stroke="#8AB8FA" stroke-width="2" stroke-linecap="round"/><path d="M49 199h120" stroke="#789EDB" stroke-width="1.2" opacity=".5"/><path d="m49 199 0-111" stroke="#789EDB" stroke-width="1.2" opacity=".5"/><path d="M51 179c22 5 42-27 67-41 23-12 44-6 61-34" stroke="#78DEC9" stroke-width="2" opacity=".8" stroke-dasharray="4 5"/></svg></div></div></section>
+ <section aria-labelledby="topicsHeading"><div class="section-heading"><div><h2 id="topicsHeading">באיזה נושא מלמדים היום?</h2><p>בחרו תחום כדי לראות את ההדגמות המתאימות לשיעור.</p></div><span class="help-copy">כל הסרטונים מרוכזים בקובץ אחד</span></div><div class="topics" id="topicTabs" role="group" aria-label="סינון לפי נושא"></div><div class="newton-filters" id="lawFilters" hidden aria-label="סינון לפי חוקי ניוטון"><span>סינון לפי חוק:</span><button type="button" data-law="הכול" class="active">כל חוקי ניוטון</button><button type="button" data-law="חוק ראשון">החוק הראשון</button><button type="button" data-law="חוק שני">החוק השני</button><button type="button" data-law="חוק שלישי">החוק השלישי</button></div></section>
+ <section aria-labelledby="resultsHeading"><div class="controls"><label class="search"><svg class="icon"><use href="#i-search"/></svg><input id="searchInput" type="search" placeholder="חיפוש סרטון, חוק או תופעה..." aria-label="חיפוש בסרטונים"></label><select id="sortSelect" class="sort" aria-label="מיון סרטונים"><option value="recommended">מיון: מומלצים קודם</option><option value="title">מיון: לפי שם הסרטון</option><option value="category">מיון: לפי נושא</option></select><label class="check-control"><input type="checkbox" id="favoritesOnly"> <svg class="icon" style="color:#dda02d"><use href="#i-star"/></svg> מועדפים בלבד</label><button type="button" class="btn mini" id="resetBtn" hidden>ניקוי סינון</button></div>
+ <div class="results-line"><h3 id="resultsHeading">כל הסרטונים</h3><span class="muted" id="resultCount" aria-live="polite"></span></div><div class="grid" id="videoGrid"></div></section>
+ <footer class="footer"><div><strong>פיזיקה שרואים</strong> · מאגר אישי למורה לפיזיקה · הסרטונים המקוריים כלולים בקובץ; עריכות, מחיקות, הערות ומועדפים נשמרים בדפדפן זה.</div><div>הצפייה בסרטונים דורשת חיבור לאינטרנט. מומלץ לבדוק קישורים מראש ולהקרין רק את קטעי ההדגמה.</div></footer>
+</main>
+<dialog id="videoDialog" aria-labelledby="detailTitle"><div class="dialog-header"><div><div class="dialog-eyebrow" id="detailCategory"></div><h2 id="detailTitle"></h2></div><button class="x-btn" data-close="videoDialog" aria-label="סגירה"><svg class="icon"><use href="#i-close"/></svg></button></div><div class="dialog-main"><p id="detailDescription" class="dialog-summary"></p><div class="dialog-video" id="playerZone"><div class="dialog-cover"><svg width="52" height="52" viewBox="0 0 24 24"><use href="#i-play" fill="white"/></svg><button id="embedBtn" class="btn primary" type="button">הצגת הסרטון כאן</button><span class="note" style="color:#d1deef">הסרטון נטען רק לאחר לחיצה</span></div></div><div class="dialog-actions"><a id="youtubeLink" class="btn navy" href="https://www.youtube.com" target="_blank" rel="noopener noreferrer"><svg class="icon"><use href="#i-external"/></svg> פתיחה ביוטיוב</a><button class="btn" type="button" id="questionOnlyBtn">הצגת השאלה בלבד</button></div><div id="lessonContents"><div class="instruction-panel"><p class="small-heading">לפני הצפייה · שאלת חיזוי לכיתה</p><p class="big-question" id="detailQuestion"></p></div><div class="detail-row"><div>מושג פיזיקלי</div><div id="detailConcept"></div></div><div class="detail-row"><div>מה להקרין</div><div id="detailClip"></div></div><div class="detail-row"><div>מקור הסרטון</div><div id="detailChannel"></div></div><div class="detail-row" id="detailViewNoteRow"><div>הערות לצפייה</div><div id="detailViewNote"></div></div><button type="button" class="btn mini" id="teacherToggle" aria-expanded="false" style="margin-top:15px">הצגת דגש פיזיקלי למורה ↓</button><section class="teacher-box" id="teacherBox" hidden><h3>דגש פיזיקלי למורה</h3><p id="detailTeacher"></p></section><section class="personal-note" id="personalNotePanel" hidden><h3>📝 ההערה האישית שלי</h3><p id="personalNoteText"></p></section><div class="detail-manage"><button type="button" class="btn mini" id="editVideo">✎ עריכת הסרטון</button><button type="button" class="btn mini" id="addNoteVideo">📝 הוספת / עריכת הערה</button><button type="button" class="btn mini danger" id="deleteVideo">מחיקת הסרטון</button></div></div><div id="questionOnly" hidden><div class="instruction-panel"><p class="small-heading">שאלת חיזוי לתלמידים</p><p class="big-question" id="largeQuestion" style="font-size:clamp(23px,3.3vw,35px)"></p></div><p style="font-size:13px;color:var(--sub)">אפשר לפתוח את הסרטון ביוטיוב באמצעות הלחצן למעלה.</p></div></div></dialog>
+<dialog id="addDialog" aria-labelledby="addTitle"><div class="dialog-header"><div><div class="dialog-eyebrow">ניהול המאגר</div><h2 id="addTitle">הוספת סרטון חדש</h2></div><button class="x-btn" data-close="addDialog" aria-label="סגירה"><svg class="icon"><use href="#i-close"/></svg></button></div><form id="addForm" class="dialog-main"><div class="form-grid"><div class="field full"><label for="formTitle">שם הסרטון *</label><input id="formTitle" name="title" placeholder="לדוגמה: כדור על משטח מסתובב" required maxlength="130"></div><div class="field"><label for="formCategory">נושא *</label><select id="formCategory" name="category" required></select></div><div class="field"><label for="formConcept">מושג מרכזי *</label><input id="formConcept" name="concept" placeholder="לדוגמה: החוק השני של ניוטון" required maxlength="130"></div><div class="field full"><label for="formUrl">קישור לסרטון YouTube *</label><input id="formUrl" name="url" type="url" placeholder="https://www.youtube.com/watch?v=..." required></div><div class="field full"><label for="formDescription">מה רואים?</label><textarea name="description" id="formDescription" placeholder="תיאור קצר של ההדגמה"></textarea></div><div class="field full"><label for="formQuestion">שאלת חיזוי *</label><textarea name="question" id="formQuestion" required placeholder="איזו שאלה היית שואל לפני ההקרנה?"></textarea></div><div class="field full"><label for="formTeacher">דגש מדעי למורה</label><textarea name="teacherNote" id="formTeacher" placeholder="ההסבר הפיזיקלי, ומה חשוב לדייק"></textarea></div><div class="field"><label for="formClip">מה להקרין?</label><input name="clip" id="formClip" placeholder="הקטע המרכזי"></div><div class="field"><label for="formChannel">ערוץ / מקור</label><input name="channel" id="formChannel" placeholder="שם הערוץ"></div></div><div class="field full" style="margin-top:16px"><label for="formNotes">הערות אישיות שלי לסרטון</label><textarea name="notes" id="formNotes" maxlength="3000" placeholder="למשל: להקרין מ־0:18, לעצור לפני הנפילה, להכין שאלה על זוג הכוחות..."></textarea><span class="form-hint">הערות אלה מוצגות בכרטיס המורה בלבד ונשמרות בדפדפן.</span></div><div class="dialog-footer"><button type="submit" class="btn primary">שמירה במאגר</button><button type="button" class="btn" data-close="addDialog">ביטול</button></div><p class="note">עריכות, מחיקות, הערות וסרטונים חדשים נשמרים בדפדפן המקומי. לשמירה לטווח ארוך או להעברה למחשב אחר השתמשו בייצוא גיבוי.</p></form></dialog>
+<dialog id="noteDialog" aria-labelledby="noteModalTitle">
+  <div class="dialog-header"><div><div class="dialog-eyebrow">הערות לעצמי</div><h2 id="noteModalTitle">הערה אישית לסרטון</h2></div><button type="button" class="x-btn" data-close="noteDialog" aria-label="סגירה"><svg class="icon"><use href="#i-close"/></svg></button></div>
+  <form id="noteForm" class="dialog-main">
+    <p id="noteVideoTitle" class="dialog-summary"></p>
+    <div class="field"><label for="noteTextarea">הערות לשימוש בשיעור</label><textarea id="noteTextarea" class="large-notes" maxlength="3000" placeholder="תזכורות, שאלות נוספות, דקות צפייה, תובנות לאחר שיעור..."></textarea></div>
+    <div class="dialog-footer"><button type="submit" class="btn primary">שמירת ההערה</button><button type="button" class="btn" data-close="noteDialog">ביטול</button></div>
+    <p class="note">ההערה נשמרת בדפדפן הזה ונכללת בקובץ הגיבוי.</p>
+  </form>
+</dialog>
+<input type="file" id="backupFile" accept="application/json,.json" hidden>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+<script>
+const ORIGINAL_VIDEOS = [{"category":"חוקי ניוטון","concept":"חוק ראשון – התמדה","title":"משיכת מפה מתחת לכלים (BYU)","description":"מושכים מפה במהירות והכלים כמעט נשארים במקומם","clip":"ההדגמה עצמה","question":"למה הכלים אינם נגררים עם המפה?","teacherNote":"ההשפעה תלויה במשך פעולת החיכוך; לא מדובר בהיעדר חיכוך.","priority":"גבוהה","url":"https://www.youtube.com/watch?v=57ez9GpXwK0","channel":"BYU Physics & Astronomy","viewNote":"ניסוי חזותי","id":"v1","featured":true},{"category":"חוקי ניוטון","concept":"חוק שני – תלות במסה","title":"עגלה עם מאוורר ומשקל משתנה","description":"כוח דחף דומה מאיץ עגלה קלה וכבדה באופן שונה","clip":"ההשוואה בין שתי המסות","question":"אם הכוח זהה, מה יקרה לתאוצה כשהמסה תגדל?","teacherNote":"F_net=ma; המסה היא מדד להתמדה.","priority":"גבוהה","url":"https://www.youtube.com/watch?v=JjDJbY7r47A","channel":"Utah State University / Physics Demos","viewNote":"הדגמה","id":"v2","featured":true},{"category":"חוקי ניוטון","concept":"חוק שני – כוח ותאוצה","title":"עגלה: מדידת כוח כנגד תאוצה","description":"הדגמת קשר לינארי בין כוח ותאוצה בעזרת עגלה","clip":"להראות ניסוי וגרף בלבד","question":"איך ייראה גרף הכוח השקול כתלות בתאוצה?","teacherNote":"השיפוע בגרף F(a) הוא המסה.","priority":"בינונית","url":"https://www.youtube.com/watch?v=7qrmTf5ygio","channel":"PhysicsNerd4Life","viewNote":"עדיפות לניסוי על פני הסבר","id":"v3","featured":false},{"category":"חוקי ניוטון","concept":"חוק שלישי – פעולה ותגובה","title":"הדגמת וולטר לוין","description":"הדגמת פעולה ותגובה ושימור תנע","clip":"קטע ההדגמה בלבד","question":"אם הכוחות זהים, מדוע שני הגופים לא נעים אותו דבר?","teacherNote":"זוג הכוחות פועל על גופים שונים.","priority":"גבוהה","url":"https://www.youtube.com/watch?v=ruBfXIVSYZ8","channel":"Walter Lewin (קטע משיעור)","viewNote":"לגזור קטע קצר","id":"v4","featured":true},{"category":"חוקי ניוטון","concept":"חוק שלישי – כוחות הדדיים","title":"שתי עגלות עם מדי כוח","description":"התצוגות של מדי הכוח שוות בגודל והפוכות בכיוון","clip":"כל הסרטון – כעשר שניות, לפי מדריך המקור","question":"האם העגלה שמושכת מפעילה כוח גדול יותר?","teacherNote":"פעולה ותגובה קיימות גם ללא תנועה.","priority":"גבוהה","url":"https://www.youtube.com/watch?v=1-Es7v8J06o","channel":"The Physics Classroom","viewNote":"סרטון קצר מאוד","id":"v5","featured":true},{"category":"חוקי ניוטון","concept":"חוק שלישי – תגובת נגד","title":"מזחלת שמשתחררת מגומייה","description":"מערכת עם כוח פנימי ומזחלת הנרתעת לכיוון ההפוך","clip":"כדקה, לפי מדריך המקור","question":"על מה הגומייה מפעילה כוח?","teacherNote":"יש לצייר כוחות על כל גוף בנפרד.","priority":"בינונית","url":"https://www.youtube.com/watch?v=D4j5bcaV2Ws","channel":"ScienceFix / The Physics Classroom","viewNote":"כדקה","id":"v6","featured":false},{"category":"חוקי ניוטון","concept":"חוק שלישי – פעולה ותגובה בחלל","title":"החוק השלישי בתחנת החלל – YouTube Shorts","description":"המחשה קצרה של תנועת גופים ותגובות הדדיות בסביבה כמעט חסרת משקל.","clip":"סרטון Shorts קצר – להקרין בשלמותו","question":"כששני גופים מפעילים כוחות זה על זה בחלל, מה אפשר להסיק על גודל הכוחות ועל כיווני התנועה?","teacherNote":"כוחות הפעולה והתגובה שווים בגודלם, מנוגדים בכיוונם ופועלים על גופים שונים. שינויי המהירות תלויים גם במסות.","priority":"גבוהה","url":"https://www.youtube.com/shorts/d5EPLXZN2cg","channel":"YouTube Shorts – Newton’s 3rd Law of Motion in space","viewNote":"נוסף לבקשת המורה; מתאים לפתיחת שיעור על חוק שלישי","id":"v19","featured":true},{"category":"תנע והתנגשויות","concept":"שימור תנע – מסות שונות","title":"כדור טניס על כדורסל – וולטר לוין","description":"כדור הטניס מזנק לגובה מפתיע אחרי פגיעה בכדורסל","clip":"רק ההדגמה","question":"מאין מגיעה האנרגיה שמאפשרת לכדור הטניס לעלות גבוה מנקודת שחרורו?","teacherNote":"אין שימור אנרגיה מכנית לכל כדור בנפרד; מנתחים התנגשויות בשלבים.","priority":"גבוהה","url":"https://www.youtube.com/watch?v=4wAoDZyo0Ok","channel":"Walter Lewin / TARS","viewNote":"מפתיע במיוחד","id":"v7","featured":true},{"category":"תנע והתנגשויות","concept":"התנגשות בשתי מסות שונות","title":"כדור טניס וכדורסל בניסוי ביתי","description":"ניסוי חלופי לאותה תופעה","clip":"הנפילה המשותפת והקפיצה","question":"כיצד הגובה משתנה כאשר מחליפים בין סדר הכדורים?","teacherNote":"להבחין בין המערכת של שני הכדורים לבין רצף הפגיעות בקרקע.","priority":"בינונית","url":"https://www.youtube.com/watch?v=sW1BnJmqyL8","channel":"Entdecker-Lab","viewNote":"חלופה לקטע הקודם","id":"v8","featured":false},{"category":"תנע והתנגשויות","concept":"התנגשות פלסטית לחלוטין","title":"שתי עגלות נצמדות בסקוץ'","description":"עגלה פוגעת בשנייה ושתיהן נעות יחד","clip":"התנגשות והתוצאה","question":"אם עגלה אחת במנוחה והמסות שוות, מה תהיה מהירותן המשותפת?","teacherNote":"שימור תנע; האנרגיה הקינטית אינה נשמרת.","priority":"גבוהה","url":"https://www.youtube.com/watch?v=o3zfrfePe14","channel":"Mr. Hennon's Physics","viewNote":"ניסוי פשוט וברור","id":"v9","featured":true},{"category":"תנע והתנגשויות","concept":"מתקף, תנע ושימור אנרגיה","title":"מטוטלת ניוטון בהילוך איטי מאוד","description":"מתקן כדורי התנגשות, עם התנגשות קיצונית ומהירה","clip":"רק חלק ההדגמה; הסרטון המלא ארוך יותר","question":"מדוע בדרך כלל יוצא אותו מספר כדורים בצד האחר?","teacherNote":"הקטע הקיצוני אינו מערכת אלסטית אידאלית; לדון באיבודי אנרגיה.","priority":"בינונית","url":"https://www.youtube.com/watch?v=YcBg6os2dPY","channel":"The Slow Mo Guys","viewNote":"לבחור חלק קצר בלבד","id":"v10","featured":false},{"category":"שימור אנרגיה","concept":"המרת אנרגיית גובה ותנועה","title":"מטוטלת כבדה מול הפנים – Shorts","description":"משחררים כדור כבד מגובה הפנים; הוא שב כמעט לאותו גובה","clip":"הסרטון הקצר כולו","question":"האם הכדור יפגע בפני האדם בחזרה?","teacherNote":"אין דחיפה בהתחלה; עקרונית חיכוך גורם לגובה חזרה נמוך יותר.","priority":"גבוהה","url":"https://www.youtube.com/watch?v=Rh2m8Fm_uM4","channel":"Physics Dynamics","viewNote":"סרטון קצר","id":"v11","featured":true},{"category":"שימור אנרגיה","concept":"שימור אנרגיה מכנית – מטוטלת","title":"הדגמת מטוטלת – וולטר לוין","description":"מטוטלת מתקרבת לפני המדגים וחוזרת לאותו גובה בקירוב","clip":"קטע ההדגמה בלבד","question":"האם ייתכן שהמטוטלת תשוב לגובה גדול יותר ללא כוח חיצוני?","teacherNote":"E_k+E_p קבוע בקירוב; אבידות מקטינות את המשרעת.","priority":"גבוהה","url":"https://www.youtube.com/watch?v=sWxCpAet_JI","channel":"Walter Lewin","viewNote":"לצפות בקטע בלבד","id":"v12","featured":true},{"category":"שימור אנרגיה","concept":"אנרגיה והתנגדות אוויר","title":"סיכון לכאורה עם מטוטלת כדור באולינג","description":"שחרור כדור באולינג סמוך לסנטר והשוואת גובה","clip":"0:07–1:39 – קטע הדגמה מזוהה בתיאור","question":"באילו תנאים בדיוק הכדור לא יפגע בסנטר?","teacherNote":"דיון בגובה החזרה; הדגמה לצפייה בלבד ולא לשחזור.","priority":"בינונית","url":"https://www.youtube.com/watch?v=CGHRWmTEsQc","channel":"Phantastic Physics","viewNote":"הסרטון המלא ארוך","id":"v13","featured":false},{"category":"תנועה מעגלית","concept":"תאוצה רדיאלית – כוח נורמלי","title":"אופנוע על קיר אנכי – Wall of Death","description":"אופנוע מקיף קיר אנכי במהירות גבוהה","clip":"רק מעברי הרכיבה על הקיר","question":"איזה כוח פועל לכיוון מרכז המעגל, ומה מונע נפילה?","teacherNote":"N הוא הכוח הרדיאלי; חיכוך סטטי אנכי מאזן את המשקל.","priority":"גבוהה","url":"https://www.youtube.com/watch?v=bKd_wbWRcmw","channel":"Guy Martin Official","viewNote":"קטע פעלול מתוך סרטון","id":"v14","featured":true},{"category":"תנועה מעגלית","concept":"תנועה מעגלית אנכית","title":"דלי מים שמסתובב בלי לשפוך","description":"דלי מים מבצע לולאה אנכית והמים נשארים בפנים","clip":"ההדגמה בלבד","question":"מהו הכוח השקול על המים כשהדלי נמצא בראש המעגל?","teacherNote":"בראש המעגל הכוח השקול כלפי מטה; לא 'כוח צנטריפטלי' נוסף.","priority":"גבוהה","url":"https://www.youtube.com/watch?v=eNyov0I3gHI","channel":"Integral Physics","viewNote":"קטע מתוך הסבר","id":"v15","featured":true},{"category":"תנועה מעגלית","concept":"תאוצה רדיאלית","title":"משטח מסתובב עם כוסות מים","description":"כוסות מים על לוח הקשור בחבלים בעת סיבוב","clip":"קטע המתקן בפעולה","question":"מה מספק את הכוח המכוון אל מרכז המעגל?","teacherNote":"המתיחות והכוחות הנורמליים קובעים את המסלול.","priority":"בינונית","url":"https://www.youtube.com/watch?v=GNFStPe0BlQ","channel":"Mister C","viewNote":"ייתכן שדורש דילוג על ההסבר","id":"v16","featured":false},{"category":"חיכוך","concept":"חיכוך סטטי וקינטי","title":"עגלה עם מסה תלויה – מעבר מחיכוך סטטי לקינטי","description":"בהגדלת הכוח החיצוני העגלה נשארת במקום עד תחילת ההחלקה","clip":"שני שלבי הניסוי","question":"האם כוח החיכוך הסטטי קבוע תמיד?","teacherNote":"f_s≤μ_s N; אחרי החלקה משתמשים בקירוב f_k=μ_k N.","priority":"גבוהה","url":"https://www.youtube.com/watch?v=jTJteJ94xaM","channel":"Utah State University / Physics Demos","viewNote":"הדגמה ישירה","id":"v17","featured":true},{"category":"חיכוך","concept":"חיכוך סטטי וקינטי – מדידה","title":"גרירת בלוק בעזרת מד כוח","description":"הכוח המופעל גדל עד תחילת החלקה ואז קטן","clip":"להשוות לפני ואחרי תחילת התנועה","question":"מתי נמדד כוח גדול יותר: לפני התנועה או במהלכה?","teacherNote":"חיכוך סטטי מאזֵן את הכוח עד ערך מרבי.","priority":"גבוהה","url":"https://www.youtube.com/watch?v=ktt7BxfB_wY","channel":"UCSB Physics Demos","viewNote":"מדידה ישירה","id":"v18","featured":true}];
+const CATEGORIES = [
+ {name:'חוקי ניוטון',icon:'Σ',color:'#6375e9',subtitle:'כוחות ותאוצה'},
+ {name:'תנע והתנגשויות',icon:'⇄',color:'#138d91',subtitle:'מתקף ושימור תנע'},
+ {name:'שימור אנרגיה',icon:'↗',color:'#b66a25',subtitle:'גובה ומהירות'},
+ {name:'תנועה מעגלית',icon:'⟳',color:'#8b62ba',subtitle:'תאוצה רדיאלית'},
+ {name:'חיכוך',icon:'≋',color:'#d17c70',subtitle:'סטטי וקינטי'}
+];
+const el = id => document.getElementById(id);
+const STORAGE = 'physics_video_library_mechanics_v1'; // Retain storage key to migrate existing local preferences.
+const saved = {added: [],favorites: [],overrides: {},deleted: [],notes: {}};
+try {
+  const previous = JSON.parse(localStorage.getItem(STORAGE) || 'null');
+  if(previous && Array.isArray(previous.added) && Array.isArray(previous.favorites)) {
+    saved.added = previous.added;
+    saved.favorites = previous.favorites;
+    if(previous.overrides && typeof previous.overrides === 'object' && !Array.isArray(previous.overrides)) saved.overrides = previous.overrides;
+    if(Array.isArray(previous.deleted)) saved.deleted = previous.deleted;
+    if(previous.notes && typeof previous.notes === 'object' && !Array.isArray(previous.notes)) saved.notes = previous.notes;
+  }
+} catch(e) { /* browser storage unavailable */ }
+let selectedCategory = 'הכול', selectedLaw = 'הכול', selectedVideo = null, editingId = null, noteEditingId = null, showingQuestionOnly = false;
+const ORIGINAL_BY_ID = new Map(ORIGINAL_VIDEOS.map(v => [v.id,v]));
+function allVideos() {
+  return [
+    ...ORIGINAL_VIDEOS.filter(v=>!saved.deleted.includes(v.id)).map(v=>({...v,...(saved.overrides[v.id]||{}),notes:saved.notes[v.id]||''})),
+    ...saved.added.map(v=>({...v,notes:saved.notes[v.id]||'',custom:true}))
+  ];
+}
+function videoById(id) {return allVideos().find(v=>v.id===id)}
+function store() {try {localStorage.setItem(STORAGE,JSON.stringify(saved))} catch(e) {toast('לא ניתן לשמור בדפדפן. מומלץ לייצא גיבוי.')}}
+function escapeHTML(s) {return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function safeVideoId(url) {
+  try {const u = new URL(url), host=u.hostname.toLowerCase().replace(/^www\./,''),parts=u.pathname.split('/');let id='';
+    if(['youtube.com','m.youtube.com','music.youtube.com'].includes(host)) {
+      if(u.pathname==='/watch')id=u.searchParams.get('v')||'';
+      else if(['shorts','embed','live'].includes(parts[1]))id=parts[2]||'';
+    } else if(host==='youtu.be')id=parts[1]||'';
+    return /^[a-zA-Z0-9_-]{11}$/.test(id)?id:null;
+  } catch(e) {return null}
+}
+function safeYouTubeUrl(v){const id=safeVideoId(v.url);return id?'https://www.youtube.com/watch?v='+id:null}
+function videosToShow() {
+  const query=el('searchInput').value.trim().toLocaleLowerCase('he'),onlyFav=el('favoritesOnly').checked;
+  const values=allVideos().filter(v=>
+    (selectedCategory==='הכול'||v.category===selectedCategory) &&
+    (selectedCategory!=='חוקי ניוטון'||selectedLaw==='הכול'||v.concept.includes(selectedLaw)) &&
+    (!onlyFav||saved.favorites.includes(v.id)) &&
+    (!query||[v.title,v.category,v.concept,v.description,v.question,v.teacherNote,v.channel,v.notes,v.viewNote].join(' ').toLocaleLowerCase('he').includes(query))
+  );
+  const sort=el('sortSelect').value;
+  if(sort==='title')values.sort((a,b)=>a.title.localeCompare(b.title,'he'));
+  else if(sort==='category')values.sort((a,b)=>CATEGORIES.findIndex(c=>c.name===a.category)-CATEGORIES.findIndex(c=>c.name===b.category));
+  else values.sort((a,b)=>Number(b.featured)-Number(a.featured)||a.category.localeCompare(b.category,'he'));
+  return values;
+}
+function renderTopics(){const all=allVideos();el('topicTabs').innerHTML=CATEGORIES.map(c=>{const count=all.filter(v=>v.category===c.name).length;return `<button class="topic ${selectedCategory===c.name?'active':''}" type="button" style="--c:${c.color}" data-topic="${escapeHTML(c.name)}" aria-pressed="${selectedCategory===c.name}"><span class="topic-top"><span class="topic-symbol">${c.icon}</span><span class="count">${count}</span></span><span class="topic-title">${c.name}</span><span class="topic-sub">${c.subtitle}</span></button>`}).join('');
+ el('lawFilters').hidden=selectedCategory!=='חוקי ניוטון';
+ el('lawFilters').querySelectorAll('[data-law]').forEach(b=>{b.classList.toggle('active',b.dataset.law===selectedLaw);b.setAttribute('aria-pressed',String(b.dataset.law===selectedLaw))});
+}
+function topicColor(name){return (CATEGORIES.find(c=>c.name===name)||CATEGORIES[0]).color}
+function card(v){
+ const id=safeVideoId(v.url),fav=saved.favorites.includes(v.id),thumbnail=id?`<img alt="" loading="lazy" src="https://i.ytimg.com/vi/${id}/hqdefault.jpg" onerror="this.remove()">`:'';
+ const priority=v.featured?'מומלץ לפתיחת שיעור':'הדגמה ממוקדת';
+ return `<article class="video-card" style="--c:${topicColor(v.category)}">
+ <button class="poster" type="button" data-open="${escapeHTML(v.id)}" aria-label="פתיחת סרטון: ${escapeHTML(v.title)}"><span class="poster-fallback">F = ma</span>${thumbnail}<span class="poster-label">${escapeHTML(v.category)}</span><span class="play-circle"><svg class="icon" style="height:22px;width:22px"><use href="#i-play"/></svg></span><span class="poster-caption"><span>${priority}</span><span>לכרטיס הוראה ↗</span></span></button>
+ <div class="card-body"><span class="concept">${escapeHTML(v.concept)}</span><div class="card-head"><h3 class="card-title">${escapeHTML(v.title)}</h3><button class="fav-btn ${fav?'selected':''}" type="button" data-fav="${escapeHTML(v.id)}" aria-label="${fav?'הסרה מהמועדפים':'הוספה למועדפים'}" title="${fav?'הסרה מהמועדפים':'הוספה למועדפים'}" aria-pressed="${fav}"><svg class="icon"><use href="#i-star"/></svg></button></div>
+ <p class="card-description">${escapeHTML(v.description)}</p><div class="question"><p class="question-top">? שאלת חיזוי לכיתה</p><p class="question-text">${escapeHTML(v.question)}</p></div>
+ ${v.notes?'<span class="note-indicator">📝 קיימת הערה אישית</span>':''}
+ <div class="card-foot"><button class="btn primary" type="button" data-open="${escapeHTML(v.id)}">פתיחת כרטיס הוראה <svg class="icon" style="height:16px;width:16px"><use href="#i-arrow"/></svg></button><a class="btn mini" href="${escapeHTML(safeYouTubeUrl(v)||'#')}" target="_blank" rel="noopener noreferrer" title="לצפייה ביוטיוב" aria-label="פתיחת הסרטון ביוטיוב"><svg class="icon"><use href="#i-external"/></svg></a></div>
+ <div class="card-manage"><button type="button" data-edit="${escapeHTML(v.id)}">✎ עריכה</button><button type="button" data-note="${escapeHTML(v.id)}">📝 ${v.notes?'עריכת הערה':'הערות'}</button><button type="button" class="danger" data-delete="${escapeHTML(v.id)}">✕ מחיקה</button></div></div></article>`;
+}
+function render(){renderTopics();const data=videosToShow();el('totalCount').textContent=allVideos().length;el('resultCount').textContent=`${data.length} מתוך ${allVideos().length} סרטונים`;el('resultsHeading').textContent=selectedCategory==='הכול'?'כל הסרטונים':selectedCategory==='חוקי ניוטון'&&selectedLaw!=='הכול'?'חוקי ניוטון · '+selectedLaw:selectedCategory;
+ el('resetBtn').hidden=selectedCategory==='הכול'&&!el('searchInput').value&&!el('favoritesOnly').checked;
+ el('videoGrid').innerHTML=data.length?data.map(card).join(''):`<div class="empty"><span style="font-size:40px">⌕</span><strong>לא נמצאו סרטונים</strong><p>אפשר לנסות חיפוש אחר או לנקות את הסינון.</p><button class="btn" type="button" id="emptyReset">הצגת כל הסרטונים</button></div>`;
+ el('restoreBtn').hidden=!saved.deleted.length;
+ el('restoreBtn').textContent=`↶ שחזור סרטונים שנמחקו (${saved.deleted.length})`;
+}
+function resetFilters(){selectedCategory='הכול';selectedLaw='הכול';el('searchInput').value='';el('favoritesOnly').checked=false;render()}
+function toast(t){const node=el('toast');node.textContent=t;node.classList.add('show');clearTimeout(toast._t);toast._t=setTimeout(()=>node.classList.remove('show'),3200)}
+function refreshPersonalNote(v){const text=v?.notes||'';el('personalNotePanel').hidden=!text;el('personalNoteText').textContent=text;}
+function openVideo(id){selectedVideo=videoById(id);if(!selectedVideo)return;const v=selectedVideo;
+ el('detailCategory').textContent=v.category+' · '+v.concept;el('detailTitle').textContent=v.title;el('detailDescription').textContent=v.description||'הדגמה פיזיקלית';el('detailQuestion').textContent=v.question;el('largeQuestion').textContent=v.question;el('detailConcept').textContent=v.concept;el('detailClip').textContent=v.clip||'ההדגמה המרכזית';el('detailChannel').textContent=v.channel||'YouTube';el('detailViewNote').textContent=v.viewNote||'';el('detailViewNoteRow').hidden=!v.viewNote;el('detailTeacher').textContent=v.teacherNote||'לא נוסף עדיין הסבר פיזיקלי.';refreshPersonalNote(v);
+ el('teacherBox').hidden=true;el('teacherToggle').textContent='הצגת דגש פיזיקלי למורה ↓';el('teacherToggle').setAttribute('aria-expanded','false');showingQuestionOnly=false;el('questionOnly').hidden=true;el('lessonContents').hidden=false;el('questionOnlyBtn').textContent='הצגת השאלה בלבד';
+ el('playerZone').innerHTML='<div class="dialog-cover"><svg width="52" height="52" viewBox="0 0 24 24"><use href="#i-play" fill="white"/></svg><button id="embedBtn" class="btn primary" type="button">הצגת הסרטון כאן</button><span class="note" style="color:#d1deef">הסרטון נטען רק לאחר לחיצה</span></div>';
+ el('youtubeLink').href=safeYouTubeUrl(v)||'https://www.youtube.com';el('videoDialog').showModal();
+}
+function embedVideo(){if(!selectedVideo)return;const id=safeVideoId(selectedVideo.url);if(!id){toast('לא ניתן להטמיע את הסרטון. השתמשו בקישור ליוטיוב.');return;}const fr=document.createElement('iframe');fr.title='נגן YouTube: '+selectedVideo.title;fr.allow='accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture; web-share';fr.allowFullscreen=true;fr.referrerPolicy='strict-origin-when-cross-origin';fr.src='https://www.youtube-nocookie.com/embed/'+id+'?rel=0';el('playerZone').replaceChildren(fr)}
+function closeModal(which){const x=el(which);if(x.open)x.close()}
+function openAddForm(video=null){editingId=video?.id||null;el('addTitle').textContent=video?'עריכת סרטון':'הוספת סרטון חדש';el('addForm').reset();if(video)for(const [k,v] of Object.entries(video)){const f=el('addForm').elements.namedItem(k);if(f)f.value=v??'';}if(!video)el('formCategory').value=selectedCategory==='הכול'?CATEGORIES[0].name:selectedCategory;el('addDialog').showModal()}
+function formToVideo(){const d=new FormData(el('addForm')),vals={};for(const [k,v] of d)vals[k]=String(v).trim();if(!safeVideoId(vals.url)){toast('נדרש קישור תקין לסרטון YouTube');el('formUrl').focus();return null;}if(!CATEGORIES.some(c=>c.name===vals.category)){toast('יש לבחור נושא');return null;}return vals;}
+function saveVideo(vals){const note=vals.notes||'';delete vals.notes;
+ if(editingId){const existing=videoById(editingId);if(!existing){toast('הסרטון לא נמצא');return false;}
+   if(ORIGINAL_BY_ID.has(editingId))saved.overrides[editingId]={...vals};
+   else {const i=saved.added.findIndex(v=>v.id===editingId);if(i<0)return false;saved.added[i]={...saved.added[i],...vals}}
+   saved.notes[editingId]=note;
+ }else{const id='u'+Date.now()+'_'+Math.floor(Math.random()*99999);saved.added.unshift({...vals,id,priority:'בינונית',featured:false,custom:true,viewNote:''});saved.notes[id]=note}
+ store();return true;
+}
+function openNoteForm(id){const v=videoById(id);if(!v)return;noteEditingId=id;el('noteVideoTitle').textContent=v.title;el('noteTextarea').value=v.notes||'';el('noteDialog').showModal();el('noteTextarea').focus()}
+function deleteVideoById(id){const v=videoById(id);if(!v)return;const question=`למחוק את הסרטון ”${v.title}” מהמאגר?\n\nאפשר לשחזר סרטונים שהיו חלק מהמאגר המקורי דרך תפריט הגיבוי.`;if(!confirm(question))return;
+ if(ORIGINAL_BY_ID.has(id)){if(!saved.deleted.includes(id))saved.deleted.push(id)}else saved.added=saved.added.filter(x=>x.id!==id);
+ saved.favorites=saved.favorites.filter(x=>x!==id);store();if(el('videoDialog').open)closeModal('videoDialog');render();toast('הסרטון הוסר מהמאגר');
+}
+function downloadFile(name,text,type){const a=document.createElement('a'),url=URL.createObjectURL(new Blob([text],{type}));a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000)}
+function backup(){downloadFile('גיבוי_מאגר_סרטוני_מכניקה.json',JSON.stringify({format:'physics-mechanics-library-v2',added:saved.added,favorites:saved.favorites,overrides:saved.overrides,deleted:saved.deleted,notes:saved.notes},null,2),'application/json;charset=utf-8');toast('קובץ הגיבוי נוצר')}
+function validBackupData(obj){if(!obj||!['physics-mechanics-library-v1','physics-mechanics-library-v2'].includes(obj.format)||!Array.isArray(obj.added)||!Array.isArray(obj.favorites)||obj.added.length>500||obj.favorites.length>1000)return false;
+ const validV=v=>v&&typeof v.title==='string'&&v.title.length<300&&typeof v.question==='string'&&v.question.length<2000&&typeof v.concept==='string'&&CATEGORIES.some(c=>c.name===v.category)&&!!safeVideoId(v.url);
+ if(!obj.added.every(validV))return false;
+ if(obj.format==='physics-mechanics-library-v1')return true;
+ if(!obj.overrides||typeof obj.overrides!=='object'||Array.isArray(obj.overrides)||!Array.isArray(obj.deleted)||obj.deleted.length>1000||!obj.notes||typeof obj.notes!=='object'||Array.isArray(obj.notes))return false;
+ return Object.keys(obj.overrides).length<=500&&Object.keys(obj.notes).length<=1000&&Object.keys(obj.overrides).every(k=>ORIGINAL_BY_ID.has(k)&&validV(obj.overrides[k]))&&obj.deleted.every(id=>ORIGINAL_BY_ID.has(id))&&Object.values(obj.notes).every(n=>typeof n==='string'&&n.length<=3000);
+}
+
+// Category/filter controls
+el('topicTabs').addEventListener('click',e=>{const b=e.target.closest('[data-topic]');if(!b)return;selectedCategory=selectedCategory===b.dataset.topic?'הכול':b.dataset.topic;selectedLaw='הכול';render()});
+el('lawFilters').addEventListener('click',e=>{const b=e.target.closest('[data-law]');if(b){selectedLaw=b.dataset.law;render()}});
+// Card controls, including built-in content
+el('videoGrid').addEventListener('click',e=>{
+ const b=e.target.closest('[data-open],[data-fav],[data-edit],[data-note],[data-delete],#emptyReset');if(!b)return;
+ if(b.id==='emptyReset'){resetFilters();return}
+ if(b.dataset.fav){const id=b.dataset.fav;saved.favorites=saved.favorites.includes(id)?saved.favorites.filter(x=>x!==id):[...saved.favorites,id];store();render();}
+ else if(b.dataset.open)openVideo(b.dataset.open);
+ else if(b.dataset.edit)openAddForm(videoById(b.dataset.edit));
+ else if(b.dataset.note)openNoteForm(b.dataset.note);
+ else if(b.dataset.delete)deleteVideoById(b.dataset.delete);
+});
+for(const id of ['searchInput','sortSelect','favoritesOnly'])el(id).addEventListener(id==='searchInput'?'input':'change',render);
+el('resetBtn').addEventListener('click',resetFilters);
+el('addBtn').addEventListener('click',()=>openAddForm());
+document.querySelectorAll('[data-close]').forEach(b=>b.addEventListener('click',()=>closeModal(b.dataset.close)));
+el('videoDialog').addEventListener('close',()=>{el('playerZone').replaceChildren();selectedVideo=null});
+for(const id of ['videoDialog','addDialog','noteDialog'])el(id).addEventListener('click',e=>{if(e.target===el(id))closeModal(id)});
+el('playerZone').addEventListener('click',e=>{if(e.target.closest('#embedBtn'))embedVideo()});
+el('teacherToggle').addEventListener('click',()=>{const box=el('teacherBox');box.hidden=!box.hidden;el('teacherToggle').textContent=box.hidden?'הצגת דגש פיזיקלי למורה ↓':'הסתרת הדגש הפיזיקלי ↑';el('teacherToggle').setAttribute('aria-expanded',String(!box.hidden))});
+el('questionOnlyBtn').addEventListener('click',()=>{showingQuestionOnly=!showingQuestionOnly;el('lessonContents').hidden=showingQuestionOnly;el('questionOnly').hidden=!showingQuestionOnly;el('questionOnlyBtn').textContent=showingQuestionOnly?'חזרה לכרטיס המלא':'הצגת השאלה בלבד'});
+el('addForm').addEventListener('submit',e=>{e.preventDefault();const v=formToVideo();if(!v||!saveVideo(v))return;closeModal('addDialog');render();toast(editingId?'השינויים נשמרו':'הסרטון נוסף למאגר');editingId=null});
+el('editVideo').addEventListener('click',()=>{const v=selectedVideo;if(!v)return;closeModal('videoDialog');openAddForm(v)});
+el('deleteVideo').addEventListener('click',()=>{if(selectedVideo)deleteVideoById(selectedVideo.id)});
+el('addNoteVideo').addEventListener('click',()=>{if(selectedVideo)openNoteForm(selectedVideo.id)});
+el('noteForm').addEventListener('submit',e=>{e.preventDefault();if(!noteEditingId||!videoById(noteEditingId))return;saved.notes[noteEditingId]=el('noteTextarea').value.trim();store();if(selectedVideo?.id===noteEditingId){selectedVideo=videoById(noteEditingId);refreshPersonalNote(selectedVideo)}closeModal('noteDialog');render();noteEditingId=null;toast('ההערה נשמרה')});
+el('backupBtn').addEventListener('click',()=>{el('backupPanel').hidden=!el('backupPanel').hidden;el('backupBtn').setAttribute('aria-expanded',String(!el('backupPanel').hidden))});
+document.addEventListener('click',e=>{if(!e.target.closest('.backup-menu')){el('backupPanel').hidden=true;el('backupBtn').setAttribute('aria-expanded','false')}});
+el('exportBtn').addEventListener('click',()=>{backup();el('backupPanel').hidden=true});
+el('importBtn').addEventListener('click',()=>el('backupFile').click());
+el('restoreBtn').addEventListener('click',()=>{if(!saved.deleted.length)return;if(!confirm('לשחזר את כל הסרטונים המקוריים שהוסרו?'))return;saved.deleted=[];store();el('backupPanel').hidden=true;render();toast('הסרטונים שוחזרו')});
+el('backupFile').addEventListener('change',async e=>{const f=e.target.files?.[0];if(!f)return;try{const obj=JSON.parse(await f.text());if(!validBackupData(obj))throw Error('invalid');if(!confirm('לייבא את הגיבוי? זה יחליף את הסרטונים האישיים, העריכות, ההערות והמועדפים השמורים בדפדפן זה.'))return;
+ saved.added=obj.added.map(v=>({...v,custom:true}));saved.favorites=obj.favorites.filter(id=>typeof id==='string');saved.overrides=obj.format.endsWith('v2')?obj.overrides:{};saved.deleted=obj.format.endsWith('v2')?obj.deleted:[];saved.notes=obj.format.endsWith('v2')?obj.notes:{};store();resetFilters();toast('הגיבוי יובא בהצלחה');
+ }catch(err){toast('קובץ הגיבוי אינו תקין')}finally{el('backupFile').value=''}});
+for(const cat of CATEGORIES){const opt=document.createElement('option');opt.value=cat.name;opt.textContent=cat.name;el('formCategory').appendChild(opt)}
+render();
+</script>
+<input type='hidden' name='ntsp_block_page' value='https://m.safepage.neto.net.il/?a=block/block1&level=-15&url=http%3A%2F%2Fchatgpt.com%2Fbackend-api%2Festuary%2Fcontent%3Fid%3Dfile_0000000065a08210b3b7bf6477fbe5b2%26fn%3D%25D7%259E%25D7%2590%25D7%2592%25D7%25A8_%25D7%25A1%25D7%25A8%25D7%2598%25D7%2595%25D7%25A0%25D7%2599_%25D7%259E%25D7%259B%25D7%25A0%25D7%2599%25D7%25A7%25D7%2594_%25D7%2590%25D7%2599%25D7%25A0%25D7%2598%25D7%25A8%25D7%2590%25D7%25A7%25D7%2598%25D7%2599%25D7%2591%25D7%2599.html%26cd%3Dattachment%26ts%3D497863%26p%3Dfs%26cid%3D1%26sig%3Dd7097d355d07a6eef884c15158b0ec141ff80042011c70f03&user_id=445362&sigid=ec9b20c2d21d695bbe1d254135d4d9a8d40f4f36520c7ffb949ac74079951d89&startm=0&keyword=&referer=https%3A%2F%2Fchatgpt.com%2F&category=24&cause=Quiltingjs'/><input type='hidden' name='ntsp_is_etrog' value='0'/><input type='hidden' name='ntsp_url_category' value='24'/><input type='hidden' name='ntsp_quilting' value='3'/><input type='hidden' name='ntsp_media_level' value='-15'/><input type='hidden' name='ntsp_user_level' value='-15'/><input type='hidden' name='ntsp_url_level' value='20'/><input type='hidden' name='ntsp_block_wa_status' value='0'/><script src='/jsQuilting/server/jsDict_utf8.js?v=1&k=23898278c1850f536d688db3614128a0' type='text/javascript' defer></script></body>
+</html>

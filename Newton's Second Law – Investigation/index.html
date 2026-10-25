@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light">
+  <title>חוקרים את החוק השני של ניוטון | דף חקר אינטראקטיבי</title>
+  <style>
+    :root{--ink:#192c3a;--muted:#617483;--navy:#153b52;--teal:#087f79;--mint:#ddf3ed;--blue:#e8f1f8;--sand:#faf7f0;--line:#dce5e8;--red:#a94f39;--card:#fff;--radius:18px}
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{margin:0;background:var(--sand);font-family:Arial,'Noto Sans Hebrew','Segoe UI',sans-serif;color:var(--ink);line-height:1.65}
+    button,input,textarea{font:inherit}
+    a{color:#08766f}
+    .topbar{background:var(--navy);color:white;padding:20px clamp(16px,4vw,48px);display:flex;gap:20px;align-items:center;justify-content:space-between;flex-wrap:wrap;box-shadow:0 4px 14px #172d3b23}
+    .topbar .minor{font-size:13px;color:#c6e9e5;font-weight:bold;letter-spacing:.1px}
+    .topbar h1{font-size:clamp(25px,3vw,35px);line-height:1.24;margin:4px 0 5px}
+    .topbar p{margin:0;font-size:14px;color:#d6e8f0}
+    .top-actions{display:flex;flex-wrap:wrap;gap:9px}
+    button,.btn{border:0;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:11px 16px;border-radius:12px;font-weight:bold;text-decoration:none;transition:.15s ease;background:#edf4f5;color:#1b4051}
+    button:hover,.btn:hover{filter:brightness(.97);transform:translateY(-1px)}
+    button:focus-visible,.btn:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid #edaf35;outline-offset:3px}
+    .primary{background:var(--teal);color:#fff}
+    .topbar .primary{background:#d2f5e9;color:#124d46}
+    .outline{border:1px solid #a9c8c9;background:transparent;color:var(--navy)}
+    .quiet{background:#f0f4f5;color:var(--navy)}
+    .workspace{max-width:1400px;display:grid;grid-template-columns:270px minmax(0,1fr);gap:24px;margin:27px auto;padding:0 22px;align-items:start}
+    .sidebar{min-width:0;position:sticky;top:18px;background:white;border:1px solid var(--line);border-radius:var(--radius);padding:20px;box-shadow:0 7px 23px #193e5410}
+    .side-heading{font-size:13px;color:var(--muted);font-weight:bold;margin:0 0 10px}
+    .meter{height:9px;background:#e5edef;border-radius:15px;overflow:hidden;margin:10px 0 5px}
+    .meter span{display:block;height:100%;width:0;background:linear-gradient(90deg,#4bc6a8,#087f79);transition:width .25s}
+    .statusline{font-size:12px;color:var(--muted);display:flex;justify-content:space-between;margin-bottom:22px}
+    .stepnav{display:grid;gap:6px}
+    .nav-btn{text-align:right;border:1px solid transparent;background:transparent;width:100%;display:flex;justify-content:flex-start;gap:11px;align-items:center;font-weight:normal;padding:11px 8px;border-radius:11px;color:#394e5b}
+    .nav-btn.current{background:#e1f3f0;border-color:#a9d6ca;font-weight:bold;color:#0b6c66}
+    .nav-num{display:grid;place-items:center;flex-shrink:0;width:29px;height:29px;border-radius:50%;background:#edf1f5;font-size:13px;font-weight:bold;color:#597185}
+    .nav-btn.current .nav-num{background:#087f79;color:#fff}
+    .nav-btn.done .nav-num{background:#ddf3e8;color:#08735c}
+    .side-note{font-size:12px;color:var(--muted);border-top:1px solid var(--line);margin-top:18px;padding-top:16px}
+    .main{min-width:0}
+    .step{display:none;animation:appear .2s ease}
+    .step.active{display:block}
+    @keyframes appear{from{opacity:.5;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+    .step-header{margin:0 0 18px}
+    .eyebrow{font-weight:bold;color:var(--teal);font-size:13px;letter-spacing:.3px}
+    h2{font-size:clamp(25px,3vw,33px);line-height:1.32;margin:5px 0 10px;color:var(--navy)}
+    h3{font-size:19px;color:var(--navy);margin:4px 0 12px}
+    h4{font-size:16px;margin:0 0 8px;color:var(--navy)}
+    .lead{font-size:16px;color:#536877;max-width:880px;margin:0}
+    .card{background:var(--card);padding:clamp(18px,3vw,28px);border:1px solid var(--line);border-radius:var(--radius);box-shadow:0 8px 23px #2642520b;margin:0 0 17px}
+    .info{border:1px solid #b9dfd8;background:#eaf7f3;border-radius:13px;padding:14px 17px;margin:15px 0}
+    .callout{border-right:4px solid #0b8980;border-radius:8px;background:#f2f9f7;padding:14px 18px;margin:17px 0}
+    .warning{border-right:4px solid #d89c3a;background:#fff9e9;padding:12px 17px;border-radius:8px;margin:14px 0}
+    .kicker{color:var(--teal);font-weight:bold;font-size:13px;margin:0 0 7px}
+    .question{margin:21px 0 23px}
+    .question:last-child{margin-bottom:0}
+    .question>label:first-child,.question legend{display:block;font-weight:bold;margin-bottom:8px;line-height:1.45}
+    .question legend{padding:0}
+    .question fieldset,fieldset.question{border:0;padding:0;min-width:0}
+    .help{font-size:13px;color:var(--muted);font-weight:normal;margin:1px 0 9px}
+    input[type=text],input[type=number],textarea{background:#fff;border:1.5px solid #c9d6dc;border-radius:10px;padding:11px 13px;width:100%;color:#183648;outline:none}
+    input[type=number]{direction:ltr;text-align:center;font-variant-numeric:tabular-nums}
+    textarea{min-height:97px;resize:vertical}
+    input[type=text]:focus,input[type=number]:focus,textarea:focus{border-color:#0e8d83;box-shadow:0 0 0 3px #0e8d8316}
+    .fields{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+    .fields label{font-weight:bold;font-size:13px;color:#375265}
+    .fields input{margin-top:7px}
+    .radio-stack{display:grid;gap:10px;margin:10px 0}
+    .radio-option{display:flex;gap:10px;align-items:flex-start;padding:11px 13px;border:1px solid #dce6e8;border-radius:10px;cursor:pointer;min-height:48px}
+    .radio-option:has(input:checked){background:#e9f7f1;border-color:#70bcb0}
+    .radio-option input{width:18px;height:18px;margin:4px 0 0;accent-color:#087f79;flex-shrink:0}
+    .radio-option span{flex:1}
+    .choice-feedback{display:none;margin:10px 0 5px;padding:12px 14px;border-radius:10px;font-size:14px;line-height:1.6;border:1px solid transparent}
+    .choice-feedback.show{display:block}
+    .choice-feedback.correct{background:#edf8f0;border-color:#a8dabc;color:#155b35}
+    .choice-feedback.incorrect{background:#fff6e9;border-color:#eccb9b;color:#754b19}
+    .radio-option.answer-correct:has(input:checked){border-color:#26935c;background:#edf8f0}
+    .radio-option.answer-incorrect:has(input:checked){border-color:#d69e4c;background:#fff6e9}
+    .simlink{display:flex;justify-content:space-between;align-items:center;gap:14px;background:#e9f4f5;border:1px solid #c1dcde;padding:17px;border-radius:14px;flex-wrap:wrap}
+    .simlink h3{margin:0 0 4px;font-size:17px}
+    .simlink p{margin:0;font-size:13px;color:#536c77}
+    .simlink .btn{background:#fff;border:1px solid #bdd7d5;color:#0b736a}
+    .step-list{padding-right:22px;margin:7px 0 0}.step-list li{margin:6px 0}
+    .table-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:12px;margin-top:15px}
+    table{border-collapse:collapse;width:100%;min-width:400px}
+    th{background:#edf4f6;color:#294e60;font-size:13px;padding:12px 10px;text-align:center}
+    td{padding:10px;border-top:1px solid #e4ecee;text-align:center}
+    td input[type=number]{min-width:90px;max-width:180px;padding:9px 7px}
+    .row-remove{width:34px;height:34px;min-width:34px;padding:0;border:1px solid #e7cdca;color:#a45148;background:#fff5f3;border-radius:9px;font-size:20px}
+    .table-foot{display:flex;justify-content:flex-start;gap:9px;flex-wrap:wrap;margin-top:11px}
+    .mini{padding:8px 13px;font-size:13px}
+    .graph{border:1px solid #dce8e9;background:#fcfefd;border-radius:14px;padding:10px;margin-top:14px}
+    .graph svg{display:block;width:100%;height:auto;max-height:260px}
+    .graph-msg{min-height:145px;display:flex;justify-content:center;align-items:center;color:var(--muted);font-size:14px;text-align:center;padding:20px}
+    .grid-two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+    .numeric-board{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:15px 0}
+    .numeric-board>div{background:#ecf4f6;padding:14px 7px;text-align:center;border-radius:10px}
+    .numeric-board strong{display:block;font-size:24px;color:#124a5c;direction:ltr}
+    .numeric-board small{font-size:11px;color:#536d7c}
+    .math{direction:ltr;unicode-bidi:isolate;display:inline-block;font-family:'Cambria Math',Georgia,serif;font-size:1.08em;font-weight:bold}
+    .math-banner{border-radius:14px;background:#143e54;color:#fff;padding:18px;text-align:center;margin:14px 0}
+    .math-banner .math{font-size:28px}
+    .reveal{display:none}
+    .reveal.show{display:block}
+    .selfcheck{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:14px 0}
+    .selfcheck label{display:flex;gap:8px;align-items:start;padding:13px;background:#f3f7f7;border:1px solid #e1eaec;border-radius:11px;cursor:pointer}
+    .selfcheck input{margin-top:5px;accent-color:#087f79}
+    .step-bottom{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;margin:24px 0 40px}
+    .step-bottom .right-actions{display:flex;gap:10px;flex-wrap:wrap}
+    .subtle{color:var(--muted);font-size:12px}
+    .foot{border-top:1px solid var(--line);padding-top:18px;text-align:center;color:var(--muted);font-size:13px;margin:0 0 35px}
+    .export-box{background:linear-gradient(115deg,#eff9f5,#e5f0f6);border:1px solid #bbdbd7;border-radius:16px;padding:22px;margin-top:24px}
+    .export-box .button-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:15px}
+    #toast{position:fixed;bottom:20px;left:20px;z-index:10;background:#1a4b50;color:white;border-radius:12px;padding:10px 16px;box-shadow:0 8px 22px #132d3b40;opacity:0;pointer-events:none;transition:.2s}
+    #toast.show{opacity:1}
+    @media (max-width:890px){.workspace{grid-template-columns:minmax(0,1fr);margin-top:15px;padding:0 14px}.sidebar{position:static;padding:12px}.stepnav{display:flex;overflow-x:auto;padding-bottom:4px}.nav-btn{white-space:nowrap;width:auto;flex-shrink:0}.sidebar .side-note{display:none}.statusline{margin-bottom:8px}.fields{grid-template-columns:1fr 1fr}.topbar{padding:19px}.topbar .top-actions{width:100%}}
+    @media(max-width:560px){.fields,.grid-two,.selfcheck{grid-template-columns:1fr}.numeric-board{grid-template-columns:repeat(2,1fr)}.card{padding:16px}.topbar h1{font-size:26px}.simlink .btn{width:100%}.topbar .top-actions button{flex:1}.step-bottom{flex-direction:column;align-items:stretch}.step-bottom .right-actions{display:flex}.step-bottom button{flex:1}}
+    @media print{
+      @page{size:A4;margin:13mm}
+      body{background:white;font-size:11pt;color:#111}
+      .topbar{color:#111;background:white;box-shadow:none;border-bottom:2px solid #173b52;padding:0 0 11px;margin-bottom:13px}
+      .topbar h1{color:#123f57;font-size:21pt}.topbar p,.topbar .minor{color:#555}
+      .top-actions,.sidebar,.step-bottom,.table-foot,.row-remove,.no-print,#toast,.simlink .btn{display:none!important}
+      .workspace{display:block;max-width:none;padding:0;margin:0}
+      .main{display:block}.step,.step.active{display:block!important;animation:none;margin:0 0 14px;page-break-after:auto}
+      .step-header{margin-bottom:10px}h2{font-size:17pt;margin:3px 0}h3{font-size:13pt}
+      .lead{color:#444;font-size:10pt}
+      .card{box-shadow:none;border:1px solid #d5d5d5;break-inside:avoid;padding:13px;margin-bottom:13px}
+      .question{break-inside:avoid;margin:11px 0}
+      .question textarea{min-height:60px}
+      input[type=text],input[type=number],textarea{border:1px solid #ddd;background:#fff!important;color:#111;box-shadow:none;font-size:10pt}
+      .table-wrap{overflow:visible}table{min-width:0}th,td{padding:6px;font-size:10pt}
+      .graph,.simlink,.info,.callout,.warning,.export-box{break-inside:avoid}
+      .simlink{background:#fff}.math-banner{background:#eee;color:#111}
+      .reveal{display:block!important}
+      .radio-option{padding:4px 7px;border:none;min-height:0;break-inside:avoid}
+      .radio-option:not(:has(input:checked)){color:#777}
+      .foot{display:none}
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <div class="minor">מעבדת חקר דיגיטלית · פיזיקה כיתה י״א</div>
+      <h1>חוקרים את החוק השני של ניוטון</h1>
+      <p>מהחוק הראשון אל הקשר שבין כוח, מסה ותאוצה</p>
+    </div>
+    <div class="top-actions">
+      <button class="primary" type="button" id="export-top">⬇ הורדת העבודה המלאה</button>
+      <button type="button" id="print-top">הדפסה / PDF</button>
+    </div>
+  </header>
+
+  <div class="workspace">
+    <aside class="sidebar" aria-label="ניווט בין שלבי החקר">
+      <div class="side-heading">התקדמות העבודה</div>
+      <div class="meter" aria-label="התקדמות"><span id="progress-bar"></span></div>
+      <div class="statusline"><span id="progress-text">0% הושלמו</span><span id="save-status">מוכן לעבודה</span></div>
+      <nav class="stepnav" id="step-nav">
+        <button type="button" class="nav-btn current" data-goto="0"><span class="nav-num">0</span> פתיחה והנחיות</button>
+        <button type="button" class="nav-btn" data-goto="1"><span class="nav-num">1</span> זוכרים את החוק הראשון</button>
+        <button type="button" class="nav-btn" data-goto="2"><span class="nav-num">2</span> מגלים את התאוצה</button>
+        <button type="button" class="nav-btn" data-goto="3"><span class="nav-num">3</span> חוקרים את הכוח</button>
+        <button type="button" class="nav-btn" data-goto="4"><span class="nav-num">4</span> חוקרים את המסה</button>
+        <button type="button" class="nav-btn" data-goto="5"><span class="nav-num">5</span> מנסחים את החוק</button>
+        <button type="button" class="nav-btn" data-goto="6"><span class="nav-num">6</span> מחברים ומסכמים</button>
+      </nav>
+      <div class="side-note">התשובות נשמרות אוטומטית בדפדפן, ככל שהדפדפן מאפשר זאת. בסוף <b>הורידו קובץ HTML</b> המכיל את כל עבודתכם; אל תסתפקו בשמירה האוטומטית.</div>
+    </aside>
+
+    <main class="main" id="main-content">
+      <section class="step active" data-step="0">
+        <div class="step-header"><div class="eyebrow">שלב פתיחה · לפני שמתחילים</div><h2>בואו נחקור מה משנה תנועה</h2><p class="lead">כבר למדנו את החוק הראשון והשלישי של ניוטון. בפעילות הזאת נשתמש בידע הקיים כדי לגלות כלל חדש בעצמנו.</p></div>
+        <div class="card">
+          <h3>פרטי המגישים</h3>
+          <div class="fields">
+            <label>שם התלמיד/ה או שמות חברי הקבוצה<input type="text" data-field="student" placeholder="הקלידו שם מלא" autocomplete="name"></label>
+            <label>כיתה<input type="text" data-field="class" placeholder="לדוגמה י״א 2"></label>
+            <label>תאריך<input type="text" data-field="date" placeholder="יום / חודש / שנה"></label>
+          </div>
+        </div>
+        <div class="card">
+          <h3>איך עובדים?</h3>
+          <ol class="step-list">
+            <li>פתחו את סימולציית PhET בכרטיסייה נפרדת, והשאירו גם את דף החקר פתוח.</li>
+            <li>בכל שלב: <b>מנבאים → בודקים → אוספים נתונים → מסיקים מסקנה.</b></li>
+            <li>כתבו תשובות במילים שלכם. כשצריך — הוסיפו מדידות בטבלה ובדקו את הגרף שנוצר.</li>
+            <li>עברו בין השלבים בעזרת הלחצנים. אפשר לחזור ולתקן תשובות.</li>
+            <li>בסיום הורידו את העבודה המלאה. הקובץ שיתקבל מכיל את התשובות והנתונים שהזנתם.</li>
+          </ol>
+          <div class="simlink" style="margin-top:18px">
+            <div><h3>סימולציית PhET: כוחות ותנועה – הבסיס</h3><p>להפעלת הניסוי המדומה יש צורך בחיבור לאינטרנט. דף העבודה עצמו פועל ללא חיבור.</p></div>
+            <a class="btn" href="https://phet.colorado.edu/sims/html/forces-and-motion-basics/latest/forces-and-motion-basics_all.html" target="_blank" rel="noopener noreferrer">פתיחת PhET ↗</a>
+          </div>
+          <div class="info"><b>ציוד:</b> מחשב או טאבלט, גישה ל־PhET, מחברת לחישובי עזר (לפי הצורך).</div>
+        </div>
+      </section>
+
+      <section class="step" data-step="1">
+        <div class="step-header"><div class="eyebrow">שלב 1 · ידע קודם</div><h2>חוזרים לחוק הראשון של ניוטון</h2><p class="lead">אנחנו כבר יודעים מה קורה לגוף כששקול הכוחות עליו אפס. כעת נבדוק מה קורה אם פועל עליו כוח, ואז הוא נפסק.</p></div>
+        <div class="card">
+          <div class="kicker">לפני הניסוי · ניבוי</div>
+          <fieldset class="question"><legend>1. עגלה כבר נעה ימינה. אין חיכוך. ברגע מסוים מפסיקים להפעיל עליה את הכוח שדחף אותה. מה יקרה?</legend>
+            <div class="radio-stack">
+              <label class="radio-option"><input type="radio" name="predict-stop" data-field="predict-stop" value="העגלה תיעצר מיד"><span>העגלה תיעצר מיד.</span></label>
+              <label class="radio-option"><input type="radio" name="predict-stop" data-field="predict-stop" value="העגלה תאט בהדרגה"><span>העגלה תאט בהדרגה.</span></label>
+              <label class="radio-option"><input type="radio" name="predict-stop" data-field="predict-stop" value="העגלה תמשיך במהירות קבועה"><span>העגלה תמשיך במהירות קבועה.</span></label>
+              <label class="radio-option"><input type="radio" name="predict-stop" data-field="predict-stop" value="העגלה תגביר את מהירותה"><span>העגלה תגביר את מהירותה.</span></label>
+            </div>
+          </fieldset>
+          <div class="callout"><b>בצעו:</b> פתחו את לשונית <b>״תנועה״</b> ב־PhET. הפעילו כוח כדי שהגוף יתחיל לנוע, ואז החזירו את הכוח המופעל לאפס. עקבו אחר מד המהירות. בלשונית זו אין חיכוך.</div>
+          <div class="question"><label for="s1-observe">2. מה ראיתם בעת הפעלת הכוח, ומה קרה למהירות אחרי שהפסקתם להפעיל אותו?</label><textarea id="s1-observe" data-field="s1-observe" placeholder="תארו את שני שלבי התנועה..."></textarea></div>
+          <div class="question"><label for="s1-explain">3. הסבירו את התוצאה באמצעות החוק הראשון של ניוטון. מה הקשר בין שקול הכוחות לבין <u>שינוי</u> המהירות?</label><textarea id="s1-explain" data-field="s1-explain"></textarea></div>
+        </div>
+        <div class="warning"><b>שימו לב:</b> כאשר חיכוך אינו זניח, גוף עשוי להאט גם אחרי שמפסיקים לדחוף אותו. לכן חשוב להבחין בין ״הפסקנו לדחוף״ ובין ״שקול הכוחות הוא אפס״.</div>
+      </section>
+
+      <section class="step" data-step="2">
+        <div class="step-header"><div class="eyebrow">שלב 2 · מושג חדש</div><h2>איך מודדים שינוי במהירות?</h2><p class="lead">ראינו שכאשר פועל כוח שקול, המהירות עשויה להשתנות. איך נוכל למדוד לא רק <em>כמה</em> השתנתה המהירות, אלא <em>כמה מהר</em> היא משתנה?</p></div>
+        <div class="card">
+          <h3>ניסוי מחשבתי קצר</h3>
+          <p>מכונית נעה על ציר ישר בכיוון החיובי. התוצאות הבאות מתארות את מהירותה בפרקי זמן שווים:</p>
+          <div class="numeric-board">
+            <div><small>לאחר 0 שניות</small><strong>2</strong><small>m/s</small></div>
+            <div><small>לאחר 1 שנייה</small><strong>5</strong><small>m/s</small></div>
+            <div><small>לאחר 2 שניות</small><strong>8</strong><small>m/s</small></div>
+            <div><small>לאחר 3 שניות</small><strong>11</strong><small>m/s</small></div>
+          </div>
+          <div class="grid-two">
+            <div class="question"><label for="s2-dv">4. בכמה השתנתה מהירות המכונית בשלוש השניות? (m/s)</label><input type="number" step="any" id="s2-dv" data-field="s2-dv" placeholder="הקלידו ערך"></div>
+            <div class="question"><label for="s2-rate">5. בכמה משתנה המהירות בממוצע בכל שנייה? (m/s בכל שנייה)</label><input type="number" step="any" id="s2-rate" data-field="s2-rate" placeholder="הקלידו ערך"></div>
+          </div>
+          <div class="question"><label for="s2-compare">6. מה משותף לשינויי המהירות בכל אחת משלוש השניות?</label><textarea id="s2-compare" data-field="s2-compare"></textarea></div>
+          <div class="info"><b>לגודל החדש קוראים תאוצה:</b> הוא מתאר את קצב שינוי המהירות. בחישובים שלנו נשתמש ב־<span class="math">a = Δv / Δt</span>. יחידות התאוצה: <span class="math">m/s²</span> (מטר לשנייה בכל שנייה).</div>
+          <div class="question"><label for="s2-meaning">7. הסבירו במילים שלכם: מה פירוש תאוצה של <span class="math">3 m/s²</span> בתנועה בקו ישר?</label><textarea id="s2-meaning" data-field="s2-meaning" placeholder="נסחו הסבר שאפשר לתת לתלמיד שלא השתתף בשיעור..."></textarea></div>
+        </div>
+      </section>
+
+      <section class="step" data-step="3">
+        <div class="step-header"><div class="eyebrow">שלב 3 · חקר משתנה ראשון</div><h2>מה הקשר בין הכוח לבין התאוצה?</h2><p class="lead">תכננו סדרת מדידות שתאפשר לבדוק מה קורה לתאוצה כאשר משנים רק את הכוח המופעל על גוף.</p></div>
+        <div class="card">
+          <h3>תכנון הניסוי</h3>
+          <div class="callout"><b>ב־PhET:</b> עברו ללשונית <b>״תאוצה״</b>; הגדירו חיכוך <b>״אין״</b>; סמנו הצגה של <b>מסה, ערכים ותאוצה</b> (אם אינם מוצגים). בחרו גוף אחד ושמרו על אותה מסה בכל המדידות. רשמו את קריאת התאוצה כאשר הכוח מופעל.</div>
+          <div class="grid-two">
+            <div class="question"><label for="s3-constant">8. מהי מסת הגוף שבחרתם? (kg)</label><input id="s3-constant" type="number" step="any" min="0" data-field="s3-constant" placeholder="מסה קבועה"></div>
+            <div class="question"><label for="s3-control">9. אילו תנאים צריך להשאיר קבועים כדי לבדוק רק את השפעת הכוח?</label><textarea id="s3-control" data-field="s3-control" style="min-height:76px"></textarea></div>
+          </div>
+          <h4>טבלת מדידות א׳</h4><p class="help">בחרו לפחות שלושה כוחות שונים. מומלץ לבחור גם זוג כוחות שאחד מהם כפול מהשני. ערכי המדידות יופיעו בגרף מתחת לטבלה.</p>
+          <div class="table-wrap"><table aria-label="מדידות השפעת הכוח"><thead><tr><th>#</th><th>כוח שקול (N)</th><th>תאוצה (m/s²)</th><th class="no-print">מחיקה</th></tr></thead><tbody id="force-rows"></tbody></table></div>
+          <div class="table-foot no-print"><button type="button" class="mini outline" data-add-row="force">＋ הוספת מדידה</button></div>
+          <h4 style="margin-top:23px">הגרף שלכם · תאוצה כפונקציה של כוח</h4>
+          <div class="graph" id="force-graph"><div class="graph-msg">הזינו לפחות שתי מדידות כדי לראות גרף.</div></div>
+          <div class="question"><label for="s3-doubling">10. השוו בין שני ניסויים שבהם הכוח הוכפל. מה קרה לתאוצה? השתמשו בנתונים שלכם.</label><textarea id="s3-doubling" data-field="s3-doubling"></textarea></div>
+          <div class="question"><label for="s3-conclusion">11. נסחו מסקנה כללית על הקשר בין הכוח השקול לבין התאוצה (כאשר המסה קבועה).</label><textarea id="s3-conclusion" data-field="s3-conclusion"></textarea></div>
+        </div>
+      </section>
+
+      <section class="step" data-step="4">
+        <div class="step-header"><div class="eyebrow">שלב 4 · חקר משתנה שני</div><h2>מה הקשר בין המסה לבין התאוצה?</h2><p class="lead">הפעם נשנה את מסת הגוף, אבל נקפיד ששקול הכוחות יהיה זהה בכל המדידות.</p></div>
+        <div class="card">
+          <div class="callout"><b>ב־PhET:</b> הישארו בלשונית <b>״תאוצה״</b> ועם חיכוך <b>״אין״</b>. החליפו גופים או הוסיפו גופים לעגלה כדי לשנות מסה. הפעילו בכל ניסוי <b>את אותו הכוח</b> ורשמו את התאוצה. אם נדרש, אפסו את המצב לפני המדידה הבאה.</div>
+          <div class="grid-two">
+            <div class="question"><label for="s4-constant">12. איזה כוח שקול קבוע בחרתם? (N)</label><input type="number" min="0" step="any" id="s4-constant" data-field="s4-constant" placeholder="כוח קבוע"></div>
+            <div class="question"><label for="s4-control">13. מה תצטרכו להקפיד לעשות כדי שהשוואת המסות תהיה הוגנת?</label><textarea id="s4-control" data-field="s4-control" style="min-height:76px"></textarea></div>
+          </div>
+          <h4>טבלת מדידות ב׳</h4><p class="help">בחרו לפחות שלוש מסות שונות. כדאי לבחור זוג מסות שאחת מהן כפולה מהשנייה.</p>
+          <div class="table-wrap"><table aria-label="מדידות השפעת המסה"><thead><tr><th>#</th><th>מסה (kg)</th><th>תאוצה (m/s²)</th><th class="no-print">מחיקה</th></tr></thead><tbody id="mass-rows"></tbody></table></div>
+          <div class="table-foot no-print"><button type="button" class="mini outline" data-add-row="mass">＋ הוספת מדידה</button></div>
+          <h4 style="margin-top:23px">הגרף שלכם · תאוצה כפונקציה של מסה</h4>
+          <div class="graph" id="mass-graph"><div class="graph-msg">הזינו לפחות שתי מדידות כדי לראות גרף.</div></div>
+          <div class="question"><label for="s4-doubling">14. בחרו שני ניסויים: מה קורה לתאוצה כאשר המסה מוכפלת? התייחסו לתוצאות המדידה.</label><textarea id="s4-doubling" data-field="s4-doubling"></textarea></div>
+          <div class="question"><label for="s4-conclusion">15. נסחו מסקנה כללית על הקשר בין המסה לבין התאוצה (כאשר הכוח קבוע).</label><textarea id="s4-conclusion" data-field="s4-conclusion"></textarea></div>
+        </div>
+      </section>
+
+      <section class="step" data-step="5">
+        <div class="step-header"><div class="eyebrow">שלב 5 · מסקנות</div><h2>האם אפשר לנסח חוק אחד?</h2><p class="lead">אספו את המסקנות משתי סדרות הניסויים ונסו לבנות מהן קשר מתמטי כללי. אל תפתחו את הסיכום לפני שניסיתם בעצמכם.</p></div>
+        <div class="card">
+          <div class="question"><label for="s5-recap">16. השלימו במילים: כאשר המסה קבועה, התאוצה ______ ככל שהכוח השקול גדל; וכאשר הכוח קבוע, התאוצה ______ ככל שהמסה גדלה.</label><textarea id="s5-recap" data-field="s5-recap" style="min-height:70px"></textarea></div>
+          <fieldset class="question"><legend>17. איזה ביטוי מתמטי מתאים למסקנות שלכם?</legend>
+            <div class="radio-stack">
+              <label class="radio-option"><input type="radio" name="formula-choice" data-field="formula-choice" value="F = m·a"><span><span class="math">F = m · a</span></span></label>
+              <label class="radio-option"><input type="radio" name="formula-choice" data-field="formula-choice" value="F = m/a"><span><span class="math">F = m / a</span></span></label>
+              <label class="radio-option"><input type="radio" name="formula-choice" data-field="formula-choice" value="F = a/m"><span><span class="math">F = a / m</span></span></label>
+              <label class="radio-option"><input type="radio" name="formula-choice" data-field="formula-choice" value="F = m+a"><span><span class="math">F = m + a</span></span></label>
+            </div>
+          </fieldset>
+          <div class="question"><label for="s5-evidence">18. הביאו דוגמה מספרית אחת מתוך הנתונים שלכם שתומכת בקשר שבחרתם.</label><textarea id="s5-evidence" data-field="s5-evidence"></textarea></div>
+          <div class="no-print"><button class="outline" type="button" id="reveal-button" aria-expanded="false">הצגת החוק השני והשוואה למסקנה שלי</button></div>
+          <div class="reveal" id="law-reveal">
+            <div class="math-banner"><div>החוק השני של ניוטון</div><div class="math">ΣF⃗ = ma⃗</div></div>
+            <p>תאוצת הגוף נמצאת בכיוון <b>שקול הכוחות</b> הפועל עליו. גודלה ביחס ישר לכוח השקול וביחס הפוך למסה.</p>
+            <div class="info">החוק הראשון מתקבל כמקרה פרטי: כאשר <span class="math">ΣF⃗ = 0</span>, התאוצה אפס והמהירות קבועה.</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="step" data-step="6">
+        <div class="step-header"><div class="eyebrow">שלב 6 · מחברים את החוקים</div><h2>חוזרים לעגלות ולשלושת חוקי ניוטון</h2><p class="lead">נשתמש במה שגילינו כדי להסביר את הדגמת המסילה ונבדוק כיצד החוק השני משתלב עם החוקים הראשון והשלישי.</p></div>
+        <div class="card">
+          <h3>שתי עגלות וקפיץ</h3>
+          <p>בניסוי שראינו בכיתה, קפיץ דחוס בין שתי עגלות, אחת קלה ואחת כבדה. כשהקפיץ משתחרר, העגלות נדחפות לכיוונים מנוגדים. החיכוך זניח.</p>
+          <svg viewBox="0 0 660 160" style="width:100%;max-height:190px" role="img" aria-label="שתי עגלות על מסילה, בין העגלות קפיץ; הכוחות ההדדיים בכיוונים מנוגדים">
+            <line x1="40" y1="134" x2="622" y2="134" stroke="#5c7889" stroke-width="4"/>
+            <g transform="translate(95 69)"><rect x="0" y="0" rx="7" width="155" height="52" fill="#8ed1bb" stroke="#267766" stroke-width="2"/><rect x="22" y="16" rx="3" width="55" height="27" fill="#d5efe5"/><circle cx="30" cy="61" r="12" fill="#4d6376"/><circle cx="125" cy="61" r="12" fill="#4d6376"/></g>
+            <g transform="translate(426 89)"><rect x="0" y="0" rx="7" width="115" height="32" fill="#94bddd" stroke="#3f729d" stroke-width="2"/><circle cx="22" cy="42" r="12" fill="#4d6376"/><circle cx="90" cy="42" r="12" fill="#4d6376"/></g>
+            <path d="M250 105 H274 l7 -17 13 34 13 -34 13 34 13 -34 13 17 H426" fill="none" stroke="#ce9943" stroke-width="6" stroke-linejoin="round"/>
+            <path d="M208 49H125 M139 38L125 49 139 60" fill="none" stroke="#21836f" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M462 49H547 M532 38L547 49 532 60" fill="none" stroke="#357bad" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+            <g font-family="Arial,sans-serif" fill="#1f485e" font-size="17" text-anchor="middle"><text x="174" y="23">עגלה כבדה</text><text x="484" y="23">עגלה קלה</text></g>
+          </svg>
+          <fieldset class="question"><legend>19. בזמן שהקפיץ דוחף את שתי העגלות, על איזו עגלה הוא מפעיל כוח גדול יותר? (בהנחה שהקפיץ חסר מסה)</legend>
+            <div class="radio-stack">
+              <label class="radio-option"><input type="radio" name="cart-force" data-field="cart-force" value="על הכבדה"><span>על העגלה הכבדה.</span></label>
+              <label class="radio-option"><input type="radio" name="cart-force" data-field="cart-force" value="על הקלה"><span>על העגלה הקלה.</span></label>
+              <label class="radio-option"><input type="radio" name="cart-force" data-field="cart-force" value="שווה בגודל"><span>הכוחות שווים בגודלם והפוכים בכיוונם.</span></label>
+            </div>
+          </fieldset>
+          <div class="question"><label for="s6-carts">20. מדוע בכל זאת תאוצות העגלות שונות? באיזו עגלה התאוצה גדולה יותר בגודלה? השתמשו בשני החוקים שלמדתם.</label><textarea id="s6-carts" data-field="s6-carts"></textarea></div>
+          <div class="question"><label for="s6-moving">21. גוף נע ימינה, אך שקול הכוחות עליו פועל שמאלה. מה אפשר לקבוע על תאוצתו, ומה יקרה לגודל מהירותו כל עוד הגוף עדיין נע ימינה?</label><textarea id="s6-moving" data-field="s6-moving"></textarea></div>
+          <div class="question"><label for="s6-reflect">22. מה גיליתם בעצמכם בפעילות? ומה עדיין הייתם רוצים לברר?</label><textarea id="s6-reflect" data-field="s6-reflect"></textarea></div>
+          <div class="selfcheck">
+            <label><input type="checkbox" data-field="conf-first">אני יודע/ת להסביר את הקשר בין החוק הראשון לשני.</label>
+            <label><input type="checkbox" data-field="conf-data">אני יודע/ת לחקור קשר בעזרת שינוי משתנה אחד.</label>
+            <label><input type="checkbox" data-field="conf-second">אני יכול/ה להסביר את הקשר בין כוח, מסה ותאוצה.</label>
+          </div>
+        </div>
+        <div class="export-box">
+          <h3>העבודה מוכנה להגשה?</h3>
+          <p>הורידו <b>קובץ HTML מלא</b> הכולל את כל התשובות, טבלאות המדידה והגרפים. ניתן לפתוח אותו במחשב אחר ולקרוא את העבודה גם בלי אינטרנט. אם רוצים PDF, אפשר להדפיס ולבחור במדפסת "שמירה כ־PDF".</p>
+          <div class="button-row no-print"><button type="button" class="primary" id="export-bottom">⬇ הורדת העבודה עם התשובות</button><button class="outline" type="button" id="print-bottom">הדפסה / שמירה כ־PDF</button></div>
+          <p class="subtle">חשוב: לאחר שינויים נוספים יש להוריד את הקובץ שוב כדי לכלול את הגרסה המעודכנת. פתיחת הקובץ השמור אינה דורשת חיבור לרשת; PhET עצמו כן דורש חיבור.</p>
+        </div>
+      </section>
+
+      <div class="step-bottom no-print">
+        <div class="right-actions"><button type="button" class="outline" id="prev-step">→ לשלב הקודם</button><button type="button" class="primary" id="next-step">לשלב הבא ←</button></div>
+        <div class="subtle" id="step-number">שלב 1 מתוך 7</div>
+      </div>
+      <div class="foot">דף חקר דיגיטלי · החוק השני של ניוטון · כל התשובות נשמרות בקובץ שתורידו</div>
+    </main>
+  </div>
+  <div id="toast" role="status" aria-live="polite"></div>
+  <script type="application/json" id="embedded-session">null</script>
+  <script>
+  (function () {
+    'use strict';
+    const KEY = 'newton2-inquiry-v1:' + location.pathname;
+    const defaults = {fields:{}, tables:{force:Array.from({length:4},()=>({force:'',acc:''})),mass:Array.from({length:3},()=>({mass:'',acc:''}))}, reveal:false, active:0, savedAt:0};
+    function safeParse(value){try{return JSON.parse(value)}catch(e){return null}}
+    const embedded = safeParse(document.getElementById('embedded-session').textContent);
+    let stored = null;
+    try{stored=safeParse(localStorage.getItem(KEY))}catch(e){}
+    let source = embedded && typeof embedded==='object' ? embedded : null;
+    if(stored && (!source || (Number(stored.savedAt)||0) > (Number(source.savedAt)||0))) source=stored;
+    const state = {
+      fields: (source && source.fields && typeof source.fields==='object') ? source.fields : {},
+      tables: {
+        force: (source && source.tables && Array.isArray(source.tables.force)) ? source.tables.force : defaults.tables.force,
+        mass: (source && source.tables && Array.isArray(source.tables.mass)) ? source.tables.mass : defaults.tables.mass
+      },
+      reveal:!!(source && source.reveal), active:Math.max(0,Math.min(6,Number(source?.active)||0)),savedAt:Number(source?.savedAt)||0
+    };
+    const $=id=>document.getElementById(id);
+    const steps=[...document.querySelectorAll('.step')];
+    const nav=[...document.querySelectorAll('[data-goto]')];
+    let toastTimer;
+    function toast(message){const el=$('toast');el.textContent=message;el.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),2400)}
+    function markSave(){state.savedAt=Date.now();try{localStorage.setItem(KEY,JSON.stringify(state));$('save-status').textContent='נשמר אוטומטית'}catch(e){$('save-status').textContent='שמירה מקומית לא זמינה'}}
+    function escapeHtml(v){return String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+    function renderTable(type){
+      const body=$(type+'-rows');body.textContent='';
+      state.tables[type].forEach((record,i)=>{
+        let tr=document.createElement('tr');
+        const x=type==='force'?'force':'mass';
+        tr.innerHTML='<td>'+(i+1)+'</td><td><input type="number" step="any" min="0" inputmode="decimal" aria-label="'+(type==='force'?'כוח':'מסה')+' במדידה '+(i+1)+'" data-table="'+type+'" data-col="'+x+'" data-index="'+i+'" value="'+escapeHtml(record[x]??'')+'"></td><td><input type="number" step="any" inputmode="decimal" aria-label="תאוצה במדידה '+(i+1)+'" data-table="'+type+'" data-col="acc" data-index="'+i+'" value="'+escapeHtml(record.acc??'')+'"></td><td class="no-print"><button class="row-remove" type="button" title="מחיקת המדידה" aria-label="מחיקת מדידה '+(i+1)+'" data-remove-row="'+type+'" data-index="'+i+'">×</button></td>';
+        body.appendChild(tr);
+      });
+      updateGraph(type);
+    }
+    function pointData(type){
+      const x=type==='force'?'force':'mass';
+      return state.tables[type].map(r=>({x:Number(r[x]),y:Number(r.acc),hasX:String(r[x]??'').trim()!=='',hasY:String(r.acc??'').trim()!==''})).filter(r=>r.hasX&&r.hasY&&Number.isFinite(r.x)&&Number.isFinite(r.y)&&r.x>0&&r.y>=0).sort((a,b)=>a.x-b.x);
+    }
+    function updateGraph(type){
+      const el=$(type+'-graph'); const points=pointData(type);
+      if(points.length<2){el.innerHTML='<div class="graph-msg">הזינו לפחות שתי מדידות תקינות כדי לראות גרף.</div>';return}
+      const NS='http://www.w3.org/2000/svg', w=680,h=264,m={l:68,r:20,t:20,b:57}, x0=m.l,y0=h-m.b,iw=w-m.l-m.r,ih=h-m.t-m.b;
+      let xmax=Math.max(...points.map(p=>p.x))*1.14,ymax=Math.max(...points.map(p=>p.y))*1.2;
+      if(!(xmax>0))xmax=1;if(!(ymax>0))ymax=1;
+      let svg=document.createElementNS(NS,'svg');svg.setAttribute('viewBox','0 0 '+w+' '+h);svg.setAttribute('role','img');svg.setAttribute('aria-label',type==='force'?'גרף תאוצה כתלות בכוח':'גרף תאוצה כתלות במסה');svg.style.direction='ltr';
+      function node(tag,attrs,text){let n=document.createElementNS(NS,tag);for(const [k,v] of Object.entries(attrs||{}))n.setAttribute(k,v);if(text!==undefined)n.textContent=text;svg.appendChild(n);return n}
+      function fmt(x){return Number(x.toFixed(2)).toLocaleString('en-US',{maximumFractionDigits:2})}
+      for(let i=0;i<=4;i++){
+        let yy=y0-i*ih/4,xx=x0+i*iw/4;
+        node('line',{x1:x0,y1:yy,x2:w-m.r,y2:yy,stroke:'#e3ebed','stroke-width':1});
+        node('line',{x1:xx,y1:m.t,x2:xx,y2:y0,stroke:'#eff2f3','stroke-width':1});
+        node('text',{x:x0-10,y:yy+5,'text-anchor':'end','font-size':12,fill:'#5b7282'},fmt(ymax*i/4));
+        node('text',{x:xx,y:y0+22,'text-anchor':'middle','font-size':12,fill:'#5b7282'},fmt(xmax*i/4));
+      }
+      node('line',{x1:x0,y1:m.t,x2:x0,y2:y0,stroke:'#617c88','stroke-width':1.7});
+      node('line',{x1:x0,y1:y0,x2:w-m.r,y2:y0,stroke:'#617c88','stroke-width':1.7});
+      const coords=points.map(p=>[x0+p.x/xmax*iw,y0-p.y/ymax*ih]);
+      node('polyline',{points:coords.map(p=>p.join(',')).join(' '),fill:'none',stroke:'#07857d','stroke-width':3,'stroke-linecap':'round','stroke-linejoin':'round'});
+      for(const p of coords){node('circle',{cx:p[0],cy:p[1],r:5,fill:'#0e8d83',stroke:'white','stroke-width':2})}
+      node('text',{x:x0+iw/2,y:h-8,'font-size':14,'text-anchor':'middle',fill:'#244b5d'},type==='force'?'כוח שקול (N)':'מסה (kg)');
+      const label=node('text',{x:19,y:m.t+ih/2,'font-size':14,'text-anchor':'middle',fill:'#244b5d',transform:'rotate(-90 19 '+(m.t+ih/2)+')'},'תאוצה (m/s²)');
+      el.textContent='';el.appendChild(svg);
+    }
+    // Immediate pedagogical feedback on all multiple-choice questions.
+    const choiceKeys={
+      'predict-stop':{
+        correct:'העגלה תמשיך במהירות קבועה',
+        yes:'נכון! בהיעדר חיכוך, לאחר הפסקת הדחיפה שקול הכוחות הוא אפס, ולכן המהירות אינה משתנה (החוק הראשון).',
+        no:'נסו שוב: אחרי שמפסיקים לדחוף, ובהנחה שאין חיכוך, מהו שקול הכוחות? ומה אומר החוק הראשון על המהירות כאשר שקול הכוחות אפס?'
+      },
+      'formula-choice':{
+        correct:'F = m·a',
+        yes:'נכון! הכוח השקול שווה למסה כפול התאוצה: ΣF = ma. לכן עבור מסה קבועה הכוח פרופורציוני לתאוצה, ועבור כוח קבוע התאוצה קטנה כשהמסה גדלה.',
+        no:'עדיין לא. בדקו איזה ביטוי מתאים לשתי התוצאות: הכפלת הכוח מכפילה את התאוצה, והכפלת המסה מקטינה את התאוצה פי שניים.'
+      },
+      'cart-force':{
+        correct:'שווה בגודל',
+        yes:'נכון! לפי החוק השלישי, הכוחות שהעגלות מפעילות זו על זו שווים בגודלם והפוכים בכיוונם. לפי החוק השני, התאוצה של העגלה הקלה גדולה יותר.',
+        no:'חשבו על החוק השלישי: האם המסות השונות משנות את גודל זוג כוחות הפעולה והתגובה, או דווקא את התאוצות שמתקבלות? נסו שוב.'
+      }
+    };
+    function updateChoiceFeedback(name){
+      const cfg=choiceKeys[name];if(!cfg)return;
+      const radios=[...document.querySelectorAll('input[type="radio"][name="'+name+'"]')];
+      const group=radios[0]?.closest('fieldset');if(!group)return;
+      let panel=group.querySelector('.choice-feedback');
+      if(!panel){panel=document.createElement('div');panel.className='choice-feedback';panel.setAttribute('role','status');panel.setAttribute('aria-live','polite');group.appendChild(panel)}
+      const selected=state.fields[name];
+      radios.forEach(r=>r.closest('.radio-option')?.classList.remove('answer-correct','answer-incorrect'));
+      if(!selected){panel.className='choice-feedback';panel.textContent='';return}
+      const right=selected===cfg.correct;
+      panel.className='choice-feedback show '+(right?'correct':'incorrect');
+      panel.textContent=(right?'✓ ':'↻ ')+(right?cfg.yes:cfg.no);
+      radios.find(r=>r.value===selected)?.closest('.radio-option')?.classList.add(right?'answer-correct':'answer-incorrect');
+    }
+    function restoreFields(){
+      document.querySelectorAll('[data-field]').forEach(input=>{
+        const v=state.fields[input.dataset.field];
+        if(input.type==='radio')input.checked=v===input.value;
+        else if(input.type==='checkbox')input.checked=!!v;
+        else if(v!==undefined)input.value=v;
+      });
+      Object.keys(choiceKeys).forEach(updateChoiceFeedback);
+      for(const type of ['force','mass'])renderTable(type);
+      if(state.reveal)showReveal(false);
+    }
+    function showReveal(save=true){state.reveal=true;$('law-reveal').classList.add('show');$('reveal-button').textContent='החוק השני מוצג';$('reveal-button').setAttribute('aria-expanded','true');if(save)markSave()}
+    function completion(){
+      const stageFields=[
+        ['student','class'],
+        ['predict-stop','s1-observe','s1-explain'],
+        ['s2-dv','s2-rate','s2-compare','s2-meaning'],
+        ['s3-constant','s3-control','s3-doubling','s3-conclusion'],
+        ['s4-constant','s4-control','s4-doubling','s4-conclusion'],
+        ['s5-recap','formula-choice','s5-evidence'],
+        ['cart-force','s6-carts','s6-moving','s6-reflect']
+      ];
+      let total=0,done=0;
+      const statuses=[];
+      stageFields.forEach((group,i)=>{
+        let stageDone=0,stageTotal=group.length;
+        group.forEach(key=>{if(String(state.fields[key]??'').trim()!==''){stageDone++;done++}total++});
+        if(i===3||i===4){let n=pointData(i===3?'force':'mass').length;total+=3;stageTotal+=3;done+=Math.min(3,n);stageDone+=Math.min(3,n)}
+        statuses.push(stageDone>=stageTotal);
+      });
+      const pct=Math.round(done/total*100);
+      $('progress-bar').style.width=pct+'%';$('progress-text').textContent=pct+'% הושלמו';
+      nav.forEach((btn,i)=>btn.classList.toggle('done',statuses[i]));
+      return pct;
+    }
+    function go(index,scroll=true){
+      const k=Math.max(0,Math.min(6,Number(index)||0));state.active=k;
+      steps.forEach((s,i)=>s.classList.toggle('active',i===k));
+      nav.forEach((n,i)=>{n.classList.toggle('current',i===k);n.setAttribute('aria-current',i===k?'step':'false')});
+      $('prev-step').style.visibility=k===0?'hidden':'visible';
+      $('next-step').textContent=k===6?'סיום · הורדת עבודה':'לשלב הבא ←';
+      $('step-number').textContent='שלב '+(k+1)+' מתוך 7';
+      if(scroll)window.scrollTo({top:0,behavior:'smooth'});
+      markSave();
+    }
+    document.addEventListener('input',e=>{
+      const t=e.target;
+      if(t.dataset.table){const i=Number(t.dataset.index),tab=t.dataset.table,col=t.dataset.col;if(state.tables[tab]?.[i])state.tables[tab][i][col]=t.value;updateGraph(tab);completion();markSave();return}
+      if(t.dataset.field&&t.type!=='radio'&&t.type!=='checkbox') {state.fields[t.dataset.field]=t.value;completion();markSave()}
+    });
+    document.addEventListener('change',e=>{const t=e.target;if(t.dataset.field){state.fields[t.dataset.field]=t.type==='checkbox'?t.checked:t.value;updateChoiceFeedback(t.dataset.field);completion();markSave()}});
+    document.addEventListener('click',e=>{
+      const target=e.target.closest('[data-add-row],[data-remove-row]');if(!target)return;
+      if(target.dataset.addRow){const ty=target.dataset.addRow;state.tables[ty].push(ty==='force'?{force:'',acc:''}:{mass:'',acc:''});renderTable(ty);markSave()}
+      if(target.dataset.removeRow){const ty=target.dataset.removeRow,i=Number(target.dataset.index);if(state.tables[ty].length<=1){toast('יש להשאיר לפחות שורת מדידה אחת');return}state.tables[ty].splice(i,1);renderTable(ty);completion();markSave()}
+    });
+    nav.forEach(n=>n.addEventListener('click',()=>go(n.dataset.goto)));
+    $('prev-step').addEventListener('click',()=>go(state.active-1));
+    $('next-step').addEventListener('click',()=>{if(state.active===6){exportHtml()}else go(state.active+1)});
+    $('reveal-button').addEventListener('click',()=>showReveal());
+    function exportHtml(){
+      markSave();
+      const clone=document.documentElement.cloneNode(true);
+      const session=clone.querySelector('#embedded-session');
+      // Escape the script terminator and HTML metacharacters so user text is always treated as data.
+      session.textContent=JSON.stringify(state).replace(/</g,'\\u003c').replace(/>/g,'\\u003e').replace(/&/g,'\\u0026');
+      // Include plain values in the saved DOM as a fallback for browsers with disabled JavaScript.
+      document.querySelectorAll('[data-field]').forEach(el=>{
+        const name=el.dataset.field, stored=state.fields[name];
+        if(el.type==='radio'||el.type==='checkbox'){
+          const same=el.type==='checkbox'?!!stored:stored===el.value;
+          const dest=clone.querySelector('[data-field="'+CSS.escape(name)+'"]'+(el.type==='radio'?'[value="'+CSS.escape(el.value)+'"]':''));
+          if(dest){if(same)dest.setAttribute('checked','');else dest.removeAttribute('checked')}
+        }else{
+          const dest=clone.querySelector('[data-field="'+CSS.escape(name)+'"]');
+          if(dest){if(dest.tagName==='TEXTAREA')dest.textContent=stored??'';else dest.setAttribute('value',stored??'')}
+        }
+      });
+      const html='<!DOCTYPE html>\n'+clone.outerHTML;
+      const raw=(state.fields.student||'ללא-שם').trim().replace(/[\\/:*?"<>|]/g,'').replace(/\s+/g,'-').slice(0,65) || 'ללא-שם';
+      const fileName='חקר-החוק-השני_תשובות_'+raw+'.html';
+      const blob=new Blob([html],{type:'text/html;charset=utf-8'});
+      const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=fileName;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500);
+      toast('הקובץ המלא הורד למחשב');
+    }
+    function printAll(){window.print()}
+    $('export-top').addEventListener('click',exportHtml);
+    $('export-bottom').addEventListener('click',exportHtml);
+    $('print-top').addEventListener('click',printAll);
+    $('print-bottom').addEventListener('click',printAll);
+    restoreFields();completion();go(state.active,false);
+  })();
+  </script>
+<input type='hidden' name='ntsp_block_page' value='https://m.safepage.neto.net.il/?a=block/block1&level=-30&url=http%3A%2F%2Fchatgpt.com%2Fbackend-api%2Festuary%2Fcontent%3Fid%3Dfile_00000000616081f481e3c53107f91e2a%26fn%3Dnewton_second_law_inquiry.html%26cd%3Dattachment%26ts%3D498039%26p%3Dfs%26cid%3D1%26sig%3D04759a46db0c48a2429115cc7f472c26fdf7b0f2ba2dfa38bbcf8bdc72ab01d0%26v%3D0&user_id=445362&sigid=ec9b20c2d21d695bbe1d254135d4d9a8d40f4f36520c7ffb949ac74079951d89&startm=0&keyword=&referer=https%3A%2F%2Fchatgpt.com%2F&category=24&cause=Quiltingjs'/><input type='hidden' name='ntsp_is_etrog' value='0'/><input type='hidden' name='ntsp_url_category' value='24'/><input type='hidden' name='ntsp_quilting' value='3'/><input type='hidden' name='ntsp_media_level' value='-30'/><input type='hidden' name='ntsp_user_level' value='-30'/><input type='hidden' name='ntsp_url_level' value='20'/><input type='hidden' name='ntsp_block_wa_status' value='0'/><script src='/jsQuilting/server/jsDict_utf8.js?v=1&k=23898278c1850f536d688db3614128a0' type='text/javascript' defer></script></body>
+</html>
