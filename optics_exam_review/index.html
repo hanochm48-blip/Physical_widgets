@@ -1,0 +1,594 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>הכנה למבחן מסכם בנושא אור</title>
+  <style>
+    :root {
+      color-scheme: light;
+      font-family: Arial, "Noto Sans Hebrew", sans-serif;
+      color: #172e32;
+      background: #f2f6f5;
+      --muted: #405b5e;
+      --accent: #0b6057;
+      --navy: #173437;
+      --line: #d1dfdc;
+      --wash: #e8f3ef;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    body { margin: 0; line-height: 1.55; }
+    button, input { font: inherit; }
+    a { color: var(--accent); }
+    :focus-visible { outline: 3px solid #137768; outline-offset: 3px; }
+    h1, h2, h3, h4, p { margin: 0; }
+
+    .page { max-width: 1100px; margin-inline: auto; padding: 28px 30px 64px; }
+    .hero {
+      padding: 19px 28px 24px;
+      background: var(--navy);
+      color: white;
+      border-radius: 16px 16px 0 0;
+    }
+    .blessing { font-size: .83rem; color: #c2ddd7; }
+    h1 { margin-block: 4px 2px; font-size: clamp(1.8rem, 4vw, 2.6rem); line-height: 1.19; }
+    .subtitle { color: #e2f0eb; font-size: 1.075rem; }
+    .tabs {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 1px;
+      background: var(--line);
+      border: 1px solid var(--line);
+      border-top: 0;
+      border-radius: 0 0 13px 13px;
+      overflow: hidden;
+    }
+    .tab {
+      min-height: 50px;
+      padding: 9px 5px;
+      border: 0;
+      box-shadow: inset 0 -4px transparent;
+      background: #fff;
+      color: var(--muted);
+      font-weight: 700;
+      line-height: 1.2;
+      cursor: pointer;
+    }
+    .tab:hover { background: #f3faf7; }
+    .tab[aria-selected="true"] {
+      color: var(--accent);
+      background: var(--wash);
+      box-shadow: inset 0 -4px var(--accent);
+    }
+    .tab:focus-visible { outline-offset: -5px; }
+
+    .topic { margin-block-start: 24px; }
+    .topic-title {
+      border-inline-start: 4px solid var(--accent);
+      padding-inline-start: 10px;
+      margin-block-end: 13px;
+      font-size: 1.52rem;
+      line-height: 1.25;
+    }
+    .lesson-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+      align-items: start;
+      gap: 16px;
+    }
+    .study, .workbook {
+      background: #fff;
+      padding: 17px 18px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+    }
+    .study h3, .workbook h3 { font-size: 1.06rem; margin-block-end: 7px; }
+    .points { margin: 0; padding-inline-start: 1.25em; }
+    .points li { padding-inline-start: .17em; }
+    .points li + li { margin-block-start: .38em; }
+    .points li::marker { color: var(--accent); }
+    .math { display: inline-block; direction: ltr; unicode-bidi: isolate; white-space: nowrap; }
+    .math sub { line-height: 0; }
+    .application { margin-block-start: 13px; }
+    .application h3 { margin-block-end: 4px; }
+    .indices-block { margin-block: 12px; }
+    .indices-block h3 { margin-block-end: 5px; }
+    .indices { display: flex; flex-wrap: wrap; gap: 4px 6px; margin: 0; }
+    .indices div { display: flex; gap: 5px; padding: 2px 7px; border-radius: 5px; background: var(--wash); }
+    .indices dd { margin: 0; font-variant-numeric: tabular-nums; }
+    .law { margin-block-start: 11px; }
+    .law h3 { margin-block-end: 2px; }
+    .law .equation { color: var(--accent); font-size: 1.12em; font-weight: 700; }
+    .law .equation + p, .law p + .equation { margin-block-start: 2px; }
+
+    table {
+      border-collapse: collapse;
+      inline-size: 100%;
+      line-height: 1.3;
+      font-size: .94rem;
+    }
+    th, td { padding: 7px 8px; text-align: start; vertical-align: top; }
+    thead { background: var(--wash); color: var(--navy); }
+    tbody tr { border-block-end: 1px solid var(--line); }
+    tbody tr:last-child { border-block-end: 0; }
+    tbody th { font-weight: 400; }
+    .numeric { text-align: center; white-space: nowrap; font-variant-numeric: tabular-nums; }
+    .phet-link {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-block-start: 13px;
+      padding: 9px 11px;
+      border-radius: 7px;
+      border: 1px solid var(--line);
+      background: var(--wash);
+      text-decoration: none;
+    }
+    .phet-link strong { text-decoration: underline; text-underline-offset: 3px; }
+    .phet-link small { display: block; color: var(--muted); line-height: 1.4; }
+    .phet-link:hover { background: #daeee6; }
+    .qr-code, .print-only { display: none; }
+
+    .quiz { margin-block-start: 25px; }
+    .quiz h3 { font-size: 1.33rem; }
+    .quiz-intro { margin-block: 3px 12px; color: var(--muted); }
+    .question {
+      padding: 13px 15px;
+      border: 1px solid var(--line);
+      border-radius: 11px;
+      background: #fff;
+    }
+    .question + .question { margin-block-start: 10px; }
+    fieldset { min-inline-size: 0; margin: 0; padding: 0; border: 0; }
+    legend { inline-size: 100%; padding: 0; margin-block-end: 7px; font-weight: 700; }
+    .options { display: grid; gap: 5px; }
+    .option {
+      display: flex;
+      gap: 8px;
+      align-items: baseline;
+      min-height: 34px;
+      padding: 4px 8px;
+      border: 1px solid transparent;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .option:hover, .option:has(input:checked) { background: var(--wash); }
+    .option:has(input:checked) { border-color: #9bbcb3; }
+    input[type="radio"] { margin: 0; accent-color: var(--accent); flex-shrink: 0; }
+    .check-row { display: flex; flex-wrap: wrap; align-items: center; gap: 9px 12px; margin-block-start: 12px; }
+    .check {
+      min-height: 43px;
+      border: 0;
+      border-radius: 7px;
+      padding: 7px 17px;
+      color: #fff;
+      background: var(--accent);
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .check:hover { background: #064b44; }
+    .notice { color: #744329; }
+    .results { margin-block-start: 12px; padding: 13px 17px; background: #fff; border: 1px solid var(--line); border-radius: 9px; }
+    .results h4 { font-size: 1.08rem; }
+    .results ol { padding-inline-start: 1.5em; margin-block: 6px 0; }
+    .results li + li { margin-block-start: 9px; }
+    .results li::marker, .verdict { font-weight: 700; }
+    .answer-copy { margin-inline-start: 6px; }
+    .success .verdict { color: var(--accent); }
+    .review .verdict { color: #744329; }
+    .results li p { color: var(--muted); }
+    .no-script { margin-block-start: 14px; }
+
+    @media screen and (max-width: 680px) {
+      .page { padding: 14px 13px 38px; }
+      .hero { padding: 13px 15px 17px; }
+      .subtitle { font-size: .97rem; }
+      .lesson-grid { grid-template-columns: 1fr; gap: 10px; }
+      .topic { margin-block-start: 18px; }
+      .study, .workbook { padding: 13px 14px; }
+      .question { padding-inline: 12px; }
+      .option { min-height: 40px; }
+    }
+
+    @page { size: A4; margin: 11mm 12mm 10mm; }
+    @media print {
+      :root { background: #fff; }
+      body { font-size: 10.3pt; line-height: 1.32; }
+      .page { max-width: none; margin: 0; padding: 0; }
+      .hero { padding: 0 0 3.5mm; color: #142b2e; background: #fff; border-radius: 0; border-block-end: 1pt solid #55817a; }
+      .blessing { font-size: 8.3pt; color: #435c5e; }
+      h1 { margin-block: .6mm .4mm; font-size: 22pt; }
+      .subtitle { color: var(--muted); font-size: 10.7pt; }
+      .tabs, .quiz, .no-script { display: none !important; }
+      .topic, .topic[hidden] { display: block !important; margin-block-start: 4mm; break-inside: avoid; }
+      .topic-title {
+        margin-block-end: 2.15mm;
+        padding: 1.1mm 2mm;
+        border-inline-start-width: 2pt;
+        border-block-end: .5pt solid #afc4be;
+        font-size: 13pt;
+        color: #163f3a;
+        background: #edf5f1;
+      }
+      .lesson-grid { grid-template-columns: minmax(0, 1.59fr) minmax(0, 1fr); gap: 5mm; }
+      .study, .workbook { background: transparent; border: 0; border-radius: 0; padding: 0; }
+      .study h3, .workbook h3 { margin-block-end: .8mm; font-size: 10.3pt; }
+      .points { padding-inline-start: 1.1em; }
+      .points li + li { margin-block-start: .6mm; }
+      .application { margin-block-start: 1.6mm; }
+      .indices-block, .law { margin-block: 1.45mm 0; }
+      .indices { gap: .6mm 1.3mm; }
+      .indices div { gap: 1mm; padding: .05mm 1.1mm; border-radius: 1mm; background: #edf5f1; }
+      .law h3 { margin-block-end: .1mm; }
+      .law .equation { font-size: 10.8pt; }
+      .law .equation + p, .law p + .equation { margin-block-start: .2mm; }
+      table { font-size: 9pt; line-height: 1.18; }
+      th, td { padding: .9mm 1.25mm; }
+      thead { border-block-end: .55pt solid #a4b9b4; }
+      tbody tr { border-block-end: .45pt solid #c5d3d0; }
+      .phet-link { padding: 1mm 1.6mm; margin-block-start: 2.1mm; gap: 1.3mm; border-radius: 1.5mm; background: #fff; }
+      .phet-link strong { font-size: 9.4pt; }
+      .phet-link small { font-size: 8.4pt; }
+      .phet-link .screen-only { display: none; }
+      .phet-link .print-only { display: block; }
+      .qr-code { display: block; inline-size: 18mm; block-size: 18mm; flex: none; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header class="hero">
+      <p class="blessing">בס״ד</p>
+      <h1>הכנה למבחן מסכם בנושא אור</h1>
+      <p class="subtitle">מודל הקרן, שדה ראייה, החזרה ושבירה</p>
+    </header>
+
+    <nav class="tabs" role="tablist" aria-label="נושאי המבחן" hidden>
+      <button type="button" class="tab" id="tab-rays" role="tab" aria-controls="rays" aria-selected="true">מודל הקרן</button>
+      <button type="button" class="tab" id="tab-reflection" role="tab" aria-controls="reflection" aria-selected="false" tabindex="-1">החזרת אור</button>
+      <button type="button" class="tab" id="tab-refraction" role="tab" aria-controls="refraction" aria-selected="false" tabindex="-1">שבירת אור</button>
+    </nav>
+    <noscript><p class="no-script">להפעלת הלשוניות ובדיקת התשובות יש להפעיל JavaScript בדפדפן.</p></noscript>
+
+    <section class="topic" id="rays" aria-labelledby="rays-title">
+      <h2 class="topic-title" id="rays-title">מודל הקרן</h2>
+      <div class="lesson-grid">
+        <div class="study">
+          <h3>מה צריך לדעת?</h3>
+          <ul class="points">
+            <li>בתווך אחיד האור מתפשט בקווים ישרים, המתוארים כקרניים.</li>
+            <li>כדי לראות אלומת אור מן הצד, חלק מהאור צריך להתפזר ולהגיע לעין.</li>
+            <li>במשטח שמחזיר אור בפיזור, אור מוחזר מכל נקודה מוארת לכיוונים רבים.</li>
+            <li><strong>שדה ראייה ישיר</strong> כולל עצמים שאור מהם מגיע לעין במסלול ישר ופנוי.</li>
+          </ul>
+          <div class="application">
+            <h3>יישומים</h3>
+            <ul class="points">
+              <li>חישוב גובה עץ.</li>
+              <li>לשכה אפלה והיפוך התמונה.</li>
+              <li>הארה דרך סדק רחב ומדידת רוחב הכתם המואר על המסך.</li>
+            </ul>
+          </div>
+        </div>
+        <div class="workbook">
+          <h3 id="rays-practice">תרגול מהספר</h3>
+          <table aria-labelledby="rays-practice">
+            <thead><tr><th scope="col">נושא</th><th scope="col" class="numeric">עמוד</th><th scope="col" class="numeric">תרגילים</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">קרני אור</th><td class="numeric">40</td><td class="numeric" dir="ltr">1, 6</td></tr>
+              <tr><th scope="row">חישוב גודל צל</th><td class="numeric">41</td><td class="numeric" dir="ltr">13</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <section class="quiz" aria-labelledby="rays-quiz" hidden>
+        <h3 id="rays-quiz">בדיקה עצמית</h3>
+        <p class="quiz-intro">בחרו תשובה לכל שאלה. כשתסיימו, לחצו על ״בדיקת תשובות״ כדי לקבל משוב והסבר.</p>
+        <form>
+          <div class="question">
+            <fieldset data-answer="b">
+              <legend>1. אלומת אור עוברת בחדר חשוך. אחרי שמפזרים מעט ערפל בחדר אפשר לראות אותה מהצד. מה השתנה?</legend>
+              <div class="options">
+                <label class="option"><input type="radio" name="rays-1" value="a"><span class="option-text">האור נע במסלול מעוקל לאורך כל האלומה.</span></label>
+                <label class="option"><input type="radio" name="rays-1" value="b"><span class="option-text">טיפות הערפל מפזרות חלק מאור האלומה אל העין.</span></label>
+                <label class="option"><input type="radio" name="rays-1" value="c"><span class="option-text">טיפות הערפל פולטות אור משלהן.</span></label>
+              </div>
+              <template class="solution">הצופה בצד רואה אור מטיפות הערפל, שמפזרות לכיוונו חלק מהאור שפגע בהן.</template>
+            </fieldset>
+          </div>
+          <div class="question">
+            <fieldset data-answer="c">
+              <legend>2. מציבים חץ זקוף מול לשכה אפלה בעלת נקב קטן. היכן יופיע קצהו העליון של החץ בדמות שעל המסך?</legend>
+              <div class="options">
+                <label class="option"><input type="radio" name="rays-2" value="a"><span class="option-text">בחלקה העליון של הדמות.</span></label>
+                <label class="option"><input type="radio" name="rays-2" value="b"><span class="option-text">במרכז הדמות.</span></label>
+                <label class="option"><input type="radio" name="rays-2" value="c"><span class="option-text">בחלקה התחתון של הדמות.</span></label>
+              </div>
+              <template class="solution">קרן מראש החץ עוברת דרך הנקב וממשיכה בקו ישר אל המסך. היא מגיעה נמוך יותר מהקרן שעוברת בנקב מתחתית החץ.</template>
+            </fieldset>
+          </div>
+          <div class="question">
+            <fieldset data-answer="a">
+              <legend>3. מקל אנכי בגובה 1.5 מטר מטיל צל שאורכו מטר אחד. באותו רגע, על אותה קרקע אופקית, עץ זקוף מטיל צל שאורכו 4 מטרים. מה גובה העץ?</legend>
+              <div class="options">
+                <label class="option"><input type="radio" name="rays-3" value="a"><span class="option-text">6 מטרים.</span></label>
+                <label class="option"><input type="radio" name="rays-3" value="b"><span class="option-text">4.5 מטרים.</span></label>
+                <label class="option"><input type="radio" name="rays-3" value="c"><span class="option-text">2.7 מטרים.</span></label>
+              </div>
+              <template class="solution">קרני השמש מגיעות באותה זווית, ולכן המשולשים דומים. צל העץ ארוך פי 4 מצל המקל, ולכן גם העץ גבוה פי 4 מהמקל.</template>
+            </fieldset>
+          </div>
+          <div class="check-row">
+            <button type="submit" class="check">בדיקת תשובות</button>
+            <p class="notice" role="status"></p>
+          </div>
+          <div class="results" hidden><h4 tabindex="-1"></h4><ol></ol></div>
+        </form>
+      </section>
+    </section>
+
+    <section class="topic" id="reflection" aria-labelledby="reflection-title">
+      <h2 class="topic-title" id="reflection-title">החזרת אור</h2>
+      <div class="lesson-grid">
+        <div class="study">
+          <h3>מה צריך לדעת?</h3>
+          <ul class="points">
+            <li><strong>חוק ההחזרה</strong> קובע שזווית הפגיעה שווה לזווית ההחזרה. שתי הזוויות נמדדות ביחס לאנך למשטח בנקודת הפגיעה.</li>
+            <li>החזרה מסודרת מתרחשת במשטח חלק שמחזיר אור.</li>
+            <li><strong>הדמות במראה מישורית</strong> היא דמות מדומה. היא נמצאת מאחורי המראה, במרחק השווה למרחק העצם ממנה.</li>
+            <li><strong>אוריינטציית הדמות</strong> מתהפכת בכיוון המאונך למראה ונשמרת בכיוונים המקבילים לה.</li>
+            <li><strong>שדה ראייה</strong> של דמות במראה מוגבל למקומות שמהם הקו הישר בין העין לדמות חוצה את שטח המראה המחזיר.</li>
+            <li><strong>דמות של דמות</strong> יכולה להיווצר כשדמות שנוצרת במראה אחת נמצאת לפני המראה השנייה, וקרניים שהוחזרו מהמראה הראשונה מגיעות למראה השנייה.</li>
+          </ul>
+          <div class="application">
+            <h3>פריסקופ</h3>
+            <p>סרטטו איור סכמטי של פריסקופ, ובו הסירה, דמותה ומהלך הקרניים (עמוד 77).</p>
+          </div>
+        </div>
+        <div class="workbook">
+          <h3 id="reflection-practice">תרגול מהספר</h3>
+          <table aria-labelledby="reflection-practice">
+            <thead><tr><th scope="col">נושא</th><th scope="col" class="numeric">עמוד</th><th scope="col" class="numeric">תרגילים</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">חוקי החזרה</th><td class="numeric">79</td><td class="numeric" dir="ltr">1-7</td></tr>
+              <tr><th scope="row">הגדרת הדמות לפי חוק ההחזרה</th><td class="numeric">80</td><td class="numeric" dir="ltr">10, 12</td></tr>
+              <tr><th scope="row">דמות ומהלך הקרן</th><td class="numeric">82</td><td class="numeric" dir="ltr">15, 17</td></tr>
+              <tr><th scope="row">אוריינטציה של דמות</th><td class="numeric">83</td><td class="numeric" dir="ltr">20-21, 24</td></tr>
+              <tr><th scope="row">שדה ראייה</th><td class="numeric">84</td><td class="numeric" dir="ltr">26, 28, 29</td></tr>
+              <tr><th scope="row">ריבוי מראות</th><td class="numeric">85</td><td class="numeric" dir="ltr">31, 36</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <section class="quiz" aria-labelledby="reflection-quiz" hidden>
+        <h3 id="reflection-quiz">בדיקה עצמית</h3>
+        <p class="quiz-intro">בחרו תשובה לכל שאלה. כשתסיימו, לחצו על ״בדיקת תשובות״ כדי לקבל משוב והסבר.</p>
+        <form>
+          <div class="question">
+            <fieldset data-answer="c">
+              <legend>1. קרן פוגעת במראה מישורית בזווית של <bdi>25°</bdi> ביחס לפני המראה. מהי זווית ההחזרה?</legend>
+              <div class="options">
+                <label class="option"><input type="radio" name="reflection-1" value="a"><span class="option-text"><bdi>25°</bdi></span></label>
+                <label class="option"><input type="radio" name="reflection-1" value="b"><span class="option-text"><bdi>50°</bdi></span></label>
+                <label class="option"><input type="radio" name="reflection-1" value="c"><span class="option-text"><bdi>65°</bdi></span></label>
+              </div>
+              <template class="solution">זווית הפגיעה נמדדת ביחס לאנך, ולכן היא <span class="math">90° − 25° = 65°</span>. זווית ההחזרה שווה לה.</template>
+            </fieldset>
+          </div>
+          <div class="question">
+            <fieldset data-answer="b">
+              <legend>2. עצם נמצא 35 ס״מ לפני מראה מישורית. מה המרחק בין העצם לדמותו?</legend>
+              <div class="options">
+                <label class="option"><input type="radio" name="reflection-2" value="a"><span class="option-text">35 ס״מ.</span></label>
+                <label class="option"><input type="radio" name="reflection-2" value="b"><span class="option-text">70 ס״מ.</span></label>
+                <label class="option"><input type="radio" name="reflection-2" value="c"><span class="option-text">17.5 ס״מ.</span></label>
+              </div>
+              <template class="solution">הדמות נמצאת 35 ס״מ מאחורי המראה והעצם נמצא 35 ס״מ לפניה. המרחק ביניהם הוא 70 ס״מ.</template>
+            </fieldset>
+          </div>
+          <div class="question">
+            <fieldset data-answer="a">
+              <legend>3. תלמיד זז הצידה והפסיק לראות במראה קטנה את דמותו של עצם. העצם והמראה נשארו במקומם. מה השתנה?</legend>
+              <div class="options">
+                <label class="option"><input type="radio" name="reflection-3" value="a"><span class="option-text">הקו הישר מעין התלמיד לדמות עובר כעת מחוץ לשטח המראה.</span></label>
+                <label class="option"><input type="radio" name="reflection-3" value="b"><span class="option-text">מרחק הדמות מהמראה גדל.</span></label>
+                <label class="option"><input type="radio" name="reflection-3" value="c"><span class="option-text">הדמות זזה הצידה יחד עם התלמיד.</span></label>
+              </div>
+              <template class="solution">מיקום הדמות נקבע על פי מיקום העצם והמראה. כשהתלמיד זז, נקודת החיתוך של הקו מהעין לדמות עם מישור המראה יוצאת משטח המראה המחזיר.</template>
+            </fieldset>
+          </div>
+          <div class="check-row">
+            <button type="submit" class="check">בדיקת תשובות</button>
+            <p class="notice" role="status"></p>
+          </div>
+          <div class="results" hidden><h4 tabindex="-1"></h4><ol></ol></div>
+        </form>
+      </section>
+    </section>
+
+    <section class="topic" id="refraction" aria-labelledby="refraction-title">
+      <h2 class="topic-title" id="refraction-title">שבירת אור</h2>
+      <div class="lesson-grid">
+        <div class="study">
+          <h3>מה צריך לדעת?</h3>
+          <ul class="points">
+            <li>קרן שעוברת בין תווכים בעלי מקדמי שבירה שונים משנה כיוון בפגיעה אלכסונית. בפגיעה בניצב למשטח, כיוון הקרן העוברת נשמר.</li>
+            <li>בפגיעה אלכסונית, הקרן הנשברת מתקרבת לאנך במעבר ממקדם שבירה נמוך לגבוה, ומתרחקת מהאנך במעבר ממקדם גבוה לנמוך.</li>
+          </ul>
+          <div class="indices-block">
+            <h3>מקדמי שבירה בקירוב</h3>
+            <dl class="indices">
+              <div><dt>אוויר</dt><dd dir="ltr">1</dd></div>
+              <div><dt>זכוכית</dt><dd dir="ltr">1.5</dd></div>
+              <div><dt>מים</dt><dd dir="ltr">1.33</dd></div>
+              <div><dt>יהלום</dt><dd dir="ltr">2.4</dd></div>
+            </dl>
+          </div>
+          <div class="law">
+            <h3>חוק סנל</h3>
+            <p class="equation"><span class="math"><i>n</i><sub>1</sub> sin <i>α</i> = <i>n</i><sub>2</sub> sin <i>β</i></span></p>
+            <p><span class="math"><i>n</i><sub>1</sub></span> ו־<span class="math"><i>n</i><sub>2</sub></span> הם מקדמי השבירה בתווך הראשון והשני. <span class="math"><i>α</i></span> היא זווית הפגיעה ו־<span class="math"><i>β</i></span> היא זווית השבירה. שתיהן נמדדות ביחס לאנך.</p>
+          </div>
+          <div class="law">
+            <h3>זווית קריטית</h3>
+            <p>במעבר ממקדם שבירה גבוה לנמוך, הזווית הקריטית היא זווית הפגיעה שבה זווית השבירה היא <bdi>90°</bdi>. בזווית פגיעה גדולה יותר מתרחשת החזרה פנימית מלאה.</p>
+            <p class="equation"><span class="math">sin <i>α</i><sub>c</sub> = <i>n</i><sub>2</sub> / <i>n</i><sub>1</sub></span></p>
+          </div>
+        </div>
+        <div class="workbook">
+          <h3 id="refraction-practice">תרגול מהספר</h3>
+          <table aria-labelledby="refraction-practice">
+            <thead><tr><th scope="col">נושא</th><th scope="col" class="numeric">עמוד</th><th scope="col" class="numeric">תרגילים</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">התפשטות אור לכיוון זכוכית</th><td class="numeric">153</td><td class="numeric" dir="ltr">1-6</td></tr>
+              <tr><th scope="row">מעבר בכיוון ההפוך</th><td class="numeric">154</td><td class="numeric" dir="ltr">8, 9</td></tr>
+              <tr><th scope="row">מנסרה (שאלת בונוס)</th><td class="numeric">155</td><td class="numeric" dir="ltr">13, 14</td></tr>
+            </tbody>
+          </table>
+          <a class="phet-link" href="https://phet.colorado.edu/sims/html/bending-light/latest/bending-light_all.html" target="_blank" rel="noopener">
+            <img class="qr-code" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAATsAAAE7AQAAAACKpxtqAAACr0lEQVR42u1aMbKjMBSTgBnSOd2Wzk2cPRnOzcgR9gbmBtCZGbC2sMlku99tYdOQQmk0enrv6UHhR8/S4YdPAzZgAzbgz4AbSfKG5YkO2Ph8cdjvyxPdSZLs6qUHklYr6RgVnNcBIylhlGboGCWJkkLNMnuzA7YHUF4AtodTVpavuLiGr9/29RSE5fl70v7rD6HmPd+zzeTJ2+ZengNgpa56er68Z7US80vHuNoZbN4DAAvJAcA728zb579PwE6SlReXkSRFAC8N+x2ABpgAoJckpdqLawYwSvNEScFJx7gCkw4AmFRvcRV6JikayWcRgYomOFHRaEbl9Cg4zwMmy0ZSUQ+YZ0VWTo8k9FqtxH9L7QBs1Z3rauwJMAFTwqgAMJtOypDa6YHTh6VSVTABExVNUVfdxeV1AHCiIqyUen1EVLX35EDjia6PRi+eZeABYKVzAOxc+1KRswuY4DwwrnC+dK6EcbXVN/bVzlPqtdrCEpDyKJ36aAIaPWX7nJEAZKNWcF6KsPJs9FBSwMScFgKjJN/mng5l4Dl5h6MGYHm+dOwk/TmM60Jf+UoqyZepGXnuQR/NFfS4mueeC6j9lj15t5JwmuXx5knyUTA1T815R9c8oY+w80c9B2Dla1ePnXHytj3waeznbSO9hnG9ssOqdy4vRXO18hlfLavtXKuVTwDsPAGjAqbUZ7/O10A2a+76iGXyqY+bm9GdvOOthP0O51vWjGJB17icd66v3l95WlgaWJl7pFiSjBWueu/JvCg4D8AEp+v+V66BLUwtpxtmshJgsidXrp6vLzRQdi4r8cDGJ0Te7avmK+lXoJHrKGbZRCP5nDxPrbHnxynlD3tEszzeQh9NcE09Kvc/n4+lKmkhMK7tznV1dCvlyFmfO1ftnYvts+8GbMAG/A/Av5XAxctKwrI1AAAAAElFTkSuQmCC" alt="">
+            <span><strong>הדמיית שבירת אור ב־<bdi>PhET</bdi></strong><small class="screen-only">פתחו את ההדמיה בלשונית חדשה</small><small class="print-only">לחצו על הקישור או סרקו את הקוד</small></span>
+          </a>
+        </div>
+      </div>
+
+      <section class="quiz" aria-labelledby="refraction-quiz" hidden>
+        <h3 id="refraction-quiz">בדיקה עצמית</h3>
+        <p class="quiz-intro">בחרו תשובה לכל שאלה. כשתסיימו, לחצו על ״בדיקת תשובות״ כדי לקבל משוב והסבר.</p>
+        <form>
+          <div class="question">
+            <fieldset data-answer="b">
+              <legend>1. קרן עוברת מאוויר למים בזווית פגיעה של <bdi>40°</bdi>. מהי בקירוב זווית השבירה?</legend>
+              <div class="options">
+                <label class="option"><input type="radio" name="refraction-1" value="a"><span class="option-text"><bdi>40°</bdi></span></label>
+                <label class="option"><input type="radio" name="refraction-1" value="b"><span class="option-text"><bdi>29°</bdi></span></label>
+                <label class="option"><input type="radio" name="refraction-1" value="c"><span class="option-text"><bdi>59°</bdi></span></label>
+              </div>
+              <template class="solution">מקדמי השבירה הם 1 באוויר ו־1.33 במים. מחוק סנל מתקבל <span class="math">sin <i>β</i> = sin 40° / 1.33</span>, ולכן <span class="math"><i>β</i> ≈ 29°</span>.</template>
+            </fieldset>
+          </div>
+          <div class="question">
+            <fieldset data-answer="a">
+              <legend>2. קרן פוגעת בניצב במשטח המפריד בין זכוכית לאוויר, מצד הזכוכית. מה יקרה לכיוון הקרן העוברת?</legend>
+              <div class="options">
+                <label class="option"><input type="radio" name="refraction-2" value="a"><span class="option-text">הקרן תמשיך באותו כיוון.</span></label>
+                <label class="option"><input type="radio" name="refraction-2" value="b"><span class="option-text">הקרן תתרחק מהאנך.</span></label>
+                <label class="option"><input type="radio" name="refraction-2" value="c"><span class="option-text">תתרחש החזרה פנימית מלאה.</span></label>
+              </div>
+              <template class="solution">בפגיעה בניצב זווית הפגיעה היא <bdi>0°</bdi>. לפי חוק סנל גם זווית השבירה היא <bdi>0°</bdi>, ולכן הקרן העוברת ממשיכה לאורך האנך.</template>
+            </fieldset>
+          </div>
+          <div class="question">
+            <fieldset data-answer="c">
+              <legend>3. קרן פוגעת מתוך הזכוכית במשטח המפריד בינה לבין אוויר. זווית הפגיעה <bdi>50°</bdi>. מה יקרה?</legend>
+              <div class="options">
+                <label class="option"><input type="radio" name="refraction-3" value="a"><span class="option-text">קרן נשברת תעבור לאורך הגבול בין הזכוכית לאוויר.</span></label>
+                <label class="option"><input type="radio" name="refraction-3" value="b"><span class="option-text">קרן נשברת תעבור לאוויר ותתרחק מהאנך.</span></label>
+                <label class="option"><input type="radio" name="refraction-3" value="c"><span class="option-text">תתרחש החזרה פנימית מלאה.</span></label>
+              </div>
+              <template class="solution">במעבר מזכוכית לאוויר מתקבל <span class="math">sin <i>α</i><sub>c</sub> = 1 / 1.5</span>, כלומר <span class="math"><i>α</i><sub>c</sub> ≈ 42°</span>. זווית הפגיעה גדולה מהזווית הקריטית.</template>
+            </fieldset>
+          </div>
+          <div class="check-row">
+            <button type="submit" class="check">בדיקת תשובות</button>
+            <p class="notice" role="status"></p>
+          </div>
+          <div class="results" hidden><h4 tabindex="-1"></h4><ol></ol></div>
+        </form>
+      </section>
+    </section>
+  </main>
+
+  <script>
+    const tablist = document.querySelector('.tabs');
+    const tabs = [...tablist.querySelectorAll('.tab')];
+    const panels = tabs.map(tab => document.getElementById(tab.getAttribute('aria-controls')));
+
+    function selectTopic(index) {
+      tabs.forEach((tab, position) => {
+        const active = index === position;
+        tab.setAttribute('aria-selected', String(active));
+        tab.tabIndex = active ? 0 : -1;
+        panels[position].hidden = !active;
+      });
+    }
+
+    tabs.forEach((tab, index) => {
+      const panel = panels[index];
+      panel.setAttribute('role', 'tabpanel');
+      panel.setAttribute('aria-labelledby', tab.id);
+      panel.tabIndex = 0;
+      tab.addEventListener('click', () => selectTopic(index));
+      tab.addEventListener('keydown', event => {
+        const destinations = {
+          ArrowLeft: (index + 1) % tabs.length,
+          ArrowRight: (index + tabs.length - 1) % tabs.length,
+          Home: 0,
+          End: tabs.length - 1,
+        };
+        const destination = destinations[event.key];
+        if (destination === undefined) return;
+        event.preventDefault();
+        selectTopic(destination);
+        tabs[destination].focus();
+      });
+    });
+    selectTopic(0);
+    tablist.hidden = false;
+
+    for (const quiz of document.querySelectorAll('.quiz')) {
+      const form = quiz.querySelector('form');
+      const questions = [...form.querySelectorAll('fieldset')];
+      const notice = form.querySelector('.notice');
+      const results = form.querySelector('.results');
+      const score = results.querySelector('h4');
+      const details = results.querySelector('ol');
+
+      form.addEventListener('submit', event => {
+        event.preventDefault();
+        const selected = questions.map(question => question.querySelector('input:checked'));
+        const firstUnanswered = selected.indexOf(null);
+        if (firstUnanswered !== -1) {
+          notice.textContent = `יש לבחור תשובה בשאלה ${firstUnanswered + 1} לפני הבדיקה.`;
+          questions[firstUnanswered].querySelector('input').focus();
+          return;
+        }
+
+        let correctCount = 0;
+        const items = questions.map((question, index) => {
+          const correct = selected[index].value === question.dataset.answer;
+          correctCount += Number(correct);
+          const item = document.createElement('li');
+          item.className = correct ? 'success' : 'review';
+          const verdict = document.createElement('span');
+          verdict.className = 'verdict';
+          verdict.textContent = correct ? 'נכון' : 'התשובה הנכונה';
+          const answer = question.querySelector(`input[value="${question.dataset.answer}"]`);
+          const answerText = answer.labels[0].querySelector('.option-text').cloneNode(true);
+          answerText.classList.add('answer-copy');
+          const explanation = document.createElement('p');
+          explanation.append(question.querySelector('.solution').content.cloneNode(true));
+          item.append(verdict, answerText, explanation);
+          return item;
+        });
+
+        notice.textContent = '';
+        score.textContent = `${correctCount} מתוך ${questions.length} תשובות נכונות`;
+        details.replaceChildren(...items);
+        results.hidden = false;
+        score.focus();
+      });
+
+      form.addEventListener('change', () => {
+        notice.textContent = '';
+        results.hidden = true;
+      });
+      quiz.hidden = false;
+    }
+  </script>
+</body>
+</html>
