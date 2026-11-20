@@ -28,6 +28,7 @@
   canvas {
     border: 1px solid var(--border); border-radius:8px; display:block;
     box-shadow: 0 0 40px rgba(0,80,150,0.3); cursor:crosshair;
+    max-width: min(610px, 95vw); height:auto; touch-action:none;
   }
   .panel {
     background:var(--panel); border:1px solid var(--border);
@@ -40,31 +41,67 @@
     margin-bottom:2px;
   }
   .charge-card { border-radius:6px; padding:12px; border:1px solid; }
-  .charge-card.q1 { border-color:rgba(0,212,255,0.3); background:rgba(0,212,255,0.04); }
-  .charge-card.q2 { border-color:rgba(255,77,109,0.3); background:rgba(255,77,109,0.04); }
+  .charge-card.qpos { border-color:rgba(0,212,255,0.3); background:rgba(0,212,255,0.04); }
+  .charge-card.qneg { border-color:rgba(255,77,109,0.3); background:rgba(255,77,109,0.04); }
+  .charge-card.qneutral { border-color:rgba(131,147,166,0.3); background:rgba(131,147,166,0.04); }
+  .charge-heading { display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:9px; }
+  .charge-heading .charge-label { margin-bottom:0; }
+  .remove-charge { border:1px solid var(--border); background:transparent; color:#91a6bb; border-radius:5px;
+                   padding:3px 8px; cursor:pointer; font:inherit; font-size:0.67rem; }
+  .remove-charge:hover:not(:disabled) { color:#ff8296; border-color:#ff8296; }
+  .remove-charge:disabled { opacity:0.28; cursor:not-allowed; }
+  .charge-list { display:flex; flex-direction:column; gap:10px; }
+  .charges-bar { display:flex; justify-content:space-between; align-items:center; gap:8px; }
+  .charges-count { color:var(--dim); font-size:0.67rem; }
+  .charge-actions { display:flex; gap:7px; margin-top:10px; }
+  .add-charge { flex:1; background:rgba(0,212,255,0.11); color:#9fefff;
+                border:1px solid rgba(0,212,255,0.42); padding:9px 8px; border-radius:6px;
+                cursor:pointer; font:inherit; font-size:0.78rem; font-weight:600; }
+  .add-charge:hover:not(:disabled) { background:rgba(0,212,255,0.22); }
+  .add-charge:disabled { opacity:0.35; cursor:not-allowed; }
+  .reset-charges { background:transparent; border:1px solid var(--border); color:var(--dim);
+                   padding:9px 8px; border-radius:6px; cursor:pointer; font:inherit; font-size:0.72rem; }
+  .reset-charges:hover { color:var(--text); border-color:#426381; }
+  .charges-hint { color:var(--dim); font-size:0.67rem; line-height:1.55; margin-top:7px; }
+  .panel { max-height:calc(100vh - 112px); overflow-y:auto; scrollbar-color:var(--border) transparent; }
   .dv-card {
     border-radius:6px; padding:12px; border:1px solid;
     border-color:rgba(160,224,128,0.35); background:rgba(160,224,128,0.04);
   }
   .charge-label { font-family:'Rajdhani',sans-serif; font-size:0.95rem; font-weight:700; letter-spacing:1px; margin-bottom:10px; }
-  .q1 .charge-label { color:var(--accent1); }
-  .q2 .charge-label { color:var(--accent2); }
+  .qpos .charge-label { color:var(--accent1); }
+  .qneg .charge-label { color:var(--accent2); }
+  .qneutral .charge-label { color:#8393a6; }
   .dv-card .charge-label { color:var(--accent3); }
   .slider-row { display:flex; flex-direction:column; gap:5px; }
   .slider-top { display:flex; justify-content:space-between; align-items:baseline; font-size:0.7rem; color:var(--dim); }
   .slider-value { font-family:'Rajdhani',sans-serif; font-size:1rem; font-weight:700; }
-  .q1 .slider-value { color:var(--accent1); }
-  .q2 .slider-value { color:var(--accent2); }
+  .qpos .slider-value { color:var(--accent1); }
+  .qneg .slider-value { color:var(--accent2); }
+  .qneutral .slider-value { color:#a9b7c6; }
   .dv-card .slider-value { color:var(--accent3); }
-  .dv-hint { font-size:0.65rem; color:var(--dim); margin-top:4px; line-height:1.5; }
+  .dv-hint { font-size:0.68rem; color:#819bb4; margin-top:4px; line-height:1.6; }
+  .dv-card .toggle-row { margin: 0 0 14px; color: var(--text); }
+  .dv-card input[type=range]:disabled { opacity:0.28; cursor:not-allowed; }
+  .dv-card input[type=range]:disabled::-webkit-slider-thumb { cursor:not-allowed; }
+  .dv-status { border-top:1px solid rgba(160,224,128,0.18); margin-top:10px; padding-top:9px;
+               color:var(--accent3); font-size:0.71rem; line-height:1.5; min-height:18px; }
+  .dv-card .manual-label { color:var(--dim); }
+  @media (max-width: 650px) {
+    body { padding:12px; }
+    .container { gap:14px; }
+    .panel { width:min(610px,95vw); max-height:none; overflow:visible; }
+  }
 
   input[type=range] { -webkit-appearance:none; width:100%; height:4px; border-radius:2px; outline:none; cursor:pointer; }
-  .q1 input[type=range]   { background:linear-gradient(to right, var(--accent1) var(--pct,50%), #1a2d4a var(--pct,50%)); }
-  .q2 input[type=range]   { background:linear-gradient(to right, var(--accent2) var(--pct,50%), #1a2d4a var(--pct,50%)); }
+  .qpos input[type=range] { background:linear-gradient(to right, var(--accent1) var(--pct,50%), #1a2d4a var(--pct,50%)); }
+  .qneg input[type=range] { background:linear-gradient(to right, var(--accent2) var(--pct,50%), #1a2d4a var(--pct,50%)); }
+  .qneutral input[type=range] { background:linear-gradient(to right, #8393a6 var(--pct,50%), #1a2d4a var(--pct,50%)); }
   .dv-card input[type=range] { background:linear-gradient(to right, var(--accent3) var(--pct,30%), #1a2d4a var(--pct,30%)); }
   input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; width:14px; height:14px; border-radius:50%; border:2px solid #fff; cursor:pointer; }
-  .q1 input[type=range]::-webkit-slider-thumb   { background:var(--accent1); box-shadow:0 0 8px var(--accent1); }
-  .q2 input[type=range]::-webkit-slider-thumb   { background:var(--accent2); box-shadow:0 0 8px var(--accent2); }
+  .qpos input[type=range]::-webkit-slider-thumb { background:var(--accent1); box-shadow:0 0 8px var(--accent1); }
+  .qneg input[type=range]::-webkit-slider-thumb { background:var(--accent2); box-shadow:0 0 8px var(--accent2); }
+  .qneutral input[type=range]::-webkit-slider-thumb { background:#8393a6; box-shadow:0 0 8px #8393a6; }
   .dv-card input[type=range]::-webkit-slider-thumb { background:var(--accent3); box-shadow:0 0 8px var(--accent3); }
 
   .legend { font-size:0.68rem; color:var(--dim); line-height:1.8; border-top:1px solid var(--border); padding-top:12px; }
@@ -81,46 +118,56 @@
 </head>
 <body>
 <h1>Equipotential Lines</h1>
-<div class="subtitle">קווי שווי פוטנציאל חשמלי · שני מטענים נקודתיים</div>
+<div class="subtitle">קווי שווי פוטנציאל חשמלי · מערכת מטענים נקודתיים</div>
 
 <div class="container">
   <canvas id="canvas" width="610" height="550"></canvas>
 
   <div class="panel">
-    <!-- Charges -->
-    <div class="charge-card q1">
-      <div class="charge-label">⊕ מטען 1</div>
-      <div class="slider-row">
-        <div class="slider-top"><span>עוצמה</span><span class="slider-value" id="v1">+1.0 μC</span></div>
-        <input type="range" id="s1" min="-30" max="30" value="10" step="1">
+    <!-- Add, remove and adjust point charges -->
+    <section class="charges-section" aria-label="הגדרות המטענים">
+      <div class="charges-bar">
+        <span class="section-title">מטענים נקודתיים</span>
+        <span class="charges-count" id="chargesCount">2 מתוך 8</span>
       </div>
-    </div>
-
-    <div class="charge-card q2">
-      <div class="charge-label">⊖ מטען 2</div>
-      <div class="slider-row">
-        <div class="slider-top"><span>עוצמה</span><span class="slider-value" id="v2">−1.0 μC</span></div>
-        <input type="range" id="s2" min="-30" max="30" value="-10" step="1">
+      <div id="chargeList" class="charge-list"></div>
+      <div class="charge-actions">
+        <button type="button" id="addCharge" class="add-charge">＋ הוסף מטען</button>
+        <button type="button" id="resetCharges" class="reset-charges">איפוס</button>
       </div>
-    </div>
+      <div class="charges-hint" id="chargesHint">ניתן לגרור כל מטען על פני המסך ולשנות את סימנו וגודלו במחוון.</div>
+    </section>
 
     <!-- ΔV Scale -->
     <div class="dv-card">
       <div class="charge-label">ΔV — קנה מידה</div>
+      <div class="toggle-row">
+        <span>התאמה אוטומטית</span>
+        <label class="toggle" aria-label="התאמה אוטומטית לקנה המידה">
+          <input type="checkbox" id="autoScale" checked aria-label="התאמה אוטומטית">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
       <div class="slider-row">
         <div class="slider-top">
-          <span>הפרש בין קווים</span>
-          <span class="slider-value" id="dvLabel">100 kV</span>
+          <span class="manual-label">הפרש בין קווים</span>
+          <span class="slider-value" id="dvLabel">—</span>
         </div>
-        <input type="range" id="sDV" min="1" max="100" value="40" step="1">
+        <input type="range" id="sDV" min="0" max="100" value="50" step="1"
+               disabled aria-label="הפרש פוטנציאלים בין קווים במצב ידני">
       </div>
-      <div class="dv-hint">
-        קו לכל ΔV וולט — ככל שהערך קטן יותר, יותר קווים מוצגים
+      <div class="dv-hint" id="dvHint">
+        היישומון בוחר ΔV אחיד לפי התפלגות הפוטנציאל על המסך, תוך התעלמות מערכים קיצוניים סמוך למטענים.
       </div>
+      <div class="dv-status" id="dvStatus" aria-live="polite"></div>
     </div>
 
     <!-- Toggles -->
     <div>
+      <div class="toggle-row" style="margin-bottom:10px;">
+        <span>קווי שווי פוטנציאל</span>
+        <label class="toggle" aria-label="הצגת קווי שווי פוטנציאל"><input type="checkbox" id="toggleContours" checked aria-label="הצגת קווי שווי פוטנציאל"><span class="toggle-slider"></span></label>
+      </div>
       <div class="toggle-row" style="margin-bottom:10px;">
         <span>קווי שדה חשמלי</span>
         <label class="toggle"><input type="checkbox" id="toggleField" checked><div class="toggle-slider"></div></label>
@@ -140,7 +187,7 @@
       <div class="leg-row"><div class="leg-line" style="background:#ffaaaa"></div><span>V שלילי נמוך</span></div>
       <div class="leg-row"><div class="leg-line" style="background:#ff3355"></div><span>V שלילי גבוה</span></div>
       <div style="margin-top:8px;border-top:1px solid var(--border);padding-top:8px;font-size:0.66rem;">
-        גרור את המטענים עם העכבר
+        גרור את המטענים בעזרת העכבר או במסך מגע
       </div>
     </div>
   </div>
@@ -153,24 +200,54 @@ const W = canvas.width, H = canvas.height;
 const k = 9e9;
 const GRID = 4; // px per grid cell (balance between speed & accuracy)
 
-let charges = [
-  { x: W/2 - 110, y: H/2, q: 10e-6 },
-  { x: W/2 + 110, y: H/2, q: -10e-6 }
-];
-let showField = true, showBg = true;
+const MAX_CHARGES = 8;
+let nextChargeId = 3;
+function defaultCharges() {
+  return [
+    { id: 1, x: W/2 - 110, y: H/2, q: 10e-6 },
+    { id: 2, x: W/2 + 110, y: H/2, q: -10e-6 }
+  ];
+}
+let charges = defaultCharges();
+let showField = true, showBg = true, showContours = true;
 let dragging = null;
 
-// ΔV between consecutive equipotential lines (in Volts)
-// Slider is log-scale: slider 1→100 maps to ΔV 1e3 → 1e7
-let deltaV = 1e5; // default
+// Equipotential spacing: automatically chosen by default, adjustable manually.
+// All contour levels remain exact integer multiples of the displayed ΔV.
+let autoScale = true;
+let manualDeltaV = 100;
+let deltaV = manualDeltaV;
+const MAX_CONTOUR_LEVELS = 72;
+let potentialStats = null;
 
+// A wide logarithmic range for the optional manual mode (0.1 V … 100 kV).
 function sliderToDV(s) {
-  return Math.pow(10, 3 + (s / 100) * 4); // 1e3 .. 1e7
+  return niceStep(Math.pow(10, -1 + (+s / 100) * 6));
+}
+
+// Prefer classroom-friendly steps (1, 2, 2.5, 5 … times a power of ten).
+function niceStep(v) {
+  if (!(v > 0) || !isFinite(v)) return 1;
+  const power = Math.floor(Math.log10(v));
+  let best = v, bestDistance = Infinity;
+  for (let p = power - 1; p <= power + 1; p++) {
+    for (const base of [1, 2, 2.5, 5, 10]) {
+      const candidate = base * Math.pow(10, p);
+      const distance = Math.abs(Math.log(candidate / v));
+      if (distance < bestDistance) {
+        bestDistance = distance;
+        best = candidate;
+      }
+    }
+  }
+  return best;
 }
 function fmtDV(v) {
-  if (v >= 1e6) return (v / 1e6).toPrecision(3) + ' MV';
-  if (v >= 1e3) return (v / 1e3).toPrecision(3) + ' kV';
-  return v.toFixed(0) + ' V';
+  const abs = Math.abs(v);
+  if (abs >= 1e6) return Number((v / 1e6).toPrecision(3)) + ' MV';
+  if (abs >= 1e3) return Number((v / 1e3).toPrecision(3)) + ' kV';
+  if (abs >= 1) return Number(v.toPrecision(3)) + ' V';
+  return Number(v.toPrecision(2)) + ' V';
 }
 
 // ── Grid ──────────────────────────────────────────────────
@@ -181,6 +258,7 @@ const grid = new Float64Array(cols * rows);
 function potential(px, py) {
   let V = 0;
   for (const c of charges) {
+    if (c.q === 0) continue; // neutral marker does not create a singularity
     const dx = px - c.x, dy = py - c.y;
     const r = Math.sqrt(dx*dx + dy*dy);
     if (r < 5) return NaN;
@@ -197,10 +275,8 @@ function buildGrid() {
 
 // ── Background heatmap ────────────────────────────────────
 function drawBackground() {
-  // use the maximum grid value to normalise color scale
-  let vmax = 0;
-  for (let i = 0; i < grid.length; i++) if (!isNaN(grid[i])) vmax = Math.max(vmax, Math.abs(grid[i]));
-  const ref = vmax || 1e5;
+  // Robust color scale: charges' singularities must not wash out the background.
+  const ref = potentialStats ? potentialStats.colorRef : 1e3;
   for (let r = 0; r < rows - 1; r++) {
     for (let c = 0; c < cols - 1; c++) {
       const V = grid[r * cols + c];
@@ -246,7 +322,7 @@ function marchingSquares(level) {
         case  2: segs.push([bottom(), right()]);  break;
         case  3: segs.push([left(),   right()]);  break;
         case  4: segs.push([right(),  top()]);    break;
-        case  5: segs.push([top(),    left()]); segs.push([bottom(), right()]); break;
+        case  5: segs.push([top(),    right()]); segs.push([bottom(), left()]); break;
         case  6: segs.push([bottom(), top()]);    break;
         case  7: segs.push([left(),   top()]);    break;
         case  8: segs.push([top(),    left()]);   break;
@@ -254,120 +330,205 @@ function marchingSquares(level) {
         case 10: segs.push([right(),  bottom()]); segs.push([top(), left()]); break;
         case 11: segs.push([top(),    right()]);  break;
         case 12: segs.push([right(),  left()]);   break;
-        case 13: segs.push([bottom(), left()]);   break;
-        case 14: segs.push([right(),  bottom()]); break;
+        case 13: segs.push([bottom(), right()]);   break;
+        case 14: segs.push([left(),   bottom()]); break;
       }
     }
   }
   return segs;
 }
 
-function linkSegs(segs) {
-  if (!segs.length) return [];
-  const EPS2 = (GRID * 0.8) ** 2;
-  const used = new Uint8Array(segs.length);
-  const chains = [];
-
-  for (let i = 0; i < segs.length; i++) {
-    if (used[i]) continue;
-    used[i] = 1;
-    const chain = [{ ...segs[i][0] }, { ...segs[i][1] }];
-
-    for (let pass = 0; pass < 2; pass++) { // 0=extend tail, 1=extend head
-      let extended = true;
-      while (extended) {
-        extended = false;
-        const pt = pass === 0 ? chain[chain.length - 1] : chain[0];
-        for (let j = 0; j < segs.length; j++) {
-          if (used[j]) continue;
-          const [a, b] = segs[j];
-          const d1 = (pt.x-a.x)**2 + (pt.y-a.y)**2;
-          const d2 = (pt.x-b.x)**2 + (pt.y-b.y)**2;
-          if (d1 < EPS2 || d2 < EPS2) {
-            const next = d1 < EPS2 ? { ...b } : { ...a };
-            pass === 0 ? chain.push(next) : chain.unshift(next);
-            used[j] = 1; extended = true; break;
-          }
-        }
-      }
+// Connect neighboring marching-squares segments in linear time. Their edge
+// intersections agree to sub-pixel precision, so quantized position keys suffice.
+function linkSegsFast(segs) {
+  const keyOf = p => `${Math.round(p.x * 1000)},${Math.round(p.y * 1000)}`;
+  const adjacency = new Map();
+  const add = (key, index) => {
+    if (!adjacency.has(key)) adjacency.set(key, []);
+    adjacency.get(key).push(index);
+  };
+  for (let i=0; i<segs.length; i++) {
+    add(keyOf(segs[i][0]),i);
+    add(keyOf(segs[i][1]),i);
+  }
+  const seen = new Uint8Array(segs.length);
+  const chains=[];
+  function follow(p) {
+    const output=[];
+    for (let count=0; count<=segs.length; count++) {
+      const key=keyOf(p);
+      const adjacent=adjacency.get(key) || [];
+      const nextIdx=adjacent.find(j=>!seen[j]);
+      if (nextIdx === undefined) break;
+      seen[nextIdx]=1;
+      const [a,b]=segs[nextIdx];
+      p=keyOf(a)===key ? b : a;
+      output.push(p);
     }
-    chains.push(chain);
+    return output;
+  }
+  for (let i=0; i<segs.length; i++) {
+    if (seen[i]) continue;
+    seen[i]=1;
+    const [a,b]=segs[i];
+    const tail=follow(b);
+    const head=follow(a);
+    chains.push([...head.reverse(), a, b, ...tail]);
   }
   return chains;
 }
 
-// ── Draw all equipotential contours ──────────────────────
-function drawContours() {
-  // Find range of valid potentials in the grid
-  let vmin = Infinity, vmax = -Infinity;
-  for (let i = 0; i < grid.length; i++) {
-    if (!isNaN(grid[i])) { vmin = Math.min(vmin, grid[i]); vmax = Math.max(vmax, grid[i]); }
+// ── Automatic ΔV selection ─────────────────────────────────
+// Use the visible potential distribution, rather than the absolute extremes
+// (which diverge near the point charges). Quantiles also adapt when charges move.
+function chooseContourLevels() {
+  const samples = [];
+  const coreRadius2 = 26 * 26; // hide the singular near-charge sampling region
+  for (let r = 0; r < rows; r += 2) {
+    for (let c = 0; c < cols; c += 2) {
+      const x = c * GRID, y = r * GRID;
+      if (x > W || y > H) continue;
+      let nearCharge = false;
+      for (const charge of charges) {
+        if (charge.q === 0) continue;
+        const dx = x - charge.x, dy = y - charge.y;
+        if (dx*dx + dy*dy < coreRadius2) { nearCharge = true; break; }
+      }
+      const v = grid[r * cols + c];
+      if (!nearCharge && Number.isFinite(v)) samples.push(v);
+    }
   }
-  if (!isFinite(vmin)) return;
+  if (!samples.length) return {levels:[], colorRef:1, clipped:false};
+  samples.sort((a,b) => a-b);
+  const quantile = p => {
+    const index = p * (samples.length - 1);
+    const left = Math.floor(index);
+    const f = index - left;
+    return samples[left] * (1-f) + samples[Math.min(left+1,samples.length-1)] * f;
+  };
+  const loCore = quantile(0.03), hiCore = quantile(0.97);
+  const loLimit = quantile(0.01), hiLimit = quantile(0.99);
+  const span = hiCore - loCore;
+  const maxMag = Math.max(Math.abs(loCore), Math.abs(hiCore));
+  if (span < 1e-9 && maxMag < 1e-9) {
+    return {levels:[], colorRef:1, clipped:false}; // both charges are zero
+  }
 
-  // Clamp extremes to avoid near-singularity levels (skip if within 2x charge radius)
-  const margin = deltaV; // don't draw the first/last partial lines within 1 ΔV of singularity
-  const lo = Math.ceil((vmin + margin) / deltaV) * deltaV;
-  const hi = Math.floor((vmax - margin) / deltaV) * deltaV;
+  // Aim for ~28 well-distributed potential levels across the main visible area.
+  // Additional contours near charges are allowed, up to the 1st/99th percentiles.
+  deltaV = autoScale ? niceStep(Math.max(span / 28, maxMag / 200)) : manualDeltaV;
+  const colorRef = Math.max(maxMag, deltaV, 1);
+  let first = Math.ceil(loLimit / deltaV - 1e-9);
+  let last  = Math.floor(hiLimit / deltaV + 1e-9);
+  if (first > last) return {levels:[],colorRef,clipped:false};
 
-  // Safety: cap number of lines to avoid freezing
-  const maxLines = 80;
-  const count = Math.min(maxLines, Math.round((hi - lo) / deltaV) + 1);
+  // Respect the 72-level performance limit without favoring negative or
+  // positive contours: keep a centered, continuous band of levels.
+  let clipped = false;
+  const count = last - first + 1;
+  if (count > MAX_CONTOUR_LEVELS) {
+    clipped = true;
+    const center = loLimit <= 0 && hiLimit >= 0
+      ? 0 : Math.round((loCore + hiCore) / (2 * deltaV));
+    first = Math.max(first, Math.min(last - MAX_CONTOUR_LEVELS + 1,
+                                   center - Math.floor(MAX_CONTOUR_LEVELS / 2)));
+    last = first + MAX_CONTOUR_LEVELS - 1;
+  }
+  const levels = [];
+  for (let i = first; i <= last; i++) levels.push(i * deltaV);
+  return {levels,colorRef,clipped};
+}
 
-  for (let n = 0; n < count; n++) {
-    const level = lo + n * deltaV;
-    if (level < vmin || level > vmax) continue;
-
-    const segs   = marchingSquares(level);
-    const chains = linkSegs(segs);
-
-    // Color based on level value
-    const isZero = Math.abs(level) < deltaV * 0.5;
+// ── Draw contours ──────────────────────────────────────────
+function drawContours(selection) {
+  let drawn = 0;
+  for (const level of selection.levels) {
+    const segs = marchingSquares(level);
+    if (!segs.length) continue;
+    drawn++;
+    const isZero = Math.abs(level) < deltaV * 0.001;
     let color, width;
     if (isZero) {
-      color = 'rgba(230,230,230,0.97)'; width = 2.4;
+      color = 'rgba(240,240,240,0.97)'; width = 2.4;
     } else {
-      // Normalise to [0,1] within visible range
-      const span = Math.max(Math.abs(vmax), Math.abs(vmin));
-      const t    = Math.min(1, Math.abs(level) / (span * 0.7));
-      if (level > 0) {
-        const l = 45 + t * 35;
-        color = `hsla(205,100%,${l}%,0.9)`; width = 1.4;
-      } else {
-        const l = 45 + t * 35;
-        color = `hsla(350,95%,${l}%,0.9)`;  width = 1.4;
-      }
+      const t = Math.min(1, Math.abs(level) / selection.colorRef);
+      const lightness = 48 + 28 * Math.sqrt(t);
+      color = level > 0 ? `hsla(205,100%,${lightness}%,0.94)`
+                        : `hsla(350,95%,${lightness}%,0.94)`;
+      width = 1.4;
     }
-
     ctx.strokeStyle = color;
-    ctx.lineWidth   = width;
-    ctx.lineJoin    = 'round';
-    ctx.lineCap     = 'round';
+    ctx.lineWidth = width;
+    ctx.lineJoin = 'round';
+    ctx.lineCap = 'round';
     ctx.shadowColor = color;
-    ctx.shadowBlur  = isZero ? 5 : 2;
+    ctx.shadowBlur = isZero ? 5 : 1.5;
 
+    // Link segments in O(n) rather than the old O(n²) all-pairs search.
+    // Continuous paths produce smooth, unbroken curves even at high density.
+    const chains = linkSegsFast(segs);
+    ctx.beginPath();
     for (const chain of chains) {
       if (chain.length < 2) continue;
-      ctx.beginPath();
       ctx.moveTo(chain[0].x, chain[0].y);
-      for (let i = 1; i < chain.length; i++) ctx.lineTo(chain[i].x, chain[i].y);
-      ctx.stroke();
+      for (let i = 1; i < chain.length; i++)
+        ctx.lineTo(chain[i].x,chain[i].y);
     }
+    ctx.stroke();
   }
   ctx.shadowBlur = 0;
+  const label = document.getElementById('dvLabel');
+  const status = document.getElementById('dvStatus');
+  label.textContent = selection.levels.length ? fmtDV(deltaV) : '—';
+  status.textContent = drawn
+    ? `${drawn} מפלסי פוטנציאל מוצגים${selection.clipped ? ' · מוגבל למניעת עומס' : ''}`
+    : 'אין קווי שווי פוטנציאל בתחום הנראה';
 }
 
 // ── Field lines ───────────────────────────────────────────
 function drawFieldLines() {
   if (!showField) return;
+
+  function drawArrowhead(prev, curr, color) {
+    const dx = curr.x - prev.x;
+    const dy = curr.y - prev.y;
+    const len = Math.hypot(dx, dy);
+    if (len < 1e-6) return;
+    const ux = dx / len, uy = dy / len;
+    const size = 7;
+    const wing = 0.45;
+    const backX = curr.x - ux * size;
+    const backY = curr.y - uy * size;
+
+    ctx.beginPath();
+    ctx.moveTo(curr.x, curr.y);
+    ctx.lineTo(backX + uy * size * wing, backY - ux * size * wing);
+    ctx.moveTo(curr.x, curr.y);
+    ctx.lineTo(backX - uy * size * wing, backY + ux * size * wing);
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 1.55;
+    ctx.stroke();
+  }
+
+  // Trace from both positive and negative charges to retain the complete
+  // field-line picture. Negative-charge traces are followed opposite to E,
+  // so their arrowheads are reversed below to point along the actual field.
   for (const c of charges) {
     if (c.q === 0) continue;
     const sign = c.q > 0 ? 1 : -1;
-    const col  = c.q > 0 ? 'rgba(0,212,255,0.2)' : 'rgba(255,77,109,0.2)';
-    for (let i = 0; i < 18; i++) {
-      const angle = (2 * Math.PI * i) / 18;
+    const col = 'rgba(0,212,255,0.52)';
+    const fieldSeeds = charges.length <= 2 ? 18 : charges.length <= 4 ? 12 : 8;
+    const arrowSpacing = charges.length <= 2 ? 26 : charges.length <= 4 ? 24 : 22;
+
+    // Offset the negative seeds by half a spacing. With symmetric ± charges,
+    // non-offset seeds trace the very same curves from opposite ends, so they
+    // appear not to add any field lines. Interleaving adds distinct curves.
+    const seedOffset = c.q < 0 ? Math.PI / fieldSeeds : 0;
+    for (let i = 0; i < fieldSeeds; i++) {
+      const angle = (2 * Math.PI * i) / fieldSeeds + seedOffset;
       let x = c.x + 18 * Math.cos(angle), y = c.y + 18 * Math.sin(angle);
-      ctx.beginPath(); ctx.moveTo(x, y);
+      const points = [{ x, y }];
+
       for (let s = 0; s < 900; s++) {
         let fx = 0, fy = 0, ok = true;
         for (const ch of charges) {
@@ -384,9 +545,22 @@ function drawFieldLines() {
         x += sign * 3 * fx / mag;
         y += sign * 3 * fy / mag;
         if (x < 0 || x > W || y < 0 || y > H) break;
-        ctx.lineTo(x, y);
+        points.push({ x, y });
       }
-      ctx.strokeStyle = col; ctx.lineWidth = 0.85; ctx.stroke();
+
+      if (points.length < 2) continue;
+
+      ctx.beginPath();
+      ctx.moveTo(points[0].x, points[0].y);
+      for (let p = 1; p < points.length; p++) ctx.lineTo(points[p].x, points[p].y);
+      ctx.strokeStyle = col;
+      ctx.lineWidth = 1.15;
+      ctx.stroke();
+
+      for (let p = arrowSpacing; p < points.length - 2; p += arrowSpacing) {
+        if (sign > 0) drawArrowhead(points[p - 2], points[p], col);
+        else drawArrowhead(points[p], points[p - 2], col);
+      }
     }
   }
 }
@@ -394,7 +568,7 @@ function drawFieldLines() {
 // ── Charge glows ──────────────────────────────────────────
 function drawCharges() {
   for (const c of charges) {
-    const col = c.q >= 0 ? '#00d4ff' : '#ff4d6d';
+    const col = c.q === 0 ? '#8393a6' : c.q > 0 ? '#00d4ff' : '#ff4d6d';
     const grd = ctx.createRadialGradient(c.x, c.y, 0, c.x, c.y, 32);
     grd.addColorStop(0, col + 'aa'); grd.addColorStop(1, col + '00');
     ctx.beginPath(); ctx.arc(c.x, c.y, 32, 0, Math.PI*2);
@@ -405,18 +579,33 @@ function drawCharges() {
     ctx.fillStyle = '#fff';
     ctx.font = 'bold 16px Rajdhani,monospace';
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    ctx.fillText(c.q >= 0 ? '+' : '−', c.x, c.y + 1);
+    ctx.fillText(c.q === 0 ? '0' : c.q > 0 ? '+' : '−', c.x, c.y + 1);
   }
 }
 
 // ── Render ────────────────────────────────────────────────
+// One redraw per animation frame, even when a slider or pointer sends many events.
+let redrawRequested = false;
+function requestRender() {
+  if (redrawRequested) return;
+  redrawRequested = true;
+  requestAnimationFrame(() => { redrawRequested = false; render(); });
+}
+
 function render() {
   ctx.clearRect(0, 0, W, H);
   buildGrid();
+  const selection = chooseContourLevels();
+  potentialStats = selection;
   if (showBg) drawBackground();
   else { ctx.fillStyle = '#05080f'; ctx.fillRect(0, 0, W, H); }
   drawFieldLines();
-  drawContours();
+  if (showContours) {
+    drawContours(selection);
+  } else {
+    document.getElementById('dvLabel').textContent = selection.levels.length ? fmtDV(deltaV) : '—';
+    document.getElementById('dvStatus').textContent = 'קווי שווי הפוטנציאל מוסתרים';
+  }
   drawCharges();
 }
 
@@ -426,52 +615,156 @@ function setPct(el, v) {
   el.style.setProperty('--pct', ((+v - +el.min) / (+el.max - +el.min) * 100) + '%');
 }
 
-// ── Sliders ───────────────────────────────────────────────
-document.getElementById('s1').addEventListener('input', function() {
-  charges[0].q = +this.value * 1e-6;
-  document.getElementById('v1').textContent = fmtQ(charges[0].q);
-  setPct(this, this.value); render();
+// ── Dynamic charge controls ────────────────────────────────
+const chargeList = document.getElementById('chargeList');
+const addChargeButton = document.getElementById('addCharge');
+const countLabel = document.getElementById('chargesCount');
+function chargeClass(q) { return q > 0 ? 'qpos' : q < 0 ? 'qneg' : 'qneutral'; }
+function chargeSign(q) { return q > 0 ? '⊕' : q < 0 ? '⊖' : '⊙'; }
+
+function updateChargeCard(card, charge, index) {
+  card.className = 'charge-card ' + chargeClass(charge.q);
+  card.querySelector('.charge-label').textContent = `${chargeSign(charge.q)} מטען ${index + 1}`;
+  card.querySelector('.slider-value').textContent = fmtQ(charge.q);
+  const slider = card.querySelector('input[type=range]');
+  setPct(slider, slider.value);
+}
+
+function drawChargeControls() {
+  // Build cards only when adding/deleting; updating a slider never destroys it.
+  chargeList.replaceChildren();
+  for (const [index, charge] of charges.entries()) {
+    const card = document.createElement('div');
+    card.className = 'charge-card';
+    card.dataset.chargeId = String(charge.id);
+    card.innerHTML = `
+      <div class="charge-heading">
+        <div class="charge-label"></div>
+        <button type="button" class="remove-charge" aria-label="מחק מטען ${index+1}"
+          ${charges.length === 1 ? 'disabled title="יש להשאיר לפחות מטען אחד"' : ''}>הסר</button>
+      </div>
+      <div class="slider-row">
+        <div class="slider-top"><span>גודל וסימן</span><span class="slider-value" dir="ltr"></span></div>
+        <input type="range" min="-30" max="30" step="1" value="${Math.round(charge.q*1e6)}"
+          aria-label="גודל המטען ${index+1} במיקרוקולון">
+      </div>`;
+    updateChargeCard(card, charge, index);
+    chargeList.appendChild(card);
+  }
+  countLabel.textContent = `${charges.length} מתוך ${MAX_CHARGES}`;
+  addChargeButton.disabled = charges.length >= MAX_CHARGES;
+  document.getElementById('chargesHint').textContent = charges.length >= MAX_CHARGES
+    ? 'הגעת למספר המטענים המרבי. אפשר להסיר מטען כדי להוסיף אחר.'
+    : 'ניתן לגרור כל מטען על פני המסך ולשנות את סימנו וגודלו במחוון.';
+}
+
+chargeList.addEventListener('input', event => {
+  if (event.target.type !== 'range') return;
+  const card = event.target.closest('[data-charge-id]');
+  if (!card) return;
+  const charge = charges.find(c => c.id === Number(card.dataset.chargeId));
+  if (!charge) return;
+  charge.q = Number(event.target.value) * 1e-6;
+  updateChargeCard(card, charge, charges.indexOf(charge));
+  requestRender();
 });
-document.getElementById('s2').addEventListener('input', function() {
-  charges[1].q = +this.value * 1e-6;
-  document.getElementById('v2').textContent = fmtQ(charges[1].q);
-  setPct(this, this.value); render();
+chargeList.addEventListener('click', event => {
+  if (!event.target.closest('.remove-charge') || charges.length <= 1) return;
+  const card = event.target.closest('[data-charge-id]');
+  const id = Number(card?.dataset.chargeId);
+  if (!Number.isInteger(id)) return;
+  const removed = charges.find(c => c.id === id);
+  charges = charges.filter(c => c.id !== id);
+  if (dragging === removed) dragging = null;
+  drawChargeControls();
+  requestRender();
+});
+
+// First use friendly positions around the initial pair; when charges were moved,
+// pick the candidate with most clearance to avoid overlapping another marker.
+const chargePositions = [
+  [W/2, H/2-130], [W/2, H/2+130],
+  [W/2-195, H/2-130], [W/2+195, H/2+130],
+  [W/2+195, H/2-130], [W/2-195, H/2+130],
+  [W/2, H/2], [W/2-190, H/2], [W/2+190, H/2]
+];
+function positionForNewCharge() {
+  const options = chargePositions.map(([x,y],i) => ({x,y,i,
+    distance:Math.min(...charges.map(c => Math.hypot(x-c.x, y-c.y))) }));
+  // Prefer the expected next location as long as it has enough clearance.
+  const expected = options[Math.min(Math.max(charges.length - 2, 0), options.length-1)];
+  if (expected.distance > 65) return {x:expected.x,y:expected.y};
+  options.sort((a,b) => b.distance-a.distance);
+  return {x:options[0].x, y:options[0].y};
+}
+addChargeButton.addEventListener('click', () => {
+  if (charges.length >= MAX_CHARGES) return;
+  const pos = positionForNewCharge();
+  const q = (charges.length % 2 === 0 ? 10 : -10) * 1e-6;
+  charges.push({id:nextChargeId++, x:pos.x,y:pos.y,q});
+  drawChargeControls();
+  requestRender();
+});
+document.getElementById('resetCharges').addEventListener('click', () => {
+  charges = defaultCharges();
+  nextChargeId = 3;
+  dragging = null;
+  drawChargeControls();
+  requestRender();
 });
 
 const sDV = document.getElementById('sDV');
+const autoScaleToggle = document.getElementById('autoScale');
+const dvHint = document.getElementById('dvHint');
 sDV.addEventListener('input', function() {
-  deltaV = sliderToDV(+this.value);
-  document.getElementById('dvLabel').textContent = fmtDV(deltaV);
-  setPct(this, this.value); render();
+  manualDeltaV = sliderToDV(this.value);
+  if (!autoScale) requestRender();
+});
+autoScaleToggle.addEventListener('change', function() {
+  autoScale = this.checked;
+  sDV.disabled = autoScale;
+  dvHint.textContent = autoScale
+    ? 'היישומון בוחר ΔV אחיד לפי התפלגות הפוטנציאל על המסך, תוך התעלמות מערכים קיצוניים סמוך למטענים.'
+    : 'שליטה ידנית: ככל שהפרש הפוטנציאלים קטן יותר, מופיעים יותר קווים. קווים צפופים מדי עשויים להיות קשים להבחנה.';
+  requestRender();
 });
 
-document.getElementById('toggleField').addEventListener('change', function() { showField = this.checked; render(); });
-document.getElementById('toggleBg').addEventListener('change',    function() { showBg    = this.checked; render(); });
+document.getElementById('toggleContours').addEventListener('change', function() { showContours = this.checked; requestRender(); });
+document.getElementById('toggleField').addEventListener('change', function() { showField = this.checked; requestRender(); });
+document.getElementById('toggleBg').addEventListener('change',    function() { showBg    = this.checked; requestRender(); });
 
-// ── Drag ──────────────────────────────────────────────────
-canvas.addEventListener('mousedown', e => {
+// ── Drag charges with mouse, touch or stylus ───────────────
+function canvasPoint(e) {
   const rect = canvas.getBoundingClientRect();
-  const mx = e.clientX - rect.left, my = e.clientY - rect.top;
+  return {x:(e.clientX-rect.left)*W/rect.width,
+          y:(e.clientY-rect.top)*H/rect.height};
+}
+canvas.addEventListener('pointerdown', e => {
+  const {x,y} = canvasPoint(e);
   for (let i = 0; i < charges.length; i++) {
-    if ((mx - charges[i].x)**2 + (my - charges[i].y)**2 < 625) { dragging = i; return; }
+    if ((x-charges[i].x)**2 + (y-charges[i].y)**2 < 625) {
+      dragging = charges[i];
+      canvas.setPointerCapture(e.pointerId);
+      e.preventDefault();
+      return;
+    }
   }
 });
-canvas.addEventListener('mousemove', e => {
+canvas.addEventListener('pointermove', e => {
   if (dragging === null) return;
-  const rect = canvas.getBoundingClientRect();
-  charges[dragging].x = e.clientX - rect.left;
-  charges[dragging].y = e.clientY - rect.top;
-  render();
+  const {x,y} = canvasPoint(e);
+  dragging.x = Math.max(14,Math.min(W-14,x));
+  dragging.y = Math.max(14,Math.min(H-14,y));
+  requestRender();
 });
-canvas.addEventListener('mouseup',    () => dragging = null);
-canvas.addEventListener('mouseleave', () => dragging = null);
+canvas.addEventListener('pointerup', () => dragging = null);
+canvas.addEventListener('pointercancel', () => dragging = null);
+canvas.addEventListener('lostpointercapture', () => dragging = null);
 
 // ── Init ──────────────────────────────────────────────────
-setPct(document.getElementById('s1'), 10);
-setPct(document.getElementById('s2'), -10);
-deltaV = sliderToDV(40);
-document.getElementById('dvLabel').textContent = fmtDV(deltaV);
-setPct(sDV, 40);
+drawChargeControls();
+manualDeltaV = sliderToDV(sDV.value);
+setPct(sDV, sDV.value);
 render();
 </script>
 </body>
